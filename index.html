@@ -5119,6 +5119,45 @@ body.locked > *:not(#constructionGate) { display: none !important; }
 </div>
 
 <!-- ═════════════════════════════════════════════════════════════════════
+     Part A — Edit Customer Modal
+     Edits all profile fields EXCEPT id and email. Email (login) and
+     account creation route through the admin function in Part B.
+     ═════════════════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="editAccountModal">
+  <div class="modal" style="text-align:left; max-width:560px; max-height:88vh; overflow-y:auto">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+      <h3 style="margin:0;color:var(--gold)" data-t="edit_account_title"></h3>
+      <button onclick="closeEditAccountModal()" style="background:none; border:none; color:var(--cream-dim); font-size:22px; cursor:pointer; padding:0; line-height:1">\u2715</button>
+    </div>
+    <div class="alert alert-error" id="editAccountError" style="margin-bottom:14px"></div>
+    <div style="padding:10px 12px;background:rgba(42,31,21,0.04);border-left:3px solid var(--line2);margin-bottom:16px;border-radius:4px">
+      <div style="font-size:11px;color:var(--cream-dim);margin-bottom:3px" data-t="ea_id_locked"></div>
+      <div id="editAccountId" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);word-break:break-all"></div>
+      <div style="font-size:11px;color:var(--cream-dim);margin:8px 0 3px" data-t="ea_email_locked"></div>
+      <div id="editAccountEmail" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);word-break:break-all"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 14px">
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_first"></label><input type="text" id="eaFirst" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_last"></label><input type="text" id="eaLast" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_facebook"></label><input type="text" id="eaFacebook" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_paypal"></label><input type="text" id="eaPaypal" autocomplete="off"></div>
+      <div class="field" style="grid-column:1 / -1"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_phone"></label><input type="text" id="eaPhone" autocomplete="off"></div>
+      <div class="field" style="grid-column:1 / -1"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_address"></label><input type="text" id="eaAddress" autocomplete="off"></div>
+      <div class="field" style="grid-column:1 / -1"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_address2"></label><input type="text" id="eaAddress2" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_city"></label><input type="text" id="eaCity" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_state"></label><input type="text" id="eaState" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_postal"></label><input type="text" id="eaPostal" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_country"></label><input type="text" id="eaCountry" autocomplete="off"></div>
+      <div class="field"><label style="font-size:12px;color:var(--cream-dim);font-weight:300" data-t="ea_country_code"></label><input type="text" id="eaCountryCode" autocomplete="off" maxlength="3"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="closeEditAccountModal()" style="flex:1" data-t="btn_cancel"></button>
+      <button class="btn btn-success btn-sm" onclick="saveEditAccount()" id="editAccountSaveBtn" style="flex:1" data-t="btn_save"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════════
      Phase 6.49c.2 — Standalone Ban Account Modal
      Bans an email without deleting the profile. Sets account status to
      'denied' and adds the email to banned_emails so future signups are
@@ -6864,6 +6903,25 @@ const T = {
     btn_delete_selected: "Delete Selected",
     btn_delete_all: "Delete All",
     btn_cancel: "Cancel",
+    // ── Edit Customer modal (Part A) ──
+    edit_account_title: "Edit Customer",
+    btn_edit_account: "Edit",
+    btn_save: "Save Changes",
+    ea_first: "First name",
+    ea_last: "Last name",
+    ea_facebook: "Facebook name",
+    ea_paypal: "PayPal email",
+    ea_phone: "Phone",
+    ea_address: "Address",
+    ea_address2: "Address line 2",
+    ea_city: "City",
+    ea_state: "State / Region",
+    ea_postal: "Postal code",
+    ea_country: "Country",
+    ea_country_code: "Country code",
+    ea_email_locked: "Email (used for login) \u2014 editing arrives in the next update",
+    ea_id_locked: "Account ID (read-only)",
+    ea_save_failed: "Save failed: ",
     bulk_selected: "account(s) selected",
     bulk_processing: "Deleting",
     bulk_failed_count: "deletion(s) failed",
@@ -8064,6 +8122,25 @@ admin_lottery: "Lottery",
     btn_delete_selected: "Ausgewählte löschen",
     btn_delete_all: "Alle löschen",
     btn_cancel: "Abbrechen",
+    // ── Edit Customer modal (Part A) ──
+    edit_account_title: "Kunde bearbeiten",
+    btn_edit_account: "Bearbeiten",
+    btn_save: "\u00c4nderungen speichern",
+    ea_first: "Vorname",
+    ea_last: "Nachname",
+    ea_facebook: "Facebook-Name",
+    ea_paypal: "PayPal-E-Mail",
+    ea_phone: "Telefon",
+    ea_address: "Adresse",
+    ea_address2: "Adresszusatz",
+    ea_city: "Stadt",
+    ea_state: "Bundesland / Region",
+    ea_postal: "Postleitzahl",
+    ea_country: "Land",
+    ea_country_code: "L\u00e4ndercode",
+    ea_email_locked: "E-Mail (f\u00fcr Login) \u2014 Bearbeitung folgt im n\u00e4chsten Update",
+    ea_id_locked: "Konto-ID (schreibgesch\u00fctzt)",
+    ea_save_failed: "Speichern fehlgeschlagen: ",
     bulk_selected: "Konto/Konten ausgewählt",
     bulk_processing: "Wird gelöscht",
     bulk_failed_count: "Löschvorgang/Löschvorgänge fehlgeschlagen",
@@ -11659,6 +11736,7 @@ async function renderAdminAccounts() {
           <td style="font-size:11px;color:var(--cream-dim);white-space:nowrap">${_fmtJoined(p.created_at)}</td>
           <td>${flagHtml||'—'}</td>
           <td><div class="action-group">
+            <button class="btn btn-outline btn-sm" onclick="openEditAccountModal('${p.id}')">${t('btn_edit_account')}</button>
             ${p.status!=='approved'?`<button class="btn btn-success btn-sm" onclick="adminSetStatus('${p.id}','approved')">${t('btn_approve')}</button>`:''}
             ${p.status!=='denied'?`<button class="btn btn-danger btn-sm" onclick="adminSetStatus('${p.id}','denied')">${t('btn_deny')}</button>`:''}
             ${banBtn}
@@ -14330,6 +14408,75 @@ async function adminSetUnlimited(userId, val) {
 // ════════════════════════════════════════════════════════════════════════
 
 // --- Single-user delete ---
+
+// \u2500\u2500 Part A \u2014 Edit Customer modal handlers \u2500\u2500
+// Edits all profile fields except id and email. Reads from the Accounts
+// cache (_adminAccountsState._cache) and saves via the same
+// profiles.update() + capability pattern used by adminSetStatus.
+function openEditAccountModal(userId) {
+  const modal = document.getElementById('editAccountModal');
+  if (!modal) return;
+  const list = (_adminAccountsState && _adminAccountsState._cache) || [];
+  const p = list.find(x => String(x.id) === String(userId));
+  if (!p) return;
+  const err = document.getElementById('editAccountError');
+  if (err) { err.classList.remove('show'); err.textContent = ''; }
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : v); };
+  document.getElementById('editAccountId').textContent = p.id || '';
+  document.getElementById('editAccountEmail').textContent = p.email || '';
+  setVal('eaFirst', p.first_name);
+  setVal('eaLast', p.last_name);
+  setVal('eaFacebook', p.facebook_name);
+  setVal('eaPaypal', p.paypal_email);
+  setVal('eaPhone', p.phone);
+  setVal('eaAddress', p.address);
+  setVal('eaAddress2', p.address_line_2);
+  setVal('eaCity', p.city);
+  setVal('eaState', p.state_region);
+  setVal('eaPostal', p.postal_code);
+  setVal('eaCountry', p.country);
+  setVal('eaCountryCode', p.country_code);
+  document.getElementById('editAccountSaveBtn').dataset.userId = p.id;
+  modal.classList.add('show');
+}
+
+function closeEditAccountModal() {
+  const modal = document.getElementById('editAccountModal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function saveEditAccount() {
+  if (!requireCapability('can_manage_members')) return;
+  const btn = document.getElementById('editAccountSaveBtn');
+  const userId = btn && btn.dataset.userId;
+  if (!userId) return;
+  const err = document.getElementById('editAccountError');
+  const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const nn = (x) => (x === '' ? null : x);
+  const updates = {
+    first_name:     nn(val('eaFirst')),
+    last_name:      nn(val('eaLast')),
+    facebook_name:  nn(val('eaFacebook')),
+    paypal_email:   nn(val('eaPaypal')),
+    phone:          nn(val('eaPhone')),
+    address:        nn(val('eaAddress')),
+    address_line_2: nn(val('eaAddress2')),
+    city:           nn(val('eaCity')),
+    state_region:   nn(val('eaState')),
+    postal_code:    nn(val('eaPostal')),
+    country:        nn(val('eaCountry')),
+    country_code:   nn(val('eaCountryCode')),
+  };
+  if (btn) btn.disabled = true;
+  const { error } = await sb.from('profiles').update(updates).eq('id', userId);
+  if (btn) btn.disabled = false;
+  if (error) {
+    if (err) { err.textContent = t('ea_save_failed') + (error.message || ''); err.classList.add('show'); }
+    return;
+  }
+  closeEditAccountModal();
+  await renderAdminAccounts();
+}
 
 function openDeleteAccountModal(userId, email, name) {
   const modal = document.getElementById('deleteAccountModal');
