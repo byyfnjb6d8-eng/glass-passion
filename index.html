@@ -4102,10 +4102,11 @@ body.locked > *:not(#constructionGate) { display: none !important; }
   <div class="gate-card">
     <div class="gate-logo">GLÄSERNE LEIDENSCHAFT</div>
     <div class="gate-sub">Glas &amp; Weihnachtsschmuck der besonderen Art</div>
-    <div class="gate-title">Under Construction</div>
+    <div class="gate-title">Crafting Christmas Magic</div>
     <div class="gate-msg">
-      This site is currently being built for the 2026 season.<br>
-      Please enter the access code to continue.
+      We are busy in the workshop bringing this season's Christmas magic to life.<br>
+      <br>
+      <span style="font-style:italic;opacity:0.85">Wir sind fleißig in der Werkstatt und erwecken den Weihnachtszauber dieser Saison zum Leben.</span>
     </div>
     <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" spellcheck="false">
     <label class="gate-remember">
@@ -4157,7 +4158,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
   // toggle alone cannot remove the screen. This switch is what actually
   // shows/hides it. To bring the gate BACK, set GATE_DISABLED = false and
   // redeploy (the server-side password check still works as before).
-  var GATE_DISABLED = false;  // Gate UP — site locked while triaging. Set true to reopen.
+  var GATE_DISABLED = false;  // Gate BACK UP — Christmas-magic screen active. Set to true to take it down again.
   if (GATE_DISABLED) {
     var gd = document.getElementById('constructionGate');
     if (gd) gd.classList.add('hidden');
@@ -5359,29 +5360,6 @@ body.locked > *:not(#constructionGate) { display: none !important; }
 <!-- Phase 6.30: Ship modal — captures carrier + tracking number when admin
      transitions an order to shipped status. Both fields required.
      Two save buttons: ship + email customer (default), or silent (no email). -->
-<!-- Admin: Add Item to an existing order (regular catalogue item). -->
-<div class="modal-bg" id="addItemModal" onclick="onAddItemModalBgClick(event)">
-  <div class="modal" style="text-align:left; max-width:520px" onclick="event.stopPropagation()">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
-      <h3 style="margin:0">Add Item to Order</h3>
-      <button onclick="closeAddItemModal()" style="background:none; border:none; color:var(--cream-dim); font-size:22px; cursor:pointer; padding:0; line-height:1">✕</button>
-    </div>
-    <p style="margin:0 0 12px 0; color:var(--cream-dim); font-size:13px; font-weight:300">Add a catalogue ornament to this order. It is priced at its current catalogue price and the order total updates automatically. No email is sent — the customer is only notified when you change the order status.</p>
-    <div id="addItemOrderInfo" style="padding:8px 12px;background:rgba(176,141,64,0.06);border-left:3px solid var(--gold);margin-bottom:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)"></div>
-    <div class="field">
-      <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Ornament</label>
-      <select id="addItemCatalogSelect" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px">
-        <option value=""></option>
-      </select>
-    </div>
-    <div id="addItemError" style="display:none;color:#b00;font-size:13px;margin-top:10px"></div>
-    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-      <button id="addItemSaveBtn" class="btn btn-gold btn-sm" onclick="doAddItemToOrder()">Add to Order</button>
-      <button class="btn btn-ghost btn-sm" onclick="closeAddItemModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-bg" id="shipOrderModal" onclick="onShipModalBgClick(event)">
   <div class="modal" style="text-align:left; max-width:560px" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
@@ -9156,7 +9134,6 @@ let activeStyleFilter = 'all';
 // name, qty, shipping_method, total, paypal, status. dir is 'asc' or 'desc'.
 // Resets on each renderAdmin() invocation (acceptable per our decision).
 let adminOrderSort = { col: 'created_at', dir: 'desc' };
-let adminOrderSearchQuery = '';
 
 // ════════════════════════════════
 // INIT
@@ -11853,7 +11830,6 @@ ${_paymentLine}
 Kind regards,
 Ivonne and Mr. D`;
 
-    const canEditItems = hasCapability('can_edit_orders') && (o.status === 'pending' || o.status === 'approved' || o.status === 'waitlisted');
     // Phase 6.27: line item detail table for the expanded view
     const lineItemRows = (o.order_items || []).map(i => {
       const r = resolveOrderItem(i);
@@ -11871,24 +11847,18 @@ Ivonne and Mr. D`;
       const giftRemoveBtn = (r.is_gift && r.id)
         ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeGiftItem('${r.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="${escapeHtml(t('gift_remove_btn'))}">✕</button>`
         : '';
-      const itemRemoveBtn = (!r.is_gift && r.id && canEditItems)
-        ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeOrderItem('${r.id}','${o.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="Remove this item from the order">✕</button>`
-        : '';
       return `<tr>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-dim)">${escapeHtml(r.style)}</td>
         <td style="color:var(--cream)">${escapeHtml(r.name)}${setBadge}${giftBadge}${giftNoteLine}</td>
         <td style="color:var(--cream-dim);font-style:italic">${escapeHtml(colorDisplay)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;color:var(--cream)">${qty}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream-dim);white-space:nowrap">${priceCell}${giftRemoveBtn}${itemRemoveBtn}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream-dim);white-space:nowrap">${priceCell}${giftRemoveBtn}</td>
       </tr>`;
     }).join('');
     // Phase 6.29: "Add Gift Item" button below the table — only when order
     // is in a state where adding makes sense (not cancelled/shipped).
     const giftAddBtnHtml = (o.status === 'pending' || o.status === 'approved' || o.status === 'waitlisted')
       ? `<div style="margin-top:8px"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openGiftModal('${o.id}','${escapeHtml(o.order_id || '')}')" style="font-size:11px">${t('add_gift_btn')}</button></div>`
-      : '';
-    const addItemBtnHtml = canEditItems
-      ? `<div style="margin-top:8px"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openAddItemModal('${o.id}','${escapeHtml(o.order_id || '')}')" style="font-size:11px">+ Add Item</button></div>`
       : '';
     const lineItemTableHtml = `<div class="admin-details-block admin-line-items-block" style="grid-column:1/-1">
       <h4>${t('details_items') || 'Items'}</h4>
@@ -11904,7 +11874,7 @@ Ivonne and Mr. D`;
           <tbody>${lineItemRows}</tbody>
         </table>
       </div>
-      ${giftAddBtnHtml}${addItemBtnHtml}
+      ${giftAddBtnHtml}
     </div>`;
 
     // Phase 6.27: total cell shows final + subtotal hint when they differ
@@ -11915,7 +11885,7 @@ Ivonne and Mr. D`;
       return '€' + final.toFixed(2) + `<br><span style="font-size:10px;color:var(--cream-dim);font-weight:300">sub €${sub.toFixed(2)}</span>`;
     })();
 
-    return `<tr class="admin-row-expandable" data-expand-target="expand-${o.id}" data-search="${escapeHtml(((o.order_id||'')+' '+name+' '+email+' '+(o.paypal_email||'')).toLowerCase())}" onclick="toggleAdminOrderRow('${o.id}')">
+    return `<tr class="admin-row-expandable" data-expand-target="expand-${o.id}" onclick="toggleAdminOrderRow('${o.id}')">
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.5px"><span class="admin-expand-chevron">▸</span> ${o.order_id||'—'}${o.over_cap_at_submit ? `<span class="overcap-badge" title="Customer submitted ${o.over_cap_selected_count} ornaments when cap was ${o.over_cap_limit_at_submit}">⚠ Over-cap</span>` : ''}${o.submitted_after_window ? `<span class="late-submit-badge" title="${escapeHtml(t('late_submit_admin_tooltip'))}">${escapeHtml(t('late_submit_badge'))}</span>` : ''}${o.submitted_at_or_over_global_cap ? `<span class="global-cap-badge" title="${escapeHtml(t('overcap_admin_tooltip'))}">${escapeHtml(t('overcap_admin_badge'))}</span>` : ''}${(Array.isArray(o.over_limit_product_ids) && o.over_limit_product_ids.length) ? `<span class="global-cap-badge" title="${escapeHtml(t('overlimit_admin_tooltip') + ' ' + (o.over_limit_product_ids.map(pid => { const it = (o.order_items||[]).find(x => x.product_id === pid); return it ? (it.product_name||pid) : pid; }).join(', ')))}">${escapeHtml(t('overlimit_admin_badge'))}</span>` : ''}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);line-height:1.5">${placed}</td>
       <td><strong style="color:var(--cream)">${escapeHtml(name)}</strong><br><span style="font-size:11px;color:var(--cream-dim)">${escapeHtml(email)}</span></td>
@@ -12058,10 +12028,6 @@ Ivonne and Mr. D`;
     <button class="btn btn-outline btn-sm" onclick="exportAdminOrdersCsv()">${t('export_orders_btn')}</button>
     <button class="btn btn-outline btn-sm" onclick="exportAdminItemsCsv()">${t('export_items_btn')}</button>
   </div>
-  <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <input id="adminOrderSearch" type="text" oninput="filterAdminOrders(this.value)" placeholder="Search orders — ID, name, email…" style="flex:1;min-width:240px;max-width:420px;padding:9px 12px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:13px">
-    <span id="adminOrderSearchCount" style="font-size:12px;color:var(--cream-dim)"></span>
-  </div>
   <div class="admin-table-wrap"><table class="admin-table"><thead><tr>
     ${sortHdr(t('col_order_id') || t('order_id_label'), 'order_id')}
     ${sortHdr(t('col_placed'), 'created_at')}
@@ -12074,9 +12040,6 @@ Ivonne and Mr. D`;
   </tr></thead><tbody>
     ${rowsHtml}
   </tbody></table></div>`;
-  const _ose = document.getElementById('adminOrderSearch');
-  if (_ose) _ose.value = adminOrderSearchQuery;
-  if (adminOrderSearchQuery) filterAdminOrders(adminOrderSearchQuery);
   // Phase 6.29.5: REMOVED the applyT() call that was added in 6.29.1.
   // It was redundant because the same release converted all dynamic
   // buttons (gift, customs) to inline t() interpolation, which bakes
@@ -12852,129 +12815,6 @@ async function doSaveAddOrder() {
   closeAddOrderModal();
   if (typeof renderAdminOrders === 'function') renderAdminOrders();
   alert(t('ao_success').replace('{id}', order.order_id || order.id));
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// Admin: edit line items on an existing order (add / remove regular items)
-// + client-side search for the Orders console. Gated by can_edit_orders;
-// add/remove only for pending/approved/waitlisted orders. No emails are sent
-// by these actions — notifications fire only on explicit status changes.
-// ═══════════════════════════════════════════════════════════════════════
-let _addItemContext = { orderDbId: null, orderIdLabel: '' };
-
-function openAddItemModal(orderDbId, orderIdLabel) {
-  if (!requireCapability('can_edit_orders')) return;
-  _addItemContext = { orderDbId, orderIdLabel };
-  const info = document.getElementById('addItemOrderInfo');
-  if (info) info.textContent = orderIdLabel ? 'Order: ' + orderIdLabel : '';
-  const sel = document.getElementById('addItemCatalogSelect');
-  sel.innerHTML = '<option value=""></option>' +
-    (PRODUCTS || []).slice()
-      .filter(p => (p.status || 'active') === 'active')
-      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-      .map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml((p.style || p.id) + ' — ' + (p.name || ''))}${p.is_set ? ' (Set)' : ''}${p.color ? ' · ' + escapeHtml(p.color) : ''} — €${(typeof p.euros === 'number' ? p.euros : 0).toFixed(2)}</option>`)
-      .join('');
-  sel.value = '';
-  const err = document.getElementById('addItemError');
-  if (err) err.style.display = 'none';
-  document.getElementById('addItemModal').classList.add('show');
-}
-
-function closeAddItemModal() {
-  const m = document.getElementById('addItemModal');
-  if (m) m.classList.remove('show');
-  _addItemContext = { orderDbId: null, orderIdLabel: '' };
-}
-
-function onAddItemModalBgClick(event) {
-  if (event.target.id === 'addItemModal') closeAddItemModal();
-}
-
-async function doAddItemToOrder() {
-  if (!sb) return;
-  if (!requireCapability('can_edit_orders')) return;
-  const orderDbId = _addItemContext.orderDbId;
-  const productId = document.getElementById('addItemCatalogSelect').value;
-  const err = document.getElementById('addItemError');
-  const showErr = (m) => { if (err) { err.textContent = m; err.style.display = 'block'; } };
-  if (!orderDbId) { showErr('No order selected.'); return; }
-  if (!productId) { showErr('Please choose an ornament to add.'); return; }
-  const p = (PRODUCTS || []).find(x => x.id === productId);
-  if (!p) { showErr('That product could not be found.'); return; }
-  const btn = document.getElementById('addItemSaveBtn');
-  const prev = btn ? btn.textContent : '';
-  if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
-  const { data: order, error: oErr } = await sb.from('orders')
-    .select('id, user_id, season').eq('id', orderDbId).single();
-  if (oErr || !order) {
-    if (btn) { btn.disabled = false; btn.textContent = prev; }
-    showErr('Could not load the order: ' + (oErr ? oErr.message : 'not found'));
-    return;
-  }
-  const nowIso = new Date().toISOString();
-  const row = {
-    order_id: order.id, user_id: order.user_id, product_id: p.id,
-    season: order.season || '2026', created_at: nowIso,
-    product_name: p.name || null, product_style: p.style || null,
-    product_color: p.color || null, product_height: p.height || null,
-    product_euros: (typeof p.euros === 'number') ? p.euros : null,
-    product_is_set: !!p.is_set,
-    product_set_member_count: p.is_set ? setMembersOf(p).length : null,
-    added_by_admin_at: nowIso,
-  };
-  const { error: insErr } = await sb.from('order_items').insert(row);
-  if (insErr) {
-    if (btn) { btn.disabled = false; btn.textContent = prev; }
-    showErr('Could not add the item: ' + insErr.message);
-    return;
-  }
-  await recomputeOrderTotalEuros(orderDbId);
-  if (btn) { btn.disabled = false; btn.textContent = prev; }
-  closeAddItemModal();
-  await renderAdminOrders();
-}
-
-async function removeOrderItem(orderItemRowId, orderDbId) {
-  if (!sb || !orderItemRowId) return;
-  if (!requireCapability('can_edit_orders')) return;
-  if (!confirm('Remove this item from the order? This cannot be undone.')) return;
-  const { error } = await sb.from('order_items').delete().eq('id', orderItemRowId);
-  if (error) { alert('Could not remove the item: ' + error.message); return; }
-  await recomputeOrderTotalEuros(orderDbId);
-  await renderAdminOrders();
-}
-
-async function recomputeOrderTotalEuros(orderDbId) {
-  if (!orderDbId) return;
-  const { data: items, error } = await sb.from('order_items')
-    .select('product_euros, is_gift').eq('order_id', orderDbId);
-  if (error) { console.warn('[recomputeOrderTotalEuros] fetch failed', error); return; }
-  let sum = 0, cnt = 0;
-  for (const it of (items || [])) {
-    if (it.is_gift) continue;
-    sum += Number(it.product_euros) || 0;
-    cnt++;
-  }
-  const { error: upErr } = await sb.from('orders')
-    .update({ total_euros: sum, item_count: cnt }).eq('id', orderDbId);
-  if (upErr) console.warn('[recomputeOrderTotalEuros] update failed', upErr);
-}
-
-function filterAdminOrders(q) {
-  adminOrderSearchQuery = q || '';
-  const norm = adminOrderSearchQuery.trim().toLowerCase();
-  const rows = document.querySelectorAll('#adminOrders tr.admin-row-expandable');
-  let shown = 0;
-  rows.forEach(row => {
-    const hay = row.getAttribute('data-search') || '';
-    const match = !norm || hay.indexOf(norm) !== -1;
-    row.style.display = match ? '' : 'none';
-    const det = document.getElementById(row.getAttribute('data-expand-target'));
-    if (det && !match) det.style.display = 'none';
-    if (match) shown++;
-  });
-  const cnt = document.getElementById('adminOrderSearchCount');
-  if (cnt) cnt.textContent = norm ? (shown + (shown === 1 ? ' match' : ' matches')) : '';
 }
 
 function openGiftModal(orderDbId, orderIdLabel) {
