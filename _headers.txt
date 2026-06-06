@@ -1,0 +1,19 @@
+# Netlify _headers — Gläserne Leidenschaft
+# Purpose: make sure the app shell (index.html) is ALWAYS revalidated, so a
+# visitor can never be served a stale, out-of-date copy of the site. This is
+# what prevents the "old cached page shows old data" problem (e.g. a product
+# name a customer sees that no longer matches the live database).
+#
+# How it works: "max-age=0, must-revalidate" lets the browser keep a copy but
+# forces it to check with the server on every load. Netlify uses ETags, so if
+# nothing changed the server replies "304 Not Modified" (fast, no re-download);
+# if you've deployed an update, the visitor gets the new version immediately.
+#
+# Placement: this file must be named exactly  _headers  (no extension) and sit
+# in the SAME folder as index.html in your Netlify deploy.
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
