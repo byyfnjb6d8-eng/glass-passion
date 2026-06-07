@@ -5410,6 +5410,14 @@ body.locked > *:not(#constructionGate) { display: none !important; }
         <option value=""></option>
       </select>
     </div>
+    <div class="field" style="margin-top:10px">
+      <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Quantity</label>
+      <input type="number" id="addItemQty" min="1" max="50" value="1" style="width:110px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:14px">
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Note — admin only (e.g. special coloration)</label>
+      <textarea id="addItemNote" rows="2" placeholder="Optional production note. Not shown to the customer." style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:13px;box-sizing:border-box;resize:vertical"></textarea>
+    </div>
     <div id="addItemError" style="display:none;color:#b00;font-size:13px;margin-top:10px"></div>
     <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
       <button id="addItemSaveBtn" class="btn btn-gold btn-sm" onclick="doAddItemToOrder()">Add to Order</button>
@@ -6160,7 +6168,7 @@ function productImageUrl(filename) {
 // "[Item no longer in catalog: <product_id>]" so historical orders
 // don't render with empty fields when the catalog has moved on.
 // ═══════════════════════════════════════════════════════════════════════
-const ORDER_ITEMS_PROJECTION = 'order_items(id, product_id, created_at, product_name, product_style, product_color, product_height, product_euros, product_is_set, product_set_member_count, is_gift, gift_note, added_by_admin_at, declared_value_euros, net_weight_grams)';
+const ORDER_ITEMS_PROJECTION = 'order_items(id, product_id, created_at, product_name, product_style, product_color, product_height, product_euros, product_is_set, product_set_member_count, is_gift, gift_note, added_by_admin_at, declared_value_euros, net_weight_grams, item_note)';
 
 // ═══════════════════════════════════════════════════════════════════════
 // Phase 6.30: Shipping tracking — carrier list, URL templates, auto-detect
@@ -11938,6 +11946,7 @@ Ivonne and Mr. D`;
       // gift_note (if any) appears as italic muted text below the name.
       const giftBadge = r.is_gift ? ` <span class="gift-badge-mini">🎁 ${t('gift_badge')}</span>` : '';
       const giftNoteLine = (r.is_gift && r.gift_note) ? `<div style="font-size:11px;color:var(--cream-dim);font-style:italic;margin-top:3px">${escapeHtml(r.gift_note)}</div>` : '';
+      const itemNoteLine = (!r.is_gift && i.item_note) ? `<div style="font-size:11px;color:var(--gold-dim);font-style:italic;margin-top:3px">✎ ${escapeHtml(i.item_note)}</div>` : '';
       const priceCell = r.is_gift
         ? `<span style="color:#4a8a5e;font-weight:600">FREE</span><br><span style="font-size:9px;color:var(--cream-dim);font-style:italic">declared €${(r.declared_value_euros || 0).toFixed(2)}</span>`
         : `€${(r.euros || 0).toFixed(2)}`;
@@ -11947,12 +11956,15 @@ Ivonne and Mr. D`;
       const itemRemoveBtn = (!r.is_gift && r.id && canEditItems)
         ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeOrderItem('${r.id}','${o.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="Remove this item from the order">✕</button>`
         : '';
+      const itemNoteBtn = (!r.is_gift && r.id && canEditItems)
+        ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); editItemNote('${r.id}','${o.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="Add or edit a production note (admin only)">✎</button>`
+        : '';
       return `<tr>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-dim)">${escapeHtml(r.style)}</td>
-        <td style="color:var(--cream)">${escapeHtml(r.name)}${setBadge}${giftBadge}${giftNoteLine}</td>
+        <td style="color:var(--cream)">${escapeHtml(r.name)}${setBadge}${giftBadge}${giftNoteLine}${itemNoteLine}</td>
         <td style="color:var(--cream-dim);font-style:italic">${escapeHtml(colorDisplay)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;color:var(--cream)">${qty}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream-dim);white-space:nowrap">${priceCell}${giftRemoveBtn}${itemRemoveBtn}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream-dim);white-space:nowrap">${priceCell}${giftRemoveBtn}${itemRemoveBtn}${itemNoteBtn}</td>
       </tr>`;
     }).join('');
     // Phase 6.29: "Add Gift Item" button below the table — only when order
@@ -12939,6 +12951,8 @@ function openAddItemModal(orderDbId, orderIdLabel) {
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
       .map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml((p.style || p.id) + ' — ' + (p.name || ''))}${p.is_set ? ' (Set)' : ''}${p.color ? ' · ' + escapeHtml(p.color) : ''} — €${(typeof p.euros === 'number' ? p.euros : 0).toFixed(2)}</option>`).join('');
   sel.value = '';
+  const qEl = document.getElementById('addItemQty'); if (qEl) qEl.value = '1';
+  const nEl = document.getElementById('addItemNote'); if (nEl) nEl.value = '';
   const err = document.getElementById('addItemError'); if (err) err.style.display = 'none';
   document.getElementById('addItemModal').classList.add('show');
 }
@@ -12964,6 +12978,8 @@ async function doAddItemToOrder() {
   if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
   const { data: order, error: oErr } = await sb.from('orders').select('id, user_id, season').eq('id', orderDbId).single();
   if (oErr || !order) { if (btn) { btn.disabled = false; btn.textContent = prev; } showErr('Could not load the order: ' + (oErr ? oErr.message : 'not found')); return; }
+  const qty = Math.max(1, Math.min(50, parseInt((document.getElementById('addItemQty')||{}).value, 10) || 1));
+  const note = ((document.getElementById('addItemNote')||{}).value || '').trim();
   const nowIso = new Date().toISOString();
   const row = {
     order_id: order.id, user_id: order.user_id, product_id: p.id,
@@ -12974,8 +12990,10 @@ async function doAddItemToOrder() {
     product_is_set: !!p.is_set,
     product_set_member_count: p.is_set ? setMembersOf(p).length : null,
     added_by_admin_at: nowIso,
+    item_note: note || null,
   };
-  const { error: insErr } = await sb.from('order_items').insert(row);
+  const rows = Array.from({ length: qty }, () => ({ ...row }));
+  const { error: insErr } = await sb.from('order_items').insert(rows);
   if (insErr) { if (btn) { btn.disabled = false; btn.textContent = prev; } showErr('Could not add the item: ' + insErr.message); return; }
   await recomputeOrderTotalEuros(orderDbId);
   if (btn) { btn.disabled = false; btn.textContent = prev; }
@@ -12990,6 +13008,22 @@ async function removeOrderItem(orderItemRowId, orderDbId) {
   const { error } = await sb.from('order_items').delete().eq('id', orderItemRowId);
   if (error) { alert('Could not remove the item: ' + error.message); return; }
   await recomputeOrderTotalEuros(orderDbId);
+  await renderAdminOrders();
+  reopenAdminOrderRow(orderDbId);
+}
+async function editItemNote(orderItemRowId, orderDbId) {
+  if (!sb || !orderItemRowId) return;
+  if (!requireCapability('can_edit_orders')) return;
+  let existing = '';
+  try {
+    const { data: cur } = await sb.from('order_items').select('item_note').eq('id', orderItemRowId).single();
+    existing = (cur && cur.item_note) || '';
+  } catch (e) {}
+  const next = prompt('Production note for this item (admin only — e.g. special coloration). Leave blank to clear:', existing);
+  if (next === null) return;
+  const trimmed = next.trim();
+  const { error } = await sb.from('order_items').update({ item_note: trimmed || null }).eq('id', orderItemRowId);
+  if (error) { alert('Could not save the note: ' + error.message); return; }
   await renderAdminOrders();
   reopenAdminOrderRow(orderDbId);
 }
