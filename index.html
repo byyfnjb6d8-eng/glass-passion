@@ -5284,6 +5284,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
       <input type="text" id="aoCustomName" data-t-placeholder="ao_custom_name_ph" style="flex:1;min-width:160px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:13px;box-sizing:border-box">
       <input type="number" step="0.01" min="0" id="aoCustomPrice" data-t-placeholder="ao_custom_price_ph" style="width:120px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:13px;box-sizing:border-box">
+      <input type="number" min="1" max="50" value="1" id="aoCustomQty" title="Quantity" style="width:70px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:13px;box-sizing:border-box">
+      <input type="text" id="aoCustomNote" placeholder="Note (admin only)" style="flex:1;min-width:160px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:13px;box-sizing:border-box">
       <button class="btn btn-outline btn-sm" onclick="aoAddCustomItem()" data-t="ao_custom_add"></button>
     </div>
 
@@ -12035,6 +12037,7 @@ Ivonne and Mr. D`;
                   ? 'Friends &amp; Family <span style="color:var(--cream-dim);font-size:11px">(no fee)</span>'
                   : '<span style="color:var(--cream-dim)">— not specified —</span>'}
             </div>
+            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim);margin-top:6px">PayPal: ${o.paypal_email ? escapeHtml(o.paypal_email) : '<span style="color:#b00">— not on file —</span>'}</div>
           </div>
           <div class="admin-details-block admin-pricing-block" style="grid-column:1/-1;background:rgba(201,168,76,0.04);padding:16px;border-radius:var(--r);border:1px solid var(--line2)">
             <h4>${t('details_pricing')}</h4>
@@ -12630,6 +12633,7 @@ let _giftModalContext = { orderDbId: null, orderIdLabel: null };
 // inline t() (never applyT) to avoid the adminOrders re-render side effect.
 let _aoState = { customer: null, customItems: [] };
 let _aoSelectedCatalog = new Set();
+let _aoCatalogMeta = {}; // id -> { qty, note }
 let _aoSearchResults = [];
 let _aoSearchTimer = null;
 
@@ -12637,6 +12641,7 @@ function openAddOrderModal() {
   if (!requireCapability('can_edit_orders')) return;
   _aoState = { customer: null, customItems: [] };
   _aoSelectedCatalog = new Set();
+  _aoCatalogMeta = {};
   _aoSearchResults = [];
   document.getElementById('aoCustomerSearch').value = '';
   document.getElementById('aoCustomerResults').innerHTML = '';
@@ -12675,6 +12680,7 @@ function closeAddOrderModal() {
   if (m) { m.classList.remove('show'); m.style.display = ''; }
   _aoState = { customer: null, customItems: [] };
   _aoSelectedCatalog = new Set();
+  _aoCatalogMeta = {};
 }
 
 function onAddOrderBgClick(event) {
@@ -12725,7 +12731,7 @@ function aoPickCustomer(idx) {
   const nm = ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || '—';
   const picked = document.getElementById('aoCustomerPicked');
   picked.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;background:rgba(176,141,64,0.06);border-left:3px solid var(--gold);border-radius:4px">
-    <div style="font-size:13px;color:var(--cream)"><span style="font-weight:500">${escapeHtml(nm)}</span> <span style="color:var(--cream-dim)">— ${escapeHtml(p.email || '')}</span></div>
+    <div style="font-size:13px;color:var(--cream)"><span style="font-weight:500">${escapeHtml(nm)}</span> <span style="color:var(--cream-dim)">— ${escapeHtml(p.email || '')}</span><br><span style="font-size:11px;color:var(--cream-dim)">PayPal: ${p.paypal_email ? escapeHtml(p.paypal_email) : '— none on file (use Edit Customer to add) —'}</span></div>
     <button class="btn btn-ghost btn-sm" onclick="aoClearCustomer()" style="font-size:11px">${escapeHtml(t('ao_change'))}</button>
   </div>`;
   picked.style.display = 'block';
@@ -12749,31 +12755,59 @@ function aoRenderCatalogList() {
     .slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   if (!items.length) { list.innerHTML = `<div style="font-size:12px;color:var(--cream-dim);font-style:italic;padding:6px">${escapeHtml(t('ao_no_products'))}</div>`; return; }
   list.innerHTML = items.map(p => {
-    const checked = _aoSelectedCatalog.has(p.id) ? 'checked' : '';
+    const isChecked = _aoSelectedCatalog.has(p.id);
+    const checked = isChecked ? 'checked' : '';
+    const meta = _aoCatalogMeta[p.id] || { qty: 1, note: '' };
     const setBadge = p.is_set ? ` <span style="font-size:10px;color:var(--gold-dim)">(${escapeHtml(t('ao_set'))})</span>` : '';
     const color = p.color ? ` <span style="color:var(--cream-dim);font-size:12px">· ${escapeHtml(p.color)}</span>` : '';
-    return `<label style="display:flex;align-items:center;gap:9px;padding:5px 4px;cursor:pointer;border-bottom:1px solid rgba(42,31,21,0.06)">
-      <input type="checkbox" ${checked} onchange="aoToggleCatalog('${escapeHtml(p.id)}', this.checked)">
-      <span style="flex:1;font-size:13px;color:var(--cream)"><span style="font-family:'DM Mono',monospace;color:var(--gold-dim);font-size:11px">${escapeHtml(p.style || p.id)}</span> ${escapeHtml(p.name || '')}${setBadge}${color}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim);white-space:nowrap">€${(typeof p.euros === 'number' ? p.euros : 0).toFixed(2)}</span>
-    </label>`;
+    const editRow = isChecked
+      ? `<div style="display:flex;gap:8px;align-items:center;padding:0 4px 8px 30px;flex-wrap:wrap" onclick="event.stopPropagation()">
+          <label style="font-size:11px;color:var(--cream-dim)">Qty</label>
+          <input type="number" min="1" max="50" value="${meta.qty || 1}" onchange="aoSetCatalogQty('${escapeHtml(p.id)}', this.value)" style="width:64px;padding:5px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:12px">
+          <input type="text" value="${escapeHtml(meta.note || '')}" oninput="aoSetCatalogNote('${escapeHtml(p.id)}', this.value)" placeholder="Note (admin only — e.g. special coloration)" style="flex:1;min-width:180px;padding:5px 8px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:12px">
+        </div>`
+      : '';
+    return `<div style="border-bottom:1px solid rgba(42,31,21,0.06)">
+      <label style="display:flex;align-items:center;gap:9px;padding:5px 4px;cursor:pointer">
+        <input type="checkbox" ${checked} onchange="aoToggleCatalog('${escapeHtml(p.id)}', this.checked)">
+        <span style="flex:1;font-size:13px;color:var(--cream)"><span style="font-family:'DM Mono',monospace;color:var(--gold-dim);font-size:11px">${escapeHtml(p.style || p.id)}</span> ${escapeHtml(p.name || '')}${setBadge}${color}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim);white-space:nowrap">€${(typeof p.euros === 'number' ? p.euros : 0).toFixed(2)}</span>
+      </label>
+      ${editRow}
+    </div>`;
   }).join('');
 }
 
 function aoToggleCatalog(id, on) {
-  if (on) _aoSelectedCatalog.add(id); else _aoSelectedCatalog.delete(id);
+  if (on) { _aoSelectedCatalog.add(id); if (!_aoCatalogMeta[id]) _aoCatalogMeta[id] = { qty: 1, note: '' }; }
+  else { _aoSelectedCatalog.delete(id); delete _aoCatalogMeta[id]; }
+  aoRenderCatalogList();
   aoRecalcTotal(true);
+}
+function aoSetCatalogQty(id, v) {
+  const q = Math.max(1, Math.min(50, parseInt(v, 10) || 1));
+  if (_aoCatalogMeta[id]) _aoCatalogMeta[id].qty = q;
+  aoRecalcTotal(true);
+}
+function aoSetCatalogNote(id, v) {
+  if (_aoCatalogMeta[id]) _aoCatalogMeta[id].note = v;
 }
 
 function aoAddCustomItem() {
   const nameEl = document.getElementById('aoCustomName');
   const priceEl = document.getElementById('aoCustomPrice');
+  const qtyEl = document.getElementById('aoCustomQty');
+  const noteEl = document.getElementById('aoCustomNote');
   const name = nameEl.value.trim();
   const price = parseFloat(priceEl.value);
+  const qty = Math.max(1, Math.min(50, parseInt(qtyEl ? qtyEl.value : '1', 10) || 1));
+  const note = (noteEl ? noteEl.value : '').trim();
   if (!name) { aoShowError(t('ao_err_custom_name')); return; }
   if (isNaN(price) || price < 0) { aoShowError(t('ao_err_custom_price')); return; }
-  _aoState.customItems.push({ name, price });
+  _aoState.customItems.push({ name, price, qty, note });
   nameEl.value = ''; priceEl.value = '';
+  if (qtyEl) qtyEl.value = '1';
+  if (noteEl) noteEl.value = '';
   document.getElementById('aoError').style.display = 'none';
   aoRenderCustomList();
   aoRecalcTotal(true);
@@ -12790,7 +12824,7 @@ function aoRenderCustomList() {
   if (!_aoState.customItems.length) { box.innerHTML = ''; return; }
   box.innerHTML = _aoState.customItems.map((it, i) =>
     `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 8px;border:1px solid var(--line2);border-radius:4px;margin-bottom:4px">
-      <span style="font-size:13px;color:var(--cream)">${escapeHtml(it.name)}</span>
+      <span style="font-size:13px;color:var(--cream)">${escapeHtml(it.name)}${(it.qty || 1) > 1 ? ` <span style="color:var(--gold-dim)">×${it.qty}</span>` : ''}${it.note ? `<span style="display:block;font-size:11px;color:var(--gold-dim);font-style:italic">✎ ${escapeHtml(it.note)}</span>` : ''}</span>
       <span style="display:flex;align-items:center;gap:10px">
         <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim)">€${(it.price || 0).toFixed(2)}</span>
         <button onclick="aoRemoveCustomItem(${i})" style="background:none;border:none;color:#b00;cursor:pointer;font-size:16px;line-height:1;padding:0">✕</button>
@@ -12806,12 +12840,14 @@ function aoRecalcTotal(force) {
   let sum = 0;
   for (const id of _aoSelectedCatalog) {
     const p = (PRODUCTS || []).find(x => x.id === id);
-    if (p && typeof p.euros === 'number') sum += p.euros;
+    const q = (_aoCatalogMeta[id] && _aoCatalogMeta[id].qty) || 1;
+    if (p && typeof p.euros === 'number') sum += p.euros * q;
   }
-  for (const it of _aoState.customItems) sum += (it.price || 0);
+  for (const it of _aoState.customItems) sum += (it.price || 0) * (it.qty || 1);
   const totalEl = document.getElementById('aoTotal');
   if (force || !totalEl.value) totalEl.value = sum.toFixed(2);
-  const count = _aoSelectedCatalog.size + _aoState.customItems.length;
+  const count = [..._aoSelectedCatalog].reduce((n, id) => n + (((_aoCatalogMeta[id] && _aoCatalogMeta[id].qty) || 1)), 0)
+              + _aoState.customItems.reduce((n, it) => n + (it.qty || 1), 0);
   document.getElementById('aoTotalHint').textContent =
     t('ao_total_hint').replace('{count}', count).replace('{sum}', '€' + sum.toFixed(2));
 }
@@ -12831,7 +12867,8 @@ async function doSaveAddOrder() {
   const notify = document.getElementById('aoNotify').checked;
   let totalEuros = parseFloat(document.getElementById('aoTotal').value);
   if (isNaN(totalEuros) || totalEuros < 0) totalEuros = 0;
-  const itemCount = catalogIds.length + customItems.length;
+  const itemCount = catalogIds.reduce((n, id) => n + Math.max(1, (_aoCatalogMeta[id] && _aoCatalogMeta[id].qty) || 1), 0)
+                  + customItems.reduce((n, it) => n + Math.max(1, it.qty || 1), 0);
 
   const btn = document.getElementById('aoSaveBtn');
   const prev = btn.textContent;
@@ -12886,7 +12923,9 @@ async function doSaveAddOrder() {
   const rows = [];
   for (const id of catalogIds) {
     const p = (PRODUCTS || []).find(x => x.id === id);
-    rows.push({
+    const meta = _aoCatalogMeta[id] || { qty: 1, note: '' };
+    const q = Math.max(1, meta.qty || 1);
+    const base = {
       order_id: order.id,
       user_id: cust.id,
       product_id: id,
@@ -12900,25 +12939,31 @@ async function doSaveAddOrder() {
       product_is_set: p ? !!p.is_set : false,
       product_set_member_count: (p && p.is_set) ? setMembersOf(p).length : null,
       added_by_admin_at: nowIso,
-    });
+      item_note: (meta.note || '').trim() || null,
+    };
+    for (let k = 0; k < q; k++) rows.push({ ...base });
   }
   let ci = 0;
   for (const it of customItems) {
-    rows.push({
-      order_id: order.id,
-      user_id: cust.id,
-      product_id: 'custom-' + Date.now() + '-' + (ci++),
-      season: '2026',
-      created_at: nowIso,
-      product_name: it.name,
-      product_style: 'CUSTOM',
-      product_color: null,
-      product_height: null,
-      product_euros: it.price,
-      product_is_set: false,
-      product_set_member_count: null,
-      added_by_admin_at: nowIso,
-    });
+    const q = Math.max(1, it.qty || 1);
+    for (let k = 0; k < q; k++) {
+      rows.push({
+        order_id: order.id,
+        user_id: cust.id,
+        product_id: 'custom-' + Date.now() + '-' + (ci++),
+        season: '2026',
+        created_at: nowIso,
+        product_name: it.name,
+        product_style: 'CUSTOM',
+        product_color: null,
+        product_height: null,
+        product_euros: it.price,
+        product_is_set: false,
+        product_set_member_count: null,
+        added_by_admin_at: nowIso,
+        item_note: (it.note || '').trim() || null,
+      });
+    }
   }
 
   const { error: itemsErr } = await sb.from('order_items').insert(rows);
