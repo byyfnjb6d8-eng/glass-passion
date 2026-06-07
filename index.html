@@ -6184,7 +6184,7 @@ function productImageUrl(filename) {
 // "[Item no longer in catalog: <product_id>]" so historical orders
 // don't render with empty fields when the catalog has moved on.
 // ═══════════════════════════════════════════════════════════════════════
-const ORDER_ITEMS_PROJECTION = 'order_items(id, product_id, created_at, product_name, product_style, product_color, product_height, product_euros, product_is_set, product_set_member_count, is_gift, gift_note, added_by_admin_at, declared_value_euros, net_weight_grams, item_note, quantity)';
+const ORDER_ITEMS_PROJECTION = 'order_items(*)'; // select all columns so a schema change can never break order queries
 
 // ═══════════════════════════════════════════════════════════════════════
 // Phase 6.30: Shipping tracking — carrier list, URL templates, auto-detect
@@ -11838,7 +11838,13 @@ function updateBulkBar() {
 
 async function renderAdminOrders() {
   const el = document.getElementById('adminOrders');
-  const { data: orders } = await sb.from('orders').select('*, ' + ORDER_ITEMS_PROJECTION).order('created_at', { ascending: false });
+  const { data: orders, error: _ordErr } = await sb.from('orders').select('*, ' + ORDER_ITEMS_PROJECTION).order('created_at', { ascending: false });
+  if (_ordErr) {
+    // A query error is NOT data loss — the orders are safe in the database.
+    // Show the error instead of the empty state so it can never look like a wipe.
+    el.innerHTML = `<div style="padding:16px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14px;line-height:1.5"><strong>Couldn't load orders right now.</strong><br>Your orders are safe in the database — this is a temporary query error, not deleted data. Try reloading. If it persists, report this: ${escapeHtml(_ordErr.message || String(_ordErr))}</div>`;
+    return;
+  }
   if (!orders?.length) {
     const aoBtn = hasCapability('can_edit_orders') ? `<button class="btn btn-gold btn-sm" onclick="openAddOrderModal()" style="margin-bottom:16px">${escapeHtml(t('ao_add_btn'))}</button>` : '';
     el.innerHTML = aoBtn + `<p style="color:var(--cream-dim);font-size:14px">${t('no_orders')}</p>`;
