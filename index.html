@@ -5404,13 +5404,27 @@ body.locked > *:not(#constructionGate) { display: none !important; }
       <h3 style="margin:0">Add Item to Order</h3>
       <button onclick="closeAddItemModal()" style="background:none; border:none; color:var(--cream-dim); font-size:22px; cursor:pointer; padding:0; line-height:1">✕</button>
     </div>
-    <p style="margin:0 0 12px 0; color:var(--cream-dim); font-size:13px; font-weight:300">Add a catalogue ornament to this order. It is priced at its current catalogue price and the order total updates automatically. No email is sent — the customer is only notified when you change the order status.</p>
+    <p style="margin:0 0 12px 0; color:var(--cream-dim); font-size:13px; font-weight:300">Add a catalogue ornament or a custom one-off item to this order. The order total updates automatically. No email is sent — the customer is only notified when you change the order status.</p>
     <div id="addItemOrderInfo" style="padding:8px 12px;background:rgba(176,141,64,0.06);border-left:3px solid var(--gold);margin-bottom:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)"></div>
-    <div class="field">
+    <div style="display:flex;gap:16px;margin-bottom:10px;font-size:13px;color:var(--cream)">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="addItemType" value="catalog" checked onchange="onAddItemTypeChange()"> Catalogue item</label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="addItemType" value="custom" onchange="onAddItemTypeChange()"> Custom item</label>
+    </div>
+    <div class="field" id="addItemCatalogWrap">
       <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Ornament</label>
       <select id="addItemCatalogSelect" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px">
         <option value=""></option>
       </select>
+    </div>
+    <div id="addItemCustomWrap" style="display:none">
+      <div class="field">
+        <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Item name</label>
+        <input type="text" id="addItemCustomName" placeholder="e.g. Custom bauble — cobalt blue" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px;box-sizing:border-box">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Price (€)</label>
+        <input type="number" id="addItemCustomPrice" step="0.01" min="0" placeholder="0.00" style="width:140px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:14px">
+      </div>
     </div>
     <div class="field" style="margin-top:10px">
       <label style="font-size:13px;color:var(--cream-dim);font-weight:300">Quantity</label>
@@ -6170,7 +6184,7 @@ function productImageUrl(filename) {
 // "[Item no longer in catalog: <product_id>]" so historical orders
 // don't render with empty fields when the catalog has moved on.
 // ═══════════════════════════════════════════════════════════════════════
-const ORDER_ITEMS_PROJECTION = 'order_items(id, product_id, created_at, product_name, product_style, product_color, product_height, product_euros, product_is_set, product_set_member_count, is_gift, gift_note, added_by_admin_at, declared_value_euros, net_weight_grams, item_note)';
+const ORDER_ITEMS_PROJECTION = 'order_items(id, product_id, created_at, product_name, product_style, product_color, product_height, product_euros, product_is_set, product_set_member_count, is_gift, gift_note, added_by_admin_at, declared_value_euros, net_weight_grams, item_note, quantity)';
 
 // ═══════════════════════════════════════════════════════════════════════
 // Phase 6.30: Shipping tracking — carrier list, URL templates, auto-detect
@@ -9428,7 +9442,7 @@ async function loadOrnamentSoldCounts() {
   if (!isAdmin && !siteSettings.enforceOrnamentLimits) return;
   const { data, error } = await sb
     .from('order_items')
-    .select('product_id, orders!inner(status, placed_with_unlimited_access)')
+    .select('product_id, quantity, orders!inner(status, placed_with_unlimited_access)')
     .eq('season', '2026')
     .in('orders.status', ['pending', 'approved', 'shipped']);
   if (error) { console.warn('sold-count query failed:', error); return; }
@@ -9437,7 +9451,7 @@ async function loadOrnamentSoldCounts() {
     // consume the standard availability count other customers see.
     const ord = Array.isArray(r.orders) ? r.orders[0] : r.orders;
     if (ord && ord.placed_with_unlimited_access) return;
-    ornamentSoldCount[r.product_id] = (ornamentSoldCount[r.product_id] || 0) + 1;
+    ornamentSoldCount[r.product_id] = (ornamentSoldCount[r.product_id] || 0) + (r.quantity || 1);
   });
 }
 
@@ -11841,13 +11855,26 @@ async function renderAdminOrders() {
     for (const it of (o.order_items || [])) {
       const r = resolveOrderItem(it);
       if (r.is_gift) continue;
-      qty += r.is_set ? (r.set_member_count || 1) : 1;
+      qty += (r.is_set ? (r.set_member_count || 1) : 1) * (it.quantity || 1);
     }
     o._effectiveQty = qty;
     o._finalTotal = computeOrderFinalTotal(o);
     // Cached display name for sorting (last name first so customer sort is intuitive)
     o._sortName = ((o.last_name || '') + ' ' + (o.first_name || '')).trim().toLowerCase() || (o.email || '').toLowerCase();
   }
+
+  // PayPal fallback: orders without a snapshotted paypal_email (older orders,
+  // or created before the profile had one) fall back to the customer's
+  // current profile PayPal so the invoice address is always visible.
+  try {
+    const missing = [...new Set(orders.filter(o => !o.paypal_email && o.user_id).map(o => o.user_id))];
+    if (missing.length) {
+      const { data: profs } = await sb.from('profiles').select('id, paypal_email').in('id', missing);
+      const pmap = {};
+      (profs || []).forEach(pr => { if (pr.paypal_email) pmap[pr.id] = pr.paypal_email; });
+      orders.forEach(o => { if (!o.paypal_email && pmap[o.user_id]) o._profilePaypal = pmap[o.user_id]; });
+    }
+  } catch (e) { console.warn('[orders] paypal fallback lookup failed', e); }
 
   // Phase 6.27: client-side sort based on adminOrderSort
   const sortKey = adminOrderSort.col;
@@ -11940,7 +11967,7 @@ Ivonne and Mr. D`;
     // Phase 6.27: line item detail table for the expanded view
     const lineItemRows = (o.order_items || []).map(i => {
       const r = resolveOrderItem(i);
-      const qty = r.is_set ? (r.set_member_count || 1) : 1;
+      const qty = (i.quantity || 1) * (r.is_set ? (r.set_member_count || 1) : 1);
       const colorDisplay = splitByLang(r.color, lang) || (r.is_set ? '—' : '');
       const setBadge = r.is_set ? ` <span class="set-badge-mini">${t('set_of_n').replace('{n}', r.set_member_count || 0)}</span>` : '';
       // Phase 6.29: gift rows get a green "Gift" badge and a remove button
@@ -12009,7 +12036,7 @@ Ivonne and Mr. D`;
       <td style="font-family:'DM Mono',monospace;font-size:13px;text-align:center;color:var(--cream)">${o._effectiveQty}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);text-transform:uppercase">${o.shipping_method||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">${totalCellHtml}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);word-break:break-all">${escapeHtml(o.paypal_email || '—')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);word-break:break-all">${escapeHtml(o.paypal_email || o._profilePaypal || '—')}</td>
       <td onclick="event.stopPropagation()">
         <select class="admin-status-select" data-order-id="${o.id}" onchange="adminSetOrderStatus(this.dataset.orderId, this.value)" style="padding:6px 8px; background:var(--surface2); color:var(--cream); border:1px solid var(--line2); border-radius:4px; font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.5px">
           ${statusOptions}
@@ -12037,7 +12064,7 @@ Ivonne and Mr. D`;
                   ? 'Friends &amp; Family <span style="color:var(--cream-dim);font-size:11px">(no fee)</span>'
                   : '<span style="color:var(--cream-dim)">— not specified —</span>'}
             </div>
-            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim);margin-top:6px">PayPal: ${o.paypal_email ? escapeHtml(o.paypal_email) : '<span style="color:#b00">— not on file —</span>'}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim);margin-top:6px">PayPal: ${(o.paypal_email || o._profilePaypal) ? escapeHtml(o.paypal_email || o._profilePaypal) : '<span style="color:#b00">— not on file —</span>'}</div>
           </div>
           <div class="admin-details-block admin-pricing-block" style="grid-column:1/-1;background:rgba(201,168,76,0.04);padding:16px;border-radius:var(--r);border:1px solid var(--line2)">
             <h4>${t('details_pricing')}</h4>
@@ -12292,7 +12319,7 @@ async function exportAdminOrdersCsv() {
     let effQty = 0;
     for (const it of (o.order_items || [])) {
       const r = resolveOrderItem(it);
-      effQty += r.is_set ? (r.set_member_count || 1) : 1;
+      effQty += (r.is_set ? (r.set_member_count || 1) : 1) * (it.quantity || 1);
     }
     const finalTotal = computeOrderFinalTotal(o);
     // Phase 6.27: split date and time for spreadsheet-friendly sorting
@@ -12925,7 +12952,7 @@ async function doSaveAddOrder() {
     const p = (PRODUCTS || []).find(x => x.id === id);
     const meta = _aoCatalogMeta[id] || { qty: 1, note: '' };
     const q = Math.max(1, meta.qty || 1);
-    const base = {
+    rows.push({
       order_id: order.id,
       user_id: cust.id,
       product_id: id,
@@ -12940,30 +12967,29 @@ async function doSaveAddOrder() {
       product_set_member_count: (p && p.is_set) ? setMembersOf(p).length : null,
       added_by_admin_at: nowIso,
       item_note: (meta.note || '').trim() || null,
-    };
-    for (let k = 0; k < q; k++) rows.push({ ...base });
+      quantity: q,
+    });
   }
   let ci = 0;
   for (const it of customItems) {
     const q = Math.max(1, it.qty || 1);
-    for (let k = 0; k < q; k++) {
-      rows.push({
-        order_id: order.id,
-        user_id: cust.id,
-        product_id: 'custom-' + Date.now() + '-' + (ci++),
-        season: '2026',
-        created_at: nowIso,
-        product_name: it.name,
-        product_style: 'CUSTOM',
-        product_color: null,
-        product_height: null,
-        product_euros: it.price,
-        product_is_set: false,
-        product_set_member_count: null,
-        added_by_admin_at: nowIso,
-        item_note: (it.note || '').trim() || null,
-      });
-    }
+    rows.push({
+      order_id: order.id,
+      user_id: cust.id,
+      product_id: 'custom-' + Date.now() + '-' + (ci++),
+      season: '2026',
+      created_at: nowIso,
+      product_name: it.name,
+      product_style: 'CUSTOM',
+      product_color: null,
+      product_height: null,
+      product_euros: it.price,
+      product_is_set: false,
+      product_set_member_count: null,
+      added_by_admin_at: nowIso,
+      item_note: (it.note || '').trim() || null,
+      quantity: q,
+    });
   }
 
   const { error: itemsErr } = await sb.from('order_items').insert(rows);
@@ -12998,6 +13024,10 @@ function openAddItemModal(orderDbId, orderIdLabel) {
   sel.value = '';
   const qEl = document.getElementById('addItemQty'); if (qEl) qEl.value = '1';
   const nEl = document.getElementById('addItemNote'); if (nEl) nEl.value = '';
+  const cn = document.getElementById('addItemCustomName'); if (cn) cn.value = '';
+  const cp = document.getElementById('addItemCustomPrice'); if (cp) cp.value = '';
+  const catRadio = document.querySelector('input[name="addItemType"][value="catalog"]'); if (catRadio) catRadio.checked = true;
+  onAddItemTypeChange();
   const err = document.getElementById('addItemError'); if (err) err.style.display = 'none';
   document.getElementById('addItemModal').classList.add('show');
 }
@@ -13007,38 +13037,89 @@ function closeAddItemModal() {
   _addItemContext = { orderDbId: null, orderIdLabel: '' };
 }
 function onAddItemModalBgClick(event) { if (event.target.id === 'addItemModal') closeAddItemModal(); }
+function onAddItemTypeChange() {
+  const type = (document.querySelector('input[name="addItemType"]:checked') || {}).value || 'catalog';
+  const catWrap = document.getElementById('addItemCatalogWrap');
+  const custWrap = document.getElementById('addItemCustomWrap');
+  if (catWrap) catWrap.style.display = (type === 'catalog') ? '' : 'none';
+  if (custWrap) custWrap.style.display = (type === 'custom') ? '' : 'none';
+}
 async function doAddItemToOrder() {
   if (!sb) return;
   if (!requireCapability('can_edit_orders')) return;
   const orderDbId = _addItemContext.orderDbId;
-  const productId = document.getElementById('addItemCatalogSelect').value;
   const err = document.getElementById('addItemError');
   const showErr = (m) => { if (err) { err.textContent = m; err.style.display = 'block'; } };
   if (!orderDbId) { showErr('No order selected.'); return; }
-  if (!productId) { showErr('Please choose an ornament to add.'); return; }
-  const p = (PRODUCTS || []).find(x => x.id === productId);
-  if (!p) { showErr('That product could not be found.'); return; }
+  const type = (document.querySelector('input[name="addItemType"]:checked') || {}).value || 'catalog';
+  const qty = Math.max(1, Math.min(50, parseInt((document.getElementById('addItemQty')||{}).value, 10) || 1));
+  const note = ((document.getElementById('addItemNote')||{}).value || '').trim();
+
+  // Build the product fields per type (catalogue ornament vs custom one-off).
+  let productFields, isCustom = false;
+  if (type === 'custom') {
+    isCustom = true;
+    const cname = (document.getElementById('addItemCustomName').value || '').trim();
+    const cprice = parseFloat(document.getElementById('addItemCustomPrice').value);
+    if (!cname) { showErr('Please enter a name for the custom item.'); return; }
+    if (isNaN(cprice) || cprice < 0) { showErr('Please enter a valid price (0 or more).'); return; }
+    productFields = {
+      product_name: cname, product_style: 'CUSTOM',
+      product_color: null, product_height: null,
+      product_euros: cprice, product_is_set: false,
+      product_set_member_count: null,
+    };
+  } else {
+    const productId = document.getElementById('addItemCatalogSelect').value;
+    if (!productId) { showErr('Please choose an ornament to add.'); return; }
+    const p = (PRODUCTS || []).find(x => x.id === productId);
+    if (!p) { showErr('That product could not be found.'); return; }
+    productFields = {
+      product_id: p.id,
+      product_name: p.name || null, product_style: p.style || null,
+      product_color: p.color || null, product_height: p.height || null,
+      product_euros: (typeof p.euros === 'number') ? p.euros : null,
+      product_is_set: !!p.is_set,
+      product_set_member_count: p.is_set ? setMembersOf(p).length : null,
+    };
+  }
+
   const btn = document.getElementById('addItemSaveBtn');
   const prev = btn ? btn.textContent : '';
   if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
   const { data: order, error: oErr } = await sb.from('orders').select('id, user_id, season').eq('id', orderDbId).single();
   if (oErr || !order) { if (btn) { btn.disabled = false; btn.textContent = prev; } showErr('Could not load the order: ' + (oErr ? oErr.message : 'not found')); return; }
-  const qty = Math.max(1, Math.min(50, parseInt((document.getElementById('addItemQty')||{}).value, 10) || 1));
-  const note = ((document.getElementById('addItemNote')||{}).value || '').trim();
   const nowIso = new Date().toISOString();
-  const row = {
-    order_id: order.id, user_id: order.user_id, product_id: p.id,
-    season: order.season || '2026', created_at: nowIso,
-    product_name: p.name || null, product_style: p.style || null,
-    product_color: p.color || null, product_height: p.height || null,
-    product_euros: (typeof p.euros === 'number') ? p.euros : null,
-    product_is_set: !!p.is_set,
-    product_set_member_count: p.is_set ? setMembersOf(p).length : null,
-    added_by_admin_at: nowIso,
-    item_note: note || null,
-  };
-  const rows = Array.from({ length: qty }, () => ({ ...row }));
-  const { error: insErr } = await sb.from('order_items').insert(rows);
+  let insErr = null;
+  if (!isCustom) {
+    // Non-gift catalogue items are unique per (order, product). If it's
+    // already on the order, bump the quantity instead of inserting a
+    // duplicate row (which the unique constraint rejects).
+    const { data: existingRows } = await sb.from('order_items')
+      .select('id, quantity, is_gift')
+      .eq('order_id', order.id).eq('product_id', productFields.product_id);
+    const existing = (existingRows || []).find(r => !r.is_gift);
+    if (existing) {
+      const patch = { quantity: (existing.quantity || 1) + qty };
+      if (note) patch.item_note = note;
+      ({ error: insErr } = await sb.from('order_items').update(patch).eq('id', existing.id));
+    } else {
+      ({ error: insErr } = await sb.from('order_items').insert({
+        order_id: order.id, user_id: order.user_id,
+        season: order.season || '2026', created_at: nowIso,
+        added_by_admin_at: nowIso, item_note: note || null, quantity: qty,
+        ...productFields,
+      }));
+    }
+  } else {
+    ({ error: insErr } = await sb.from('order_items').insert({
+      order_id: order.id, user_id: order.user_id,
+      season: order.season || '2026', created_at: nowIso,
+      added_by_admin_at: nowIso, item_note: note || null, quantity: qty,
+      ...productFields,
+      product_id: 'custom-' + Date.now(),
+    }));
+  }
   if (insErr) { if (btn) { btn.disabled = false; btn.textContent = prev; } showErr('Could not add the item: ' + insErr.message); return; }
   await recomputeOrderTotalEuros(orderDbId);
   if (btn) { btn.disabled = false; btn.textContent = prev; }
@@ -13074,10 +13155,10 @@ async function editItemNote(orderItemRowId, orderDbId) {
 }
 async function recomputeOrderTotalEuros(orderDbId) {
   if (!orderDbId) return;
-  const { data: items, error } = await sb.from('order_items').select('product_euros, is_gift').eq('order_id', orderDbId);
+  const { data: items, error } = await sb.from('order_items').select('product_euros, is_gift, quantity').eq('order_id', orderDbId);
   if (error) { console.warn('[recomputeOrderTotalEuros] fetch failed', error); return; }
   let sum = 0, cnt = 0;
-  for (const it of (items || [])) { if (it.is_gift) continue; sum += Number(it.product_euros) || 0; cnt++; }
+  for (const it of (items || [])) { if (it.is_gift) continue; const q = it.quantity || 1; sum += (Number(it.product_euros) || 0) * q; cnt += q; }
   const { error: upErr } = await sb.from('orders').update({ total_euros: sum, item_count: cnt }).eq('id', orderDbId);
   if (upErr) console.warn('[recomputeOrderTotalEuros] update failed', upErr);
 }
@@ -13353,7 +13434,7 @@ function computeCustomsData(orderItems) {
   let totalValue = 0;
   const lines = (orderItems || []).map(it => {
     const r = resolveOrderItem(it);
-    const qty = r.is_set ? (r.set_member_count || 1) : 1;
+    const qty = (it.quantity || 1) * (r.is_set ? (r.set_member_count || 1) : 1);
     // Per-unit declared value: use stored value if available; else fall
     // back to product_euros (snapshot from order time).
     const perUnitValue = r.declared_value_euros != null
@@ -18719,10 +18800,11 @@ async function _adminReportsRenderUnlimited() {
     (o.order_items || []).forEach(it => {
       const le = isLE(it.product_id);
       const e = Number(it.product_euros) || 0;
-      pm.orn += 1; if (le) pm.les += 1; pm.euros += e;
+      const _q = it.quantity || 1;
+      pm.orn += _q; if (le) pm.les += _q; pm.euros += e * _q;
       const key = it.product_id || (it.product_name + '|' + (it.product_color || ''));
       if (!perOrn[key]) perOrn[key] = { name: it.product_name || it.product_id, color: it.product_color || '', le, qty: 0, euros: 0 };
-      perOrn[key].qty += 1; perOrn[key].euros += e;
+      perOrn[key].qty += _q; perOrn[key].euros += e * _q;
     });
   });
 
