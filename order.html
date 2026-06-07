@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Your Order — Gläserne Leidenschaft</title>
+<style>
+  :root{ --gold:#C9A84C; --navy:#1A3A5C; --ink:#1C1914; --muted:#6E6455; --bg:#FAF7F0; --line:#e6dfce; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:Georgia,'Times New Roman',serif; line-height:1.6; }
+  .wrap{ max-width:600px; margin:0 auto; padding:32px 16px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .head{ padding:26px 30px 20px; border-bottom:2px solid var(--gold); }
+  .brand{ font-size:22px; color:var(--navy); letter-spacing:1px; }
+  .tag{ font-size:12px; font-style:italic; color:var(--muted); margin-top:4px; }
+  .body{ padding:26px 30px; }
+  h1{ font-size:20px; color:var(--navy); margin:0 0 14px; }
+  .ref{ background:var(--bg); border:1px solid #e0d9c8; padding:12px; font-family:'Courier New',monospace;
+        font-size:15px; color:var(--gold); letter-spacing:1px; text-align:center; margin:14px 0; }
+  .status{ display:inline-block; background:#2a5535; color:#fff; font-family:Arial,sans-serif; font-size:11px;
+           letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:3px; }
+  table{ width:100%; border-collapse:collapse; margin:14px 0; }
+  th{ text-align:left; font-family:Arial,sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); border-bottom:1px solid var(--line); padding:6px 0; font-weight:600; }
+  td{ padding:8px 0; font-size:14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  td.qty{ text-align:center; font-family:'Courier New',monospace; white-space:nowrap; }
+  .color{ font-size:12px; color:var(--muted); font-style:italic; }
+  .meta{ font-size:13px; color:var(--muted); margin:8px 0; }
+  .footer{ padding:16px 30px; background:var(--bg); border-top:1px solid var(--line);
+           font-size:11px; color:var(--muted); text-align:center; font-style:italic; }
+  .footer a{ color:var(--muted); }
+  .msg{ padding:30px; text-align:center; color:var(--muted); }
+  .msg.err{ color:#a8642a; }
+  .note{ font-size:13px; color:var(--muted); border-left:3px solid var(--gold); padding:8px 0 8px 14px;
+         margin:18px 0; background:var(--bg); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <div class="brand">Gläserne Leidenschaft</div>
+        <div class="tag">Glas &amp; Weihnachtsschmuck der besonderen Art</div>
+      </div>
+      <div id="content" class="body">
+        <div class="msg" id="loading">Loading your order…</div>
+      </div>
+      <div class="footer">
+        Gläserne Leidenschaft · Lauscha, Germany · <a href="mailto:info@glass-passion.com">info@glass-passion.com</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script>
+    var SB_URL  = 'https://wjddakdiknuyqchzcdbc.supabase.co';
+    var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGRha2Rpa251eXFjaHpjZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjIxMjksImV4cCI6MjA5MTY5ODEyOX0.MKt_gugn0uEuk2EiYHF0e2HU2gNFAmIHDUKgKm_x-Wk';
+
+    function esc(s){ if(s==null) return ''; return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    function showError(){
+      document.getElementById('content').innerHTML =
+        '<div class="msg err">We couldn\'t find this order.<br><br>' +
+        'This link is only active once an order has been approved. ' +
+        'If you believe this is a mistake, please contact ' +
+        '<a href="mailto:info@glass-passion.com">info@glass-passion.com</a>.</div>';
+    }
+
+    function getToken(){
+      var p = new URLSearchParams(window.location.search);
+      return p.get('t');
+    }
+
+    async function load(){
+      var token = getToken();
+      if(!token){ showError(); return; }
+      try{
+        var sb = window.supabase.createClient(SB_URL, SB_ANON);
+        var res = await sb.rpc('get_order_by_view_token', { p_token: token });
+        if(res.error || !res.data){ showError(); return; }
+        render(res.data);
+      }catch(e){ showError(); }
+    }
+
+    function render(o){
+      var name = ((o.first_name||'') + ' ' + (o.last_name||'')).trim();
+      var dateStr = '';
+      try{ if(o.created_at) dateStr = new Date(o.created_at).toLocaleDateString(); }catch(e){}
+      var items = Array.isArray(o.items) ? o.items : [];
+      var rows = items.map(function(it){
+        var color = it.product_color ? '<div class="color">'+esc(it.product_color)+'</div>' : '';
+        return '<tr><td>'+esc(it.product_name||'—')+color+'</td>'+
+               '<td class="qty">'+(it.quantity||1)+'</td></tr>';
+      }).join('');
+      if(!rows) rows = '<tr><td colspan="2" class="color">No items to display.</td></tr>';
+
+      var html =
+        '<h1>Your order'+(name? ', '+esc(name):'')+'</h1>' +
+        '<p><span class="status">Approved</span></p>' +
+        '<p class="meta">Order reference</p>' +
+        '<div class="ref">'+esc(o.order_id||'')+'</div>' +
+        (dateStr ? '<p class="meta">Placed on '+esc(dateStr)+'</p>' : '') +
+        (o.shipping_method ? '<p class="meta"><strong>Shipping:</strong> '+esc(o.shipping_method)+'</p>' : '') +
+        '<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th></tr></thead>' +
+        '<tbody>'+rows+'</tbody></table>' +
+        '<div class="note">This is a read-only copy of your approved order. ' +
+        'An invoice will be sent to your registered PayPal email once your order is completed and ready to ship.</div>' +
+        '<p style="margin-top:20px">— Ivonne and Mr. D</p>';
+      document.getElementById('content').innerHTML = html;
+    }
+
+    load();
+  </script>
+</body>
+</html>
