@@ -11942,7 +11942,7 @@ Ivonne and Mr. D`;
         ? `<span style="color:#4a8a5e;font-weight:600">FREE</span><br><span style="font-size:9px;color:var(--cream-dim);font-style:italic">declared €${(r.declared_value_euros || 0).toFixed(2)}</span>`
         : `€${(r.euros || 0).toFixed(2)}`;
       const giftRemoveBtn = (r.is_gift && r.id)
-        ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeGiftItem('${r.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="${escapeHtml(t('gift_remove_btn'))}">✕</button>`
+        ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeGiftItem('${r.id}','${o.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="${escapeHtml(t('gift_remove_btn'))}">✕</button>`
         : '';
       const itemRemoveBtn = (!r.is_gift && r.id && canEditItems)
         ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); removeOrderItem('${r.id}','${o.id}')" style="font-size:10px;padding:2px 8px;margin-left:6px" title="Remove this item from the order">✕</button>`
@@ -13040,7 +13040,7 @@ function openGiftModal(orderDbId, orderIdLabel) {
   // Populate the catalog dropdown — sort alphabetically by name
   const sel = document.getElementById('giftCatalogSelect');
   sel.innerHTML = '<option value=""></option>' +
-    PRODUCTS.slice().sort((a,b) => (a.name || '').localeCompare(b.name || '')).map(p =>
+    PRODUCTS.slice().filter(p => p.season === CURRENT_SEASON_LE && p.status !== 'archived').sort((a,b) => (a.name || '').localeCompare(b.name || '')).map(p =>
       `<option value="${p.id}">${escapeHtml(p.style + ' — ' + p.name)}${p.is_set ? ' (Set)' : ''}</option>`
     ).join('');
   sel.value = '';
@@ -13234,11 +13234,13 @@ async function doSaveGift() {
     alert(t('gift_save_failed') + ': ' + error.message);
     return;
   }
+  const _reopenId = _giftModalContext.orderDbId;
   closeGiftModal();
   await renderAdminOrders();
+  reopenAdminOrderRow(_reopenId);
 }
 
-async function removeGiftItem(orderItemRowId) {
+async function removeGiftItem(orderItemRowId, orderDbId) {
   if (!sb || !orderItemRowId) return;
   if (!requireCapability('can_edit_orders')) return;  // Phase 6.56a
   if (!confirm(t('gift_remove_confirm'))) return;
@@ -13250,6 +13252,7 @@ async function removeGiftItem(orderItemRowId) {
     return;
   }
   await renderAdminOrders();
+  reopenAdminOrderRow(orderDbId);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
