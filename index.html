@@ -14475,15 +14475,7 @@ async function generateInvoicePdf(orderDbId) {
     doc.text(ln, leftMargin + innerPadX, lineY);
     lineY += lineH;
   });
-
-  // Email — its own line, courier bold, slightly indented for emphasis
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(...PDF_BRAND.navy);
-  doc.text(o.paypal_email || '(PayPal email not on file)', leftMargin + innerPadX + 6, lineY + 1);
-  lineY += emailLineH + spacerH;
-
-  // Footnote (italic, muted)
+   // Footnote (italic, muted)
   // Phase 6.53: payment deadline note matches T&Cs rule 4 (3 days)
   doc.setFont('times', 'italic');
   doc.setFontSize(9);
