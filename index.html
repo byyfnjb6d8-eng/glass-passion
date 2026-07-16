@@ -963,6 +963,8 @@ body::before {
   transition: opacity 0.25s;
 }
 .toast-error.show { opacity: 1; pointer-events: auto; }
+/* U9: visible keyboard-focus indicator, site-wide */
+:focus-visible { outline: 2px solid var(--gold-ink) !important; outline-offset: 2px; }
 
 /* ── DIVIDER ── */
 .divider {
@@ -9936,9 +9938,9 @@ function renderProducts(filter = '') {
       if (isMultiView) {
         const urls = imgsArr.map(productImageUrl).filter(Boolean);
         const urlsJson = escapeHtml(JSON.stringify(urls));
-        photoHtml = `<div class="photo-thumb-wrap"><div class="photo-thumb" style="background-image:url(&quot;${imgUrl}&quot;)" data-photo-urls="${urlsJson}" data-photo-caption="${escapeHtml(p.name)}" data-photo-description="${escapeHtml(photoDescription)}" onclick="openPhotoLightboxFromElMulti(this)"></div><span class="photo-views-badge">📷 ${urls.length}</span></div>`;
+        photoHtml = `<div class="photo-thumb-wrap"><div class="photo-thumb" style="background-image:url(&quot;${imgUrl}&quot;)" data-photo-urls="${urlsJson}" data-photo-caption="${escapeHtml(p.name)}" data-photo-description="${escapeHtml(photoDescription)}" onclick="openPhotoLightboxFromElMulti(this)" role="button" tabindex="0" aria-label="${escapeHtml(p.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhotoLightboxFromElMulti(this)}"></div><span class="photo-views-badge">📷 ${urls.length}</span></div>`;
       } else {
-        photoHtml = `<div class="photo-thumb" style="background-image:url(&quot;${imgUrl}&quot;)" data-photo-url="${escapeHtml(imgUrl)}" data-photo-caption="${escapeHtml(p.name)}" data-photo-description="${escapeHtml(photoDescription)}" onclick="openPhotoLightboxFromEl(this)"></div>`;
+        photoHtml = `<div class="photo-thumb" style="background-image:url(&quot;${imgUrl}&quot;)" data-photo-url="${escapeHtml(imgUrl)}" data-photo-caption="${escapeHtml(p.name)}" data-photo-description="${escapeHtml(photoDescription)}" onclick="openPhotoLightboxFromEl(this)" role="button" tabindex="0" aria-label="${escapeHtml(p.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhotoLightboxFromEl(this)}"></div>`;
       }
     } else {
       photoHtml = `<div class="photo-thumb placeholder">
@@ -9991,7 +9993,7 @@ function renderProducts(filter = '') {
         if (!memberImg) {
           return `<div class="set-photo-cell placeholder"></div>`;
         }
-        return `<div class="set-photo-cell" style="background-image:url(&quot;${memberImg}&quot;)" data-photo-url="${escapeHtml(memberImg)}" data-photo-caption="${escapeHtml(cap)}" onclick="event.stopPropagation(); openPhotoLightboxFromEl(this)"></div>`;
+        return `<div class="set-photo-cell" style="background-image:url(&quot;${memberImg}&quot;)" data-photo-url="${escapeHtml(memberImg)}" data-photo-caption="${escapeHtml(cap)}" onclick="event.stopPropagation(); openPhotoLightboxFromEl(this)" role="button" tabindex="0" aria-label="${escapeHtml(cap)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openPhotoLightboxFromEl(this)}"></div>`;
       }).join('');
       const setPhotoHtml = `<div class="${gridClass}">${memberThumbsHtml}</div>`;
 
