@@ -14444,7 +14444,7 @@ async function generateInvoicePdf(orderDbId) {
   // is never too short or too tall for what's in it.
   doc.setFont('times', 'normal');
   doc.setFontSize(10);
-  const sentence = ` Please remit payment via PayPal to glass-passion@hotmail.com for €${final.toFixed(2)}:`;
+  const sentence = ` Please remit payment via PayPal to glass-passion@hotmail.com for €${final.toFixed(2)}.`;
   const sentenceLines = doc.splitTextToSize(sentence, textWidth);
   // Heights in mm: title band 10, each wrapped line ~5, email line 6, spacer 2,
   // italic note 5, plus top/bottom padding.
