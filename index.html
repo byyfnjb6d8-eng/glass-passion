@@ -7923,7 +7923,7 @@ admin_lottery: "Lottery",
     admin_lottery_lost_confirm: "Mark this entry as not selected? The customer's order proceeds with their regular ornaments only.",
     admin_lottery_swap_designated: "backup if not won:",
     admin_lottery_will_append: "below cap — LE added if won, nothing added if not",
-    admin_invoice_gated: "Invoice held — awaiting lottery draw",
+    admin_invoice_lottery_note: "Lottery entry pending — invoicing is not blocked, but if this customer wins the draw the order (and its invoice) will change.",
     // Phase 6.39: random draw
     admin_le_quantity: "Quantity available",
     admin_le_quantity_placeholder: "e.g. 20",
@@ -9101,7 +9101,7 @@ admin_lottery: "Verlosung",
     admin_lottery_lost_confirm: "Diese Teilnahme als nicht ausgewählt markieren? Die Bestellung des Kunden wird nur mit den regulären Ornamenten fortgesetzt.",
     admin_lottery_swap_designated: "Ersatz bei Niete:",
     admin_lottery_will_append: "unter dem Maximum — SE bei Gewinn hinzugefügt, sonst nichts",
-    admin_invoice_gated: "Rechnung zurückgehalten — Verlosung ausstehend",
+    admin_invoice_lottery_note: "Verlosung ausstehend — die Rechnungsstellung ist nicht blockiert; gewinnt dieser Kunde jedoch die Verlosung, ändert sich die Bestellung (und deren Rechnung).",
     // Phase 6.39: random draw
     admin_le_quantity: "Verfügbare Stückzahl",
     admin_le_quantity_placeholder: "z.B. 20",
@@ -13897,20 +13897,15 @@ function renderPaymentRequestBlock(o) {
   const finalTotal = computeOrderFinalTotal(o);
   if (!(finalTotal > 0)) return '';
 
-  // Phase 6.37: invoice gate. While a lottery entry is unresolved, the
-  // payment-request action is suppressed — the customer gets ONE invoice
-  // and it can't be correct until the draw resolves. Mark Won/Lost in the
-  // admin Lottery tab to release this.
-  if (o.lottery_status === 'pending') {
-    return `<div style="grid-column:1/-1;margin-top:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--line2);border-radius:4px">
-      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-dim);font-weight:500;margin-bottom:8px">
-        ${t('payment_request_heading')}
-      </div>
-      <div style="font-size:13px;color:var(--cream-dim);font-style:italic">
-        ⏳ ${t('admin_invoice_gated')}
-      </div>
-    </div>`;
-  }
+  // Phase 6.60: a pending lottery entry no longer holds invoicing (was the
+  // Phase 6.37 invoice gate). It now only shows a non-blocking note, since
+  // an order that later WINS the draw gains the LE item and its invoice
+  // would need re-issuing.
+  const lotteryNote = o.lottery_status === 'pending'
+    ? `<div style="font-size:12px;color:var(--cream-dim);font-style:italic;margin-bottom:8px">
+         ⏳ ${t('admin_invoice_lottery_note')}
+       </div>`
+    : '';
 
   // Sent-state indicator: if payment_request_sent_at is populated,
   // show when + by whom + a "Resend" affordance (same button, but the
@@ -13932,6 +13927,7 @@ function renderPaymentRequestBlock(o) {
     <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-dim);font-weight:500;margin-bottom:8px">
       ${t('payment_request_heading')}
     </div>
+    ${lotteryNote}
     ${statusLine}
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-gold btn-sm" id="send-pay-${o.id}" onclick="sendPaymentRequest('${o.id}')">${btnLabel}</button>
