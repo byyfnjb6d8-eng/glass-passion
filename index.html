@@ -953,6 +953,16 @@ body::before {
 .alert.show { display: block; }
 .alert-error { background: rgba(139,42,42,0.15); border: 1px solid rgba(139,42,42,0.4); color: #8b2a2a; }
 .alert-success { background: rgba(30,77,48,0.15); border: 1px solid rgba(30,77,48,0.4); color: #2a5535; }
+/* U3: bottom toast for validation errors raised outside the review panel */
+.toast-error {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: 96px; z-index: 500; max-width: min(480px, 90vw);
+  background: #f7ecec; color: #8b2a2a; border: 1px solid rgba(139,42,42,0.5);
+  border-radius: var(--r); padding: 12px 18px; font-size: 14px; line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18); opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.toast-error.show { opacity: 1; pointer-events: auto; }
 
 /* ── DIVIDER ── */
 .divider {
@@ -4384,6 +4394,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
 </div>
 
 <!-- ═══════════ PAGE: HOME ═══════════ -->
+<div class="toast-error" id="globalToastError" role="alert"></div>
 <div class="page active" id="page-home">
   <section class="hero">
     <div class="hero-inner">
@@ -4894,6 +4905,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
           <span data-t="tc_agree_order"></span>
         </label>
       </div>
+      <div class="alert alert-error" id="orderSubmitError" role="alert" style="margin-top:12px"></div>
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <button class="btn btn-ghost" onclick="showAppPanel('order')" data-t="btn_back"></button>
         <button class="btn btn-gold" onclick="submitOrder()" id="submitOrderBtn" data-t="btn_submit_order"></button>
@@ -7985,6 +7997,11 @@ admin_lottery: "Lottery",
     details_payment: "Payment Type",
     btn_submit_order: "Confirm Order", btn_back: "Back",
     order_success_title: "Order Request Received!",
+    order_tc_required: "Please confirm the Terms & Conditions checkbox before submitting your order.",
+    order_id_gen_failed: "We couldn't generate an order number. Please try again.",
+    order_save_failed: "Sorry — your order could not be saved. Please try again, and if the problem continues, email us at {email}.",
+    order_items_failed: "Your order was created, but the item details didn't save completely. Please email {email} and mention reference {ref} — we'll fix it right away.",
+    order_lottery_failed: "Your order was saved, but your lottery entry couldn't be recorded. Please email {email} with reference {ref}.",
     order_success_msg: "Thank you. Your order request has been submitted and is pending review. Mr. D and Ivonne will check availability within roughly one to two weeks and follow up by email. Your pieces are not yet reserved until that review is complete.",
     order_success_btn: "Done",
     history_title: "My Orders", history_empty: "You have not placed any orders yet.",
@@ -9163,6 +9180,11 @@ admin_lottery: "Verlosung",
     details_payment: "Zahlungsart",
     btn_submit_order: "Bestellung bestätigen", btn_back: "Zurück",
     order_success_title: "Bestellanfrage eingegangen!",
+    order_tc_required: "Bitte bestätigen Sie die AGB-Checkbox, bevor Sie Ihre Bestellung absenden.",
+    order_id_gen_failed: "Es konnte keine Bestellnummer erstellt werden. Bitte versuchen Sie es erneut.",
+    order_save_failed: "Ihre Bestellung konnte leider nicht gespeichert werden. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, schreiben Sie uns an {email}.",
+    order_items_failed: "Ihre Bestellung wurde angelegt, aber die Artikeldaten wurden nicht vollständig gespeichert. Bitte schreiben Sie an {email} mit der Referenz {ref} — wir kümmern uns sofort darum.",
+    order_lottery_failed: "Ihre Bestellung wurde gespeichert, aber Ihre Verlosungsteilnahme konnte nicht erfasst werden. Bitte schreiben Sie an {email} mit der Referenz {ref}.",
     order_success_msg: "Vielen Dank. Ihre Bestellanfrage wurde übermittelt und wird geprüft. Mr. D und Ivonne prüfen die Verfügbarkeit innerhalb von etwa ein bis zwei Wochen und melden sich per E-Mail bei Ihnen. Bis dahin sind Ihre Stücke noch nicht reserviert.",
     order_success_btn: "Fertig",
     history_title: "Meine Bestellungen", history_empty: "Sie haben noch keine Bestellungen aufgegeben.",
@@ -10919,20 +10941,20 @@ async function doResetPassword() {
 function showReview() {
   // Pick-one exclusivity (defense-in-depth; the order page already greys siblings).
   const _exclV = exclusivityViolation();
-  if (_exclV) { alert(t('exclusivity_violation_msg').replace('{group}', _exclV.name || '')); return; }
+  if (_exclV) { showToastError(t('exclusivity_violation_msg').replace('{group}', _exclV.name || '')); return; }
   // Phase 6.40: the 5-minimum gate applies ONLY to lottery entrants.
   // Non-entrants have no minimum (they can order 1 piece if they want).
   // Maximum still applies to everyone via the existing over-cap flow.
   if (lotteryOptIn) {
     const minOrnaments = siteSettings.lotteryMinimumOrnaments ?? 5;
     if (selectedItems.size < minOrnaments) {
-      alert(t('lottery_min_not_met_entrant').replace('{min}', minOrnaments));
+      showToastError(t('lottery_min_not_met_entrant').replace('{min}', minOrnaments));
       return;
     }
     // Phase 6.57: at the cap, the backup must be chosen before review.
     const backupsNeeded = lotteryBackupsNeeded();
     if (backupsNeeded > 0 && lotterySwapProductIds.filter(Boolean).length < backupsNeeded) {
-      alert(t('lottery_backup_required').replace('{n}', backupsNeeded));
+      showToastError(t('lottery_backup_required').replace('{n}', backupsNeeded));
       return;
     }
   }
@@ -11027,9 +11049,10 @@ function updateTariffAckVisibility() {
 
 async function submitOrder() {
   if (!sb || !currentUser) return;
+  clearOrderError();
   // Phase 6.56b: pre-launch mode blocks all submissions, even from approved users.
   if (isPreLaunch()) {
-    alert(t('pre_launch_blocked_alert'));
+    showOrderError(t('pre_launch_blocked_alert'));
     if (typeof applyOrderingGate === 'function') applyOrderingGate();
     return;
   }
@@ -11037,7 +11060,7 @@ async function submitOrder() {
   // (b) the window hasn't opened yet (before_open). Soft close past end-time
   // is still allowed — the order goes through with submitted_after_window=true.
   if (!isSubmitAllowed()) {
-    alert(t('ordering_closed_submit_blocked'));
+    showOrderError(t('ordering_closed_submit_blocked'));
     // Also re-render the order panel so the closed banner appears if it wasn't already
     if (typeof applyOrderingGate === 'function') applyOrderingGate();
     return;
@@ -11074,12 +11097,12 @@ async function submitOrder() {
     return;
   }
   if (!document.getElementById('orderTcCheck')?.checked) {
-    alert(t('tc_agree_order') + ' — please check the box to continue.'); return;
+    showOrderError(t('order_tc_required')); return;
   }
 
   // Pick-one exclusivity (defense-in-depth).
   const _exclSubmitV = exclusivityViolation();
-  if (_exclSubmitV) { alert(t('exclusivity_violation_msg').replace('{group}', _exclSubmitV.name || '')); return; }
+  if (_exclSubmitV) { showOrderError(t('exclusivity_violation_msg').replace('{group}', _exclSubmitV.name || '')); return; }
 
   // Phase 6.40 + 6.51a: 5-minimum applies ONLY when the customer opted into
   // at least one LE lottery; no minimum for non-entrants. Swap-piece
@@ -11088,7 +11111,7 @@ async function submitOrder() {
   if (lotteryOptIn) {
     const minOrnaments = siteSettings.lotteryMinimumOrnaments ?? 5;
     if (minOrnaments > 0 && selectedItems.size < minOrnaments) {
-      alert(t('lottery_min_not_met_entrant').replace('{min}', minOrnaments));
+      showOrderError(t('lottery_min_not_met_entrant').replace('{min}', minOrnaments));
       return;
     }
     // Phase 6.57: backup piece(s) required only when the customer is at the
@@ -11098,12 +11121,12 @@ async function submitOrder() {
     if (backupsNeeded > 0) {
       const filled = lotterySwapProductIds.filter(Boolean);
       if (filled.length < backupsNeeded) {
-        alert(t('lottery_backup_required').replace('{n}', backupsNeeded));
+        showOrderError(t('lottery_backup_required').replace('{n}', backupsNeeded));
         return;
       }
       const unique = new Set(filled);
       if (unique.size !== filled.length || filled.some(id => selectedItems.has(id))) {
-        alert(t('lottery_backup_dup_error'));
+        showOrderError(t('lottery_backup_dup_error'));
         return;
       }
     } else {
@@ -11140,7 +11163,7 @@ async function submitOrder() {
     if (!ackChecked) {
       const err = document.getElementById('tariffAckError');
       if (err) err.style.display = 'block';
-      alert(t('ship_express_ack_required'));
+      showOrderError(t('ship_express_ack_required'));
       return;
     }
     tariffAcknowledged = true;
@@ -11159,7 +11182,7 @@ async function submitOrder() {
   const { data: priorOrders } = await sb.from('orders')
     .select('id,status').eq('user_id', currentUser.id).eq('season', '2026');
   if ((priorOrders || []).some(o => o.status !== 'cancelled')) {
-    alert(t('one_order_per_season_msg'));
+    showOrderError(t('one_order_per_season_msg'));
     btn.disabled = false; btn.innerHTML = t('btn_submit_order');
     return;
   }
@@ -11197,7 +11220,7 @@ async function submitOrder() {
   const { data: orderIdResult, error: orderIdErr } = await sb.rpc('generate_order_id');
   if (orderIdErr || !orderIdResult) {
     btn.disabled = false; btn.innerHTML = t('btn_submit_order');
-    alert('Unable to generate order ID. Please try again.');
+    showOrderError(t('order_id_gen_failed'));
     return;
   }
 
@@ -11265,7 +11288,7 @@ async function submitOrder() {
   if (orderInsertError || !order) {
     console.error('[submitOrder] orders insert failed:', orderInsertError);
     btn.disabled = false; btn.innerHTML = t('btn_submit_order');
-    alert('Sorry — your order could not be saved. Please try again. If the problem persists, please contact info@glaserneleidenschaft.com.\n\nDetails (for support): ' + (orderInsertError?.message || 'unknown error'));
+    showOrderError(t('order_save_failed').replace('{email}', CONTACT_EMAIL));
     return;
   }
 
@@ -11301,7 +11324,7 @@ async function submitOrder() {
   if (itemsInsertError) {
     console.error('[submitOrder] order_items insert failed for order', order.id, ':', itemsInsertError);
     btn.disabled = false; btn.innerHTML = t('btn_submit_order');
-    alert('Your order header was created, but item details failed to save. Please contact info@glaserneleidenschaft.com with this reference: ' + (order.order_id || order.id) + '\n\nDetails: ' + itemsInsertError.message);
+    showOrderError(t('order_items_failed').replace('{email}', CONTACT_EMAIL).replace('{ref}', order.order_id || order.id));
     return;
   }
 
@@ -11318,7 +11341,7 @@ async function submitOrder() {
     const { error: entriesErr } = await sb.from('lottery_entries').insert(entryRows);
     if (entriesErr) {
       console.error('[submitOrder] lottery_entries insert failed for order', order.id, ':', entriesErr);
-      alert('Your order was saved, but the lottery entries could not be recorded. Please contact info@glaserneleidenschaft.com with this reference: ' + (order.order_id || order.id));
+      showToastError(t('order_lottery_failed').replace('{email}', CONTACT_EMAIL).replace('{ref}', order.order_id || order.id));
       // Continue — we still want the success modal to show; admin can fix.
     }
   }
@@ -22280,6 +22303,28 @@ async function refreshAdminStickyBanner() {
 }
 
 function showAlert(el, msg) { el.textContent = msg; el.classList.add('show'); }
+
+// U3: checkout errors render inline (review panel) or as a bottom toast
+// (validations that fire before the review panel exists) instead of alert().
+function showOrderError(msg) {
+  const el = document.getElementById('orderSubmitError');
+  if (!el) { alert(msg); return; }
+  showAlert(el, msg);
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function clearOrderError() {
+  const el = document.getElementById('orderSubmitError');
+  if (el) { el.classList.remove('show'); el.textContent = ''; }
+}
+let _toastTimer = null;
+function showToastError(msg) {
+  const el = document.getElementById('globalToastError');
+  if (!el) { alert(msg); return; }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 6000);
+}
 
 init();
 </script>
