@@ -6077,7 +6077,7 @@ function getActiveLEs() {
 
 // ═══════════════════════════════════════════════════════════════════════
 // BRAND PAYPAL / BUSINESS CONTACT EMAIL
-// Currently unused by the invoice PDF (Gläserne sends PayPal invoices directly
+// Currently unused by the invoice PDF (Gläserne sends invoices directly
 // to the customer's paypal_email via PayPal's invoicing feature, so customers
 // pay through PayPal's flow — not by sending money to an email on our invoice).
 // Kept here in case we need it for contact-only purposes later.
@@ -11976,7 +11976,7 @@ async function renderAdminOrders() {
       _totalsBlock = `Subtotal: €${_sub.toFixed(2)}\n(Shipping & any applicable fees will be added at invoicing.)`;
     }
     const _paymentLine = _pricingSet
-      ? `A PayPal invoice for €${_final.toFixed(2)} will be sent to your registered PayPal email (${o.paypal_email || 'not on file'}).\nPlease complete payment through the PayPal invoice you receive.\nReference: ${o.order_id || '(pending)'}`
+      ? `Your total of €${_final.toFixed(2)} should be paid through PayPal to glass-passion@hotmail.com. Please complete payment within three (3) days.\nReference: ${o.order_id || '(pending)'}`
       : `Payment instructions will be sent once final pricing is confirmed.`;
     const paymentMsg =
 `Hello ${fname || 'there'},
