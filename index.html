@@ -8027,6 +8027,11 @@ admin_lottery: "Lottery",
     pricing_discount_pct: "Discount %",
     pricing_discount_note: "Discount note (admin only)",
     history_discount: "Discount",
+    // Phase 6.59: Order History cost-breakdown lines
+    history_subtotal: "Subtotal",
+    history_shipping: "Shipping",
+    history_tariffs: "Tariffs / fees",
+    history_gs_fee: "PayPal G&S fee (5%)",
     pricing_save: "Save pricing",
     pricing_saved: "Saved!",
     pricing_total: "Final total",
@@ -9200,6 +9205,11 @@ admin_lottery: "Verlosung",
     pricing_discount_pct: "Rabatt %",
     pricing_discount_note: "Rabatt-Notiz (nur Admin)",
     history_discount: "Rabatt",
+    // Phase 6.59: Order History cost-breakdown lines
+    history_subtotal: "Zwischensumme",
+    history_shipping: "Versand",
+    history_tariffs: "Zölle / Gebühren",
+    history_gs_fee: "PayPal-W&D-Gebühr (5%)",
     pricing_save: "Preise speichern",
     pricing_saved: "Gespeichert!",
     pricing_total: "Endbetrag",
@@ -11477,13 +11487,28 @@ async function renderHistory() {
       cancellationBlock = `<div style="margin-top:10px;font-size:12px;font-style:italic;color:var(--cream-dim)">${t('cancel_order_blocked_payment_sent')}</div>`;
     }
     // Phase 6.17: show discount line only when a discount is set on this order
+    // Phase 6.59: full cost breakdown on the customer's Order History card,
+    // mirroring the invoice PDF. Shown only once pricing exists (any of
+    // shipping/tariffs/discount/G&S fee non-zero); pre-pricing orders keep
+    // the original single-total look. Discount/tariffs/fee lines appear
+    // only when non-zero, same gating as the invoice.
     const histDiscount = computeDiscountAmount(o);
-    const discountLine = histDiscount > 0
-      ? `<div style="font-size:12px;font-weight:300;color:var(--cream-dim);margin-top:6px;display:flex;justify-content:space-between;max-width:260px">
-           <span>${t('history_discount')} (${Number(o.discount_percent)}%):</span>
-           <span style="font-family:'DM Mono',monospace;color:var(--gold)">-€${histDiscount.toFixed(2)}</span>
-         </div>`
-      : '';
+    const histShip = Number(o.shipping_cost_euros) || 0;
+    const histTar = Number(o.tariffs_euros) || 0;
+    const histFee = computeGsFee(o);
+    const histSub = Number(o.total_euros) || 0;
+    const histRowStyle = 'font-size:12px;font-weight:300;color:var(--cream-dim);margin-top:6px;display:flex;justify-content:space-between;max-width:260px';
+    const histMoneyStyle = "font-family:'DM Mono',monospace;color:var(--gold)";
+    const histRow = (label, amountStr) =>
+      `<div style="${histRowStyle}"><span>${label}:</span><span style="${histMoneyStyle}">${amountStr}</span></div>`;
+    let discountLine = '';
+    if (histDiscount > 0 || histShip > 0 || histTar > 0 || histFee > 0) {
+      discountLine += histRow(t('history_subtotal'), `€${histSub.toFixed(2)}`);
+      if (histDiscount > 0) discountLine += histRow(`${t('history_discount')} (${Number(o.discount_percent)}%)`, `-€${histDiscount.toFixed(2)}`);
+      if (histShip > 0) discountLine += histRow(t('history_shipping'), `€${histShip.toFixed(2)}`);
+      if (histTar > 0) discountLine += histRow(t('history_tariffs'), `€${histTar.toFixed(2)}`);
+      if (histFee > 0) discountLine += histRow(t('history_gs_fee'), `€${histFee.toFixed(2)}`);
+    }
     const displayTotal = computeOrderFinalTotal(o);
     // Phase 6.45a: payment type indicator on customer order history.
     const paymentTypeLine = o.payment_type
@@ -12102,6 +12127,7 @@ Ivonne and Mr. D`;
               <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--cream)">
                 <span style="color:var(--cream-dim);font-size:11px;letter-spacing:1px;text-transform:uppercase">${t('pricing_total')}:</span>
                 <span id="pricing-total-${o.id}" style="color:var(--gold);margin-left:8px">€${o._finalTotal.toFixed(2)}</span>
+                ${computeGsFee(o) > 0 ? `<span style="color:var(--cream-dim);font-size:11px;margin-left:8px;font-style:italic">(incl. €${computeGsFee(o).toFixed(2)} G&amp;S fee)</span>` : ''}
               </div>
               <button id="pricing-save-${o.id}" class="btn btn-outline btn-sm" onclick="savePricing('${o.id}')">${t('pricing_save')}</button>
             </div>
@@ -13719,13 +13745,31 @@ function computeDiscountAmount(o) {
   return sub * (pct / 100);
 }
 
+// Phase 6.59: PayPal Goods & Services fee, applied at invoice time.
+// Per the T&C and order-confirmation wording ("an additional fee equal to
+// 5% of the total invoice amount"), the fee base is the FULL invoice
+// amount: items subtotal − discount + shipping + tariffs. Returns 0 for
+// Friends & Family orders or orders with no payment_type recorded.
+function computeGsFee(o) {
+  if (!o || o.payment_type !== 'goods_services') return 0;
+  const sub = Number(o.total_euros) || 0;
+  const discount = computeDiscountAmount(o);
+  const ship = Number(o.shipping_cost_euros) || 0;
+  const tar = Number(o.tariffs_euros) || 0;
+  return ((sub - discount) + ship + tar) * 0.05;
+}
+
 function computeOrderFinalTotal(o) {
   const sub = Number(o.total_euros) || 0;
   const discount = computeDiscountAmount(o);
   const ship = Number(o.shipping_cost_euros) || 0;
   const tar = Number(o.tariffs_euros) || 0;
-  // Items subtotal minus discount, then add shipping + tariffs
-  return (sub - discount) + ship + tar;
+  // Items subtotal minus discount, then add shipping + tariffs.
+  // Phase 6.59: plus the 5% G&S fee when the customer chose Goods &
+  // Services — this makes the fee flow into every consumer of the final
+  // total (payment request email, invoice PDF, admin totals, Order
+  // History, CSV exports) instead of being promised but never charged.
+  return (sub - discount) + ship + tar + computeGsFee(o);
 }
 
 // Is the invoice PDF available for this order?
@@ -13939,6 +13983,17 @@ async function sendPaymentRequest(orderDbId) {
         orderId: orderDbId,
         paymentAmount: total,
         paymentItems: items,
+        // Phase 6.59: itemized cost breakdown so the email can show
+        // Subtotal / Discount / Shipping / Tariffs / G&S fee lines
+        // (mirrors the invoice PDF totals block).
+        paymentBreakdown: {
+          subtotal: Number(o.total_euros) || 0,
+          discountPercent: Number(o.discount_percent) || 0,
+          discountAmount: computeDiscountAmount(o),
+          shipping: Number(o.shipping_cost_euros) || 0,
+          tariffs: Number(o.tariffs_euros) || 0,
+          gsFee: computeGsFee(o),
+        },
         paymentNote: pricingNote || undefined,
         adminEmail: currentUser?.email || undefined,
       }
@@ -13984,6 +14039,21 @@ async function sendPaymentRequestMailto(orderDbId) {
   const pricingNote = noteEl ? noteEl.value.trim() : '';
   const noteBlock = pricingNote ? `\n${pricingNote}\n` : '';
 
+  // Phase 6.59: itemized cost breakdown (mirrors the invoice PDF —
+  // discount/tariffs/fee lines only appear when non-zero).
+  const bdSub = Number(o.total_euros) || 0;
+  const bdDiscount = computeDiscountAmount(o);
+  const bdDiscountPct = Number(o.discount_percent) || 0;
+  const bdShip = Number(o.shipping_cost_euros) || 0;
+  const bdTar = Number(o.tariffs_euros) || 0;
+  const bdFee = computeGsFee(o);
+  const bdLines = [`Subtotal: €${bdSub.toFixed(2)}`];
+  if (bdDiscount > 0) bdLines.push(`Discount (${bdDiscountPct}%): -€${bdDiscount.toFixed(2)}`);
+  if (bdShip > 0) bdLines.push(`Shipping: €${bdShip.toFixed(2)}`);
+  if (bdTar > 0) bdLines.push(`Tariffs / fees: €${bdTar.toFixed(2)}`);
+  if (bdFee > 0) bdLines.push(`PayPal G&S fee (5%): €${bdFee.toFixed(2)}`);
+  const breakdownBlock = bdLines.join('\n');
+
   const subject = `Payment request — Gläserne Leidenschaft order ${orderRef}`;
   const body = `Hello ${firstName},
 
@@ -13993,6 +14063,7 @@ Order: ${orderRef}
 
 ${itemLines}
 
+${breakdownBlock}
 Total due: €${total.toFixed(2)}
 ${noteBlock}
 How to pay:
@@ -14340,6 +14411,9 @@ async function generateInvoicePdf(orderDbId) {
   if (discountAmt > 0) totalLine(`Discount (${discountPct}%):`, discountAmt, { negative: true });
   if (ship > 0) totalLine('Shipping:', ship);
   if (tar > 0)  totalLine('Tariffs / fees:', tar);
+  // Phase 6.59: G&S fee line — only for Goods & Services orders.
+  const gsFee = computeGsFee(o);
+  if (gsFee > 0) totalLine('PayPal G&S fee (5%):', gsFee);
   // rule line before final total
   doc.setDrawColor(...PDF_BRAND.gold);
   doc.setLineWidth(0.5);
