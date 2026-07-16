@@ -6082,7 +6082,7 @@ function getActiveLEs() {
 // pay through PayPal's flow — not by sending money to an email on our invoice).
 // Kept here in case we need it for contact-only purposes later.
 // ═══════════════════════════════════════════════════════════════════════
-const BRAND_PAYPAL_EMAIL = 'glass-passion@hotmail.com';
+const BRAND_PAYPAL_EMAIL = 'glasbaetz@hotmail.com';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CUSTOMER-FACING CONTACT EMAIL
@@ -11976,7 +11976,7 @@ async function renderAdminOrders() {
       _totalsBlock = `Subtotal: €${_sub.toFixed(2)}\n(Shipping & any applicable fees will be added at invoicing.)`;
     }
     const _paymentLine = _pricingSet
-      ? `Your total of €${_final.toFixed(2)} should be paid through PayPal to glass-passion@hotmail.com. Please complete payment within three (3) days.\nReference: ${o.order_id || '(pending)'}`
+      ? `Your total of €${_final.toFixed(2)} should be paid through PayPal to ${BRAND_PAYPAL_EMAIL}. Please complete payment within three (3) days.\nReference: ${o.order_id || '(pending)'}`
       : `Payment instructions will be sent once final pricing is confirmed.`;
     const paymentMsg =
 `Hello ${fname || 'there'},
@@ -14440,7 +14440,7 @@ async function generateInvoicePdf(orderDbId) {
   // is never too short or too tall for what's in it.
   doc.setFont('times', 'normal');
   doc.setFontSize(10);
-  const sentence = ` Please remit payment via PayPal to glass-passion@hotmail.com for €${final.toFixed(2)}.`;
+  const sentence = ` Please remit payment via PayPal to ${BRAND_PAYPAL_EMAIL} for €${final.toFixed(2)}.`;
   const sentenceLines = doc.splitTextToSize(sentence, textWidth);
   // Heights in mm: title band 10, each wrapped line ~5, email line 6, spacer 2,
   // italic note 5, plus top/bottom padding.
