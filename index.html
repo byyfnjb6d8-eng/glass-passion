@@ -4132,14 +4132,14 @@ body.locked > *:not(#constructionGate) { display: none !important; }
       <br>
       <span style="font-style:italic;opacity:0.85">Wir sind fleißig in der Werkstatt und erwecken den Weihnachtszauber dieser Saison zum Leben.</span>
     </div>
-    <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" spellcheck="false">
+    <input type="password" id="gateInput" class="gate-input" placeholder="Access code · Zugangscode" autocomplete="off" spellcheck="false">
     <label class="gate-remember">
       <input type="checkbox" id="gateRemember">
-      <span>Remember me on this device</span>
+      <span>Remember me on this device · Auf diesem Gerät merken</span>
     </label>
-    <button id="gateBtn" class="gate-btn">Enter Site</button>
+    <button id="gateBtn" class="gate-btn">Enter Site · Seite betreten</button>
     <div class="gate-error" id="gateError"></div>
-    <div class="gate-footer">If you need access, please contact the site owner.</div>
+    <div class="gate-footer">If you need access, please contact us · Wenn Sie Zugang benötigen, schreiben Sie uns:<br><a href="mailto:info@glaserneleidenschaft.com" style="color:inherit">info@glaserneleidenschaft.com</a></div>
   </div>
 </div>
 
@@ -4219,7 +4219,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
     var input = document.getElementById('gateInput');
     if (btn) {
       btn.disabled = !!busy;
-      btn.textContent = busy ? 'Checking…' : 'Enter Site';
+      btn.textContent = busy ? 'Checking… · Wird geprüft…' : 'Enter Site · Seite betreten';
     }
     if (input) input.disabled = !!busy;
   }
@@ -4268,13 +4268,13 @@ body.locked > *:not(#constructionGate) { display: none !important; }
     var val = (input && input.value || '').trim();
 
     if (!val) {
-      showError('Please enter the access code.');
+      showError('Please enter the access code. · Bitte geben Sie den Zugangscode ein.');
       return;
     }
 
     var client = getClient();
     if (!client) {
-      showError('Could not reach the validation service. Please refresh and try again.');
+      showError('Could not reach the validation service — please refresh. · Verbindung fehlgeschlagen — bitte Seite neu laden.');
       return;
     }
 
@@ -4284,7 +4284,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
     client.rpc('verify_gate_code', { code: val }).then(function(res) {
       setBusy(false);
       if (res.error) {
-        showError('Validation error. Please try again.');
+        showError('Validation error. Please try again. · Prüfung fehlgeschlagen. Bitte erneut versuchen.');
         console.error('[gate] rpc error:', res.error);
         return;
       }
@@ -4298,12 +4298,12 @@ body.locked > *:not(#constructionGate) { display: none !important; }
         } catch(e) { /* storage blocked; unlock still works for this session */ }
         unlock();
       } else {
-        showError('Incorrect access code.');
+        showError('Incorrect access code. · Falscher Zugangscode.');
         if (input) { input.value = ''; input.focus(); }
       }
     }).catch(function(e) {
       setBusy(false);
-      showError('Network error. Please try again.');
+      showError('Network error. Please try again. · Netzwerkfehler. Bitte erneut versuchen.');
       console.error('[gate] network error:', e);
     });
   }
@@ -4726,7 +4726,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
             <input type="checkbox" id="regTcCheck">
             <span data-t="tc_agree"></span>
           </label>
-          <div class="alert alert-error" id="regTcError" style="margin-top:8px">Please agree to the Terms & Conditions.</div>
+          <div class="alert alert-error" id="regTcError" style="margin-top:8px" data-t="reg_tc_required"></div>
         </div>
         <button class="btn btn-gold" onclick="doRegister()" id="registerBtn" style="width:100%"><span data-t="btn_register"></span></button>
         <div class="divider"><span data-t="or"></span></div>
@@ -7998,6 +7998,8 @@ admin_lottery: "Lottery",
     btn_submit_order: "Confirm Order", btn_back: "Back",
     order_success_title: "Order Request Received!",
     order_tc_required: "Please confirm the Terms & Conditions checkbox before submitting your order.",
+    login_fill_all_fields: "Please fill in all fields.",
+    reg_tc_required: "Please agree to the Terms & Conditions.",
     order_id_gen_failed: "We couldn't generate an order number. Please try again.",
     order_save_failed: "Sorry — your order could not be saved. Please try again, and if the problem continues, email us at {email}.",
     order_items_failed: "Your order was created, but the item details didn't save completely. Please email {email} and mention reference {ref} — we'll fix it right away.",
@@ -9181,6 +9183,8 @@ admin_lottery: "Verlosung",
     btn_submit_order: "Bestellung bestätigen", btn_back: "Zurück",
     order_success_title: "Bestellanfrage eingegangen!",
     order_tc_required: "Bitte bestätigen Sie die AGB-Checkbox, bevor Sie Ihre Bestellung absenden.",
+    login_fill_all_fields: "Bitte füllen Sie alle Felder aus.",
+    reg_tc_required: "Bitte stimmen Sie den AGB zu.",
     order_id_gen_failed: "Es konnte keine Bestellnummer erstellt werden. Bitte versuchen Sie es erneut.",
     order_save_failed: "Ihre Bestellung konnte leider nicht gespeichert werden. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, schreiben Sie uns an {email}.",
     order_items_failed: "Ihre Bestellung wurde angelegt, aber die Artikeldaten wurden nicht vollständig gespeichert. Bitte schreiben Sie an {email} mit der Referenz {ref} — wir kümmern uns sofort darum.",
@@ -10263,7 +10267,7 @@ async function doLogin() {
   const btn = document.getElementById('loginBtn');
   const err = document.getElementById('loginError');
   err.classList.remove('show');
-  if (!email || !pass) { showAlert(err, 'Please fill in all fields.'); return; }
+  if (!email || !pass) { showAlert(err, t('login_fill_all_fields')); return; }
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   btn.disabled = false; btn.innerHTML = `<span data-t="btn_login">${t('btn_login')}</span>`;
