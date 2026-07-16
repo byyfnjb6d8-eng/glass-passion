@@ -4479,16 +4479,16 @@ body.locked > *:not(#constructionGate) { display: none !important; }
       </div>
       <div class="about-image-column">
         <div class="about-image-placeholder" style="padding:0;overflow:hidden">
-          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%201.png" alt="Gläserne Leidenschaft" style="width:100%;height:100%;object-fit:cover;display:block">
+          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%201.png" alt="Gläserne Leidenschaft" width="544" height="770" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block">
         </div>
         <div class="about-image-placeholder" style="padding:0;overflow:hidden">
-          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%202.png" alt="Gläserne Leidenschaft" style="width:100%;height:100%;object-fit:cover;display:block">
+          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%202.png" alt="Gläserne Leidenschaft" width="628" height="828" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block">
         </div>
         <div class="about-image-placeholder" style="padding:0;overflow:hidden;aspect-ratio:3/4">
-          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%203.png" alt="Gläserne Leidenschaft" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block">
+          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%203.png" alt="Gläserne Leidenschaft" width="708" height="786" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block">
         </div>
         <div class="about-image-placeholder" style="padding:0;overflow:hidden;aspect-ratio:3/4">
-          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%204.png" alt="Gläserne Leidenschaft" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block">
+          <img src="https://wjddakdiknuyqchzcdbc.supabase.co/storage/v1/object/public/product-images/about%20us%204.png" alt="Gläserne Leidenschaft" width="610" height="828" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block">
         </div>
       </div>
     </div>
@@ -9511,6 +9511,7 @@ async function loadOrnamentSoldCounts() {
 // ════════════════════════════════
 function setLang(l) {
   lang = l;
+  document.documentElement.lang = l;
   document.getElementById('langEN')?.classList.toggle('active', l === 'en');
   document.getElementById('langDE')?.classList.toggle('active', l === 'de');
   applyT();
