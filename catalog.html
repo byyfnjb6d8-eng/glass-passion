@@ -1784,30 +1784,36 @@ function pdfIntroPage(doc) {
   doc.text(lines, 105, y, { align: 'center', lineHeightFactor: 1.5 });
 }
 
-function pdfAboutTextPage(doc, keys, withHead, withSig) {
+// The whole About story as ONE continuous flow (heading, then all seven
+// paragraphs breaking to a fresh page only when they run out of room),
+// followed by the photos — unlike the e-book, which interleaves them.
+function pdfAboutFlow(doc) {
+  doc.addPage();
   var y = 40;
-  if (withHead) {
-    doc.setFont('DMMono', 'normal'); doc.setFontSize(8); setColor(doc, PC.goldInk);
-    doc.setCharSpace(1);
-    doc.text(t('about_eyebrow').toUpperCase(), 105, y, { align: 'center' });
-    doc.setCharSpace(0);
-    y += 11;
-    doc.setFont('Cinzel', 'normal'); doc.setFontSize(15); setColor(doc, PC.ink);
-    doc.text(t('about_heading'), 105, y, { align: 'center' });
-    y += 8;
-    pdfDivider(doc, y, PC.goldInk);
-    y += 13;
+  doc.setFont('DMMono', 'normal'); doc.setFontSize(8); setColor(doc, PC.goldInk);
+  doc.setCharSpace(1);
+  doc.text(t('about_eyebrow').toUpperCase(), 105, y, { align: 'center' });
+  doc.setCharSpace(0);
+  y += 11;
+  doc.setFont('Cinzel', 'normal'); doc.setFontSize(15); setColor(doc, PC.ink);
+  doc.text(t('about_heading'), 105, y, { align: 'center' });
+  y += 8;
+  pdfDivider(doc, y, PC.goldInk);
+  y += 13;
+  function bodyFont() {
+    doc.setFont('Cormorant', 'normal'); doc.setFontSize(11.5); setColor(doc, PC.ink);
   }
-  doc.setFont('Cormorant', 'normal'); doc.setFontSize(11.5); setColor(doc, PC.ink);
-  keys.forEach(function (k) {
+  bodyFont();
+  ['about_s1', 'about_s2', 'about_s3', 'about_s4', 'about_s5', 'about_s6', 'about_s7'].forEach(function (k) {
     var lines = doc.splitTextToSize(t(k), 155);
-    doc.text(lines, 28, y, { lineHeightFactor: 1.45 });
-    y += lines.length * 5.9 + 6;
+    var need = lines.length * 5.7 + 4.5;
+    if (y + need > 283) { doc.addPage(); y = 40; bodyFont(); }
+    doc.text(lines, 28, y, { lineHeightFactor: 1.4 });
+    y += need;
   });
-  if (withSig) {
-    doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.goldInk);
-    doc.text('— Dietbert & Ivonne Bätz', 182, y + 4, { align: 'right' });
-  }
+  if (y > 286) { doc.addPage(); y = 40; }
+  doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.goldInk);
+  doc.text('— Dietbert & Ivonne Bätz', 182, y + 5, { align: 'right' });
 }
 
 function pdfPhotoPage(doc, jpegs) {
@@ -1844,7 +1850,9 @@ function downloadPdf() {
       pdfIntroPage(doc);
 
       PAGES.forEach(function (pg) {
-        if (pg.type === 'cover' || pg.type === 'intro' || pg.type === 'filler' || pg.type === 'back') return;
+        // About pages are rendered as one consolidated section after the
+        // products (pdfAboutFlow), not per e-book page.
+        if (pg.type !== 'orn' && pg.type !== 'set') return;
         chain = chain.then(function () {
           if (pg.type === 'orn') {
             var views = (pg.product.imgs && pg.product.imgs.length ? pg.product.imgs : (pg.product.img ? [pg.product.img] : []));
@@ -1879,28 +1887,27 @@ function downloadPdf() {
               btn.textContent = count + '/' + productPages.length;
             });
           }
-          if (pg.type === 'about') {
-            var el = pg.el;
-            if (el.classList.contains('pg-photos')) {
-              var files = Array.prototype.map.call(el.querySelectorAll('img'), function (im) {
-                return im.dataset.src || im.getAttribute('src');
-              });
-              var single = files.length === 1;
-              return Promise.all(files.map(function (u) {
-                return fetchImg(u).then(function (im) {
-                  return im ? imgToJpegCover(im, single ? 150 / 225 : 150 / 122, 1100) : null;
-                });
-              })).then(function (js) {
-                doc.addPage();
-                pdfPhotoPage(doc, js);
-              });
-            }
-            doc.addPage();
-            var keys = Array.prototype.map.call(el.querySelectorAll('p[data-t]'), function (n) { return n.dataset.t; });
-            pdfAboutTextPage(doc, keys, !!el.querySelector('.about-head'), !!el.querySelector('.about-sig'));
-            return;
-          }
         });
+      });
+
+      // About Us: continuous story text, then the four photos on two pages
+      chain = chain.then(function () {
+        pdfAboutFlow(doc);
+        var photoSets = [['about us 1.png', 'about us 2.png'], ['about us 3.png', 'about us 4.png']];
+        var pchain = Promise.resolve();
+        photoSets.forEach(function (set) {
+          pchain = pchain.then(function () {
+            return Promise.all(set.map(function (f) {
+              return fetchImg(imageUrl(f)).then(function (im) {
+                return im ? imgToJpegCover(im, 150 / 122, 1100) : null;
+              });
+            })).then(function (js) {
+              doc.addPage();
+              pdfPhotoPage(doc, js);
+            });
+          });
+        });
+        return pchain;
       });
 
       return chain.then(function () {
