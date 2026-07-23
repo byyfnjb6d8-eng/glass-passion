@@ -22393,5 +22393,23 @@ function showToastError(msg) {
 
 init();
 </script>
+<script>
+/* Phase 6.58: one anonymous visit ping per page load → /api/visit (Pages
+   Function) → Supabase site_visits. Fire-and-forget; no-op locally. */
+(function () {
+  try {
+    var data = JSON.stringify({
+      page: location.pathname,
+      ref: document.referrer || '',
+      lang: navigator.language || ''
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/visit', new Blob([data], { type: 'application/json' }));
+    } else {
+      fetch('/api/visit', { method: 'POST', body: data, keepalive: true }).catch(function () {});
+    }
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

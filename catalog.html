@@ -758,6 +758,24 @@ var SB_URL  = 'https://wjddakdiknuyqchzcdbc.supabase.co';
 var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGRha2Rpa251eXFjaHpjZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjIxMjksImV4cCI6MjA5MTY5ODEyOX0.MKt_gugn0uEuk2EiYHF0e2HU2gNFAmIHDUKgKm_x-Wk';
 var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
 
+// Phase 6.58: one anonymous visit ping per page load → /api/visit (Pages
+// Function) → site_visits table. Fire-and-forget; silently a no-op when
+// the endpoint doesn't exist (local dev).
+(function () {
+  try {
+    var data = JSON.stringify({
+      page: location.pathname,
+      ref: document.referrer || '',
+      lang: navigator.language || ''
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/visit', new Blob([data], { type: 'application/json' }));
+    } else {
+      fetch('/api/visit', { method: 'POST', body: data, keepalive: true }).catch(function () {});
+    }
+  } catch (e) {}
+})();
+
 // ════════════════════════════════════════════
 // I18N
 // ════════════════════════════════════════════
