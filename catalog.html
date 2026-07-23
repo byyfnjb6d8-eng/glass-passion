@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The 2026 Collection — Gläserne Leidenschaft</title>
+<meta name="description" content="Browse this year's mouth-blown glass Christmas ornaments, handcrafted in Lauscha, Germany. One limited collection per year — each piece hand-painted, no two alike.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gläserne Leidenschaft">
+<meta property="og:title" content="The 2026 Collection — Gläserne Leidenschaft">
+<meta property="og:description" content="Browse this year's mouth-blown glass Christmas ornaments, handcrafted in Lauscha, Germany. One limited collection per year — each piece hand-painted, no two alike.">
+<meta property="og:url" content="https://www.glass-passion.com/catalog">
+<meta property="og:image" content="https://www.glass-passion.com/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<style>
+  /* Self-hosted fonts (same set as index.html — Phase 6.36, GDPR). */
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-regular.woff2') format('woff2'); }
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:500; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-500.woff2') format('woff2'); }
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:600; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-600.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:300; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-300.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-regular.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:500; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-500.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:600; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-600.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:italic; font-weight:300; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-300italic.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:italic; font-weight:400; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-italic.woff2') format('woff2'); }
+  @font-face { font-family:'DM Mono'; font-style:normal; font-weight:300; font-display:swap;
+    src:url('/fonts/dm-mono-v16-latin-300.woff2') format('woff2'); }
+  @font-face { font-family:'DM Mono'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/dm-mono-v16-latin-regular.woff2') format('woff2'); }
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   Phase 6.57 — Public e-book catalog. Standalone page (order.html pattern),
+   design tokens copied from index.html. Data arrives via the
+   get_public_catalog() RPC — never contains prices.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Palette copied from index.html. Names are historical: --bg is LIGHT
+     cream, --cream is DARK ink. */
+  --bg:        #f5f0e3;
+  --bg2:       #faf6ea;
+  --surface:   #ffffff;
+  --gold:      #b08d40;
+  --gold-ink:  #806626;
+  --gold-lt:   #c9a84c;
+  --gold-dim:  #8a6f30;
+  --cream:     #1a1510;
+  --cream-dim: #3a3026;
+  --chrome:    #2a1f15;
+  --line:      rgba(42, 31, 21, 0.2);
+  --line2:     rgba(42, 31, 21, 0.08);
+  --shadow:    0 8px 48px rgba(42, 31, 21, 0.12);
+  --r:         2px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;   /* fallback */
+  height: 100dvh;
+  overflow: hidden;
+}
+/* Paper-grain texture (copied from index.html) */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(176,141,64,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 90% 100%, rgba(42,31,21,0.03) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='3' height='3' fill='%23f5f0e3'/%3E%3Ccircle cx='1' cy='1' r='0.3' fill='rgba(42,31,21,0.03)'/%3E%3C/svg%3E");
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 20px;
+  border-bottom: 1px solid var(--line2);
+  background: rgba(245, 240, 227, 0.9);
+}
+.topbar-brand {
+  font-family: 'Cinzel', serif;
+  font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--cream); text-decoration: none; white-space: nowrap;
+}
+.topbar-brand span { color: var(--gold-ink); }
+.lang-toggle { display: flex; gap: 2px; }
+.lang-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  padding: 6px 10px;
+  color: var(--cream-dim);
+  border: 1px solid transparent; border-radius: var(--r);
+}
+.lang-btn.active { color: var(--gold-ink); border-color: var(--line); }
+
+/* ── STAGE ── */
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  padding: 16px 8px;
+  position: relative;
+}
+
+/* Loading / prepared panel (shown before the book is built) */
+.pre-book {
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  padding: 0 24px;
+  text-align: center;
+}
+.pre-cover {
+  width: min(64vw, 300px, calc((100dvh - 300px) * 0.714));
+  aspect-ratio: 5 / 7;
+  background: linear-gradient(160deg, #35291b 0%, var(--chrome) 55%, #1d150d 100%);
+  border-radius: 3px 8px 8px 3px;
+  box-shadow: var(--shadow), inset -3px 0 8px rgba(0,0,0,0.35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; padding: 24px;
+}
+.pre-cover img { width: 34%; filter: drop-shadow(0 2px 10px rgba(201,168,76,0.35)); }
+.pre-cover .pc-title {
+  font-family: 'Cinzel', serif; font-size: clamp(15px, 2.6vw, 20px);
+  letter-spacing: 3px; text-transform: uppercase; color: var(--gold-lt);
+}
+.pre-cover .pc-sub {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(201,168,76,0.75);
+}
+.pre-status {
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--cream-dim);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+.pre-status.static { animation: none; }
+@keyframes pulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+.pre-retry {
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold-ink);
+  border: 1px solid var(--gold-ink); border-radius: var(--r);
+  padding: 12px 28px;
+}
+.pre-retry:hover { background: rgba(201,168,76,0.08); }
+
+/* ── NAV ARROWS ── */
+.nav-arrow {
+  flex: 0 0 auto;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: 50%;
+  color: var(--gold-ink);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 26px; line-height: 1;
+  transition: background 0.2s, opacity 0.2s;
+  user-select: none;
+}
+.nav-arrow:hover { background: rgba(201,168,76,0.08); }
+.nav-arrow[aria-disabled="true"] { opacity: 0.25; pointer-events: none; }
+
+/* ── BOOK ── */
+.book-scene {
+  perspective: 2600px;
+  flex: 0 1 auto;
+  touch-action: pan-y;
+  display: none;   /* shown once built */
+}
+.book-scene.ready { display: block; }
+.book {
+  position: relative;
+  width: min(88vw, 1060px, calc((100dvh - 210px) * 1.46));
+  aspect-ratio: 2 / 1.38;
+  transform-style: preserve-3d;
+  margin: 0 auto;
+  transition: transform 0.75s cubic-bezier(0.35, 0.1, 0.25, 1);
+}
+/* Closed book sits centered: shift half-a-page toward the visible side */
+.book.at-start { transform: translateX(-25%); }
+.book.at-end   { transform: translateX(25%); }
+.book.no-anim, .book.no-anim .sheet { transition: none !important; }
+
+.sheet {
+  position: absolute; top: 0; right: 0;
+  width: 50%; height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.35, 0.1, 0.25, 1);
+}
+.sheet.turning { will-change: transform; }
+.sheet.turned { transform: rotateY(-180deg); }
+.face {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+}
+.face.front { transform: rotateY(0) translateZ(0); border-radius: 0 4px 4px 0; }
+.face.back  { transform: rotateY(180deg) translateZ(0); border-radius: 4px 0 0 4px; }
+/* Moving-page shading during a turn */
+.face::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to right, rgba(42,31,21,0.20), transparent 45%);
+  opacity: 0; transition: opacity 0.75s;
+}
+.sheet.turning .face::after { opacity: 1; }
+/* Static spine shadow across the open spread */
+.book::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 70px; transform: translateX(-50%);
+  background: linear-gradient(to right, transparent, rgba(42,31,21,0.10) 46%, rgba(42,31,21,0.16) 50%, rgba(42,31,21,0.10) 54%, transparent);
+  pointer-events: none; z-index: 400;
+  opacity: 1; transition: opacity 0.4s;
+}
+.book.at-start::after, .book.at-end::after { opacity: 0; }
+
+/* Mobile: single page per sheet; turned sheets hide off the left edge */
+body.single .book { aspect-ratio: 5 / 7; width: min(92vw, 440px, calc((100dvh - 215px) * 0.714)); }
+body.single .sheet { width: 100%; }
+body.single .book::after { display: none; }
+body.single .book.at-start, body.single .book.at-end { transform: none; }
+body.single .sheet.turned:not(.turning) { visibility: hidden; }
+.face.blank {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--line); font-size: 22px;
+}
+
+/* ── PAGES (content) ── */
+.pg {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(14px, 2.6vw, 30px);
+  overflow: hidden;
+}
+.folio {
+  position: absolute; bottom: 10px;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  color: var(--cream-dim); opacity: 0.75;
+}
+.face.front .folio { right: 16px; }
+.face.back  .folio { left: 16px; }
+
+/* Cover + back cover (dark chocolate boards) */
+.pg-cover, .pg-backcover {
+  align-items: center; justify-content: center; text-align: center;
+  background: linear-gradient(160deg, #35291b 0%, var(--chrome) 55%, #1d150d 100%);
+  color: var(--gold-lt);
+  gap: clamp(8px, 1.6vh, 18px);
+}
+.cover-logo { width: clamp(64px, 22%, 120px); filter: drop-shadow(0 2px 12px rgba(201,168,76,0.35)); }
+.cover-est {
+  font-family: 'DM Mono', monospace; font-size: clamp(8px, 1.1vw, 10px);
+  letter-spacing: 2px; text-transform: uppercase; color: rgba(201,168,76,0.75);
+}
+.cover-brand {
+  font-family: 'Cinzel', serif; font-weight: 400;
+  font-size: clamp(18px, 3vw, 30px); letter-spacing: 3px; text-transform: uppercase;
+  color: #e9ddc0;
+}
+.cover-brand em { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; text-transform: none; color: var(--gold-lt); letter-spacing: 1px; }
+.cover-divider { display: flex; align-items: center; gap: 14px; justify-content: center; }
+.cover-divider::before, .cover-divider::after {
+  content: ''; width: 52px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.cover-divider::after { background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.cover-diamond { color: var(--gold-lt); font-size: 8px; }
+.cover-title {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(15px, 2.2vw, 22px); letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold-lt);
+}
+.cover-sub {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+  font-size: clamp(13px, 1.7vw, 17px); color: rgba(233,221,192,0.8);
+}
+
+/* Intro / colophon / thank-you inner pages */
+.pg-plain { align-items: center; justify-content: center; text-align: center; gap: clamp(10px, 2vh, 22px); padding: clamp(20px, 4vw, 48px); }
+.plain-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--gold-ink);
+}
+.plain-heading { font-family: 'Cinzel', serif; font-weight: 500; font-size: clamp(17px, 2.4vw, 26px); letter-spacing: 2px; }
+.plain-body {
+  font-size: clamp(14px, 1.8vw, 18px); font-weight: 300; line-height: 1.7;
+  max-width: 40ch; color: var(--cream);
+}
+.plain-quote {
+  font-style: italic; font-size: clamp(14px, 1.9vw, 19px); line-height: 1.6;
+  color: var(--cream-dim); max-width: 36ch;
+}
+.plain-note {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--cream-dim); line-height: 2;
+}
+.plain-cta {
+  display: inline-block; text-decoration: none;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold-ink);
+  border: 1px solid var(--gold-ink); border-radius: var(--r);
+  padding: 12px 26px; transition: background 0.2s;
+}
+.plain-cta:hover { background: rgba(201,168,76,0.08); }
+.pg-backcover .plain-cta { color: var(--gold-lt); border-color: var(--gold-dim); }
+.pg-backcover .plain-cta:hover { background: rgba(201,168,76,0.12); }
+.pg-backcover .plain-note { color: rgba(233,221,192,0.6); }
+.pg-backcover .cover-logo { width: clamp(48px, 16%, 84px); }
+
+/* Ornament pages */
+.pg-orn { gap: clamp(6px, 1.2vh, 12px); }
+.pg-orn.is-le::before {
+  content: ''; position: absolute; inset: 7px; pointer-events: none;
+  border: 1px solid rgba(176,141,64,0.5); border-radius: 2px;
+}
+.orn-top { display: flex; align-items: center; justify-content: space-between; min-height: 18px; gap: 8px; }
+.badge {
+  font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 2px; white-space: nowrap;
+}
+.badge-new { color: var(--gold-ink); border: 1px solid var(--gold-ink); }
+.badge-le  { background: var(--gold); color: #fff; }
+.badge-set { color: var(--cream-dim); border: 1px solid var(--line); }
+
+.plate {
+  position: relative;
+  flex: 1 1 auto; min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  box-shadow: 0 4px 20px rgba(42,31,21,0.08);
+  border-radius: 2px;
+}
+.plate.has-views { cursor: pointer; }
+.plate-img {
+  position: absolute; inset: clamp(8px, 1.4vw, 16px);
+  width: calc(100% - 2 * clamp(8px, 1.4vw, 16px));
+  height: calc(100% - 2 * clamp(8px, 1.4vw, 16px));
+  object-fit: contain;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.plate-img.on.ld { opacity: 1; }
+.plate-empty {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 30px; opacity: 0.45;
+}
+.plate-dots {
+  position: absolute; bottom: 6px; left: 0; right: 0;
+  display: flex; gap: 8px; justify-content: center;
+}
+.plate-dot {
+  width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.plate-dot::after {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  border: 1px solid var(--gold-ink); background: transparent;
+}
+.plate-dot.on::after { background: var(--gold-ink); }
+/* Set member grid takes the plate's place */
+.set-grid {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; gap: clamp(6px, 1vw, 12px);
+  grid-template-columns: repeat(2, 1fr);
+}
+.set-cell {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: 2px;
+  box-shadow: 0 3px 14px rgba(42,31,21,0.06);
+  min-height: 0;
+}
+.set-cell img {
+  position: absolute; inset: 8px 8px 20px; width: calc(100% - 16px); height: calc(100% - 28px);
+  object-fit: contain; opacity: 0; transition: opacity 0.35s ease;
+}
+.set-cell img.ld { opacity: 1; }
+.set-cell .cell-name {
+  position: absolute; left: 0; right: 0; bottom: 3px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--cream-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;
+}
+
+.orn-style {
+  font-family: 'DM Mono', monospace; font-size: clamp(8px, 1vw, 10px); letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--gold-ink); text-align: center;
+}
+.orn-name {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(14px, 2vw, 21px); letter-spacing: 1px; text-align: center;
+  line-height: 1.25;
+}
+.orn-specs {
+  display: flex; gap: clamp(10px, 2vw, 26px); justify-content: center; flex-wrap: wrap;
+}
+.spec { display: flex; align-items: baseline; gap: 7px; }
+.spec-label {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--cream-dim);
+}
+.spec-value { font-size: clamp(13px, 1.6vw, 16px); font-weight: 400; }
+.orn-desc {
+  font-style: italic; font-size: clamp(11.5px, 1.5vw, 14px); line-height: 1.5;
+  color: var(--cream);
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid var(--gold);
+  align-self: center; max-width: 46ch;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.orn-foot {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--cream-dim); opacity: 0.7; text-align: center;
+  min-height: 10px;
+}
+
+/* About Us story + photo pages */
+.pg-about { padding: clamp(18px, 3vw, 36px); }
+.about-head { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: clamp(10px, 1.8vh, 18px); }
+.pg-about p {
+  font-size: clamp(11.5px, 1.3vw, 14.5px); font-weight: 400; line-height: 1.55;
+  margin-top: clamp(6px, 1.2vh, 12px); color: var(--cream);
+}
+.pg-about p:first-of-type { margin-top: 0; }
+.about-sig {
+  font-style: italic; text-align: right;
+  margin-top: clamp(8px, 1.6vh, 16px); color: var(--gold-ink);
+  font-size: clamp(12px, 1.4vw, 15px);
+}
+.pg-photos { gap: clamp(8px, 1.4vw, 14px); }
+.photo-frame {
+  position: relative; flex: 1 1 0; min-height: 0;
+  background: var(--surface); border: 1px solid var(--line2);
+  box-shadow: 0 4px 20px rgba(42,31,21,0.08); border-radius: 2px;
+}
+.photo-frame img {
+  position: absolute; inset: clamp(6px, 1vw, 10px);
+  width: calc(100% - 2 * clamp(6px, 1vw, 10px));
+  height: calc(100% - 2 * clamp(6px, 1vw, 10px));
+  object-fit: cover; object-position: top;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.photo-frame img.ld { opacity: 1; }
+
+/* Tap zones (redundant with arrows; hidden from a11y tree) */
+.tap-zone {
+  position: absolute; top: 0; bottom: 0; width: 13%;
+  z-index: 500; cursor: pointer;
+}
+.tap-zone.left { left: 0; } .tap-zone.right { right: 0; }
+
+/* ── BOTTOM BAR ── */
+.bookbar {
+  flex: 0 0 auto;
+  display: none;
+  align-items: center; justify-content: center; gap: 18px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line2);
+}
+.bookbar.ready { display: flex; }
+.counter {
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
+  color: var(--cream-dim); min-width: 90px; text-align: center;
+}
+.toc-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold-ink);
+  border: 1px solid var(--line); border-radius: var(--r);
+  padding: 8px 16px;
+}
+.toc-btn:hover { background: rgba(201,168,76,0.08); }
+.bookbar .nav-arrow { display: none; width: 40px; height: 40px; }
+
+@media (max-width: 880px) {
+  .stage > .nav-arrow { display: none; }
+  .bookbar .nav-arrow { display: flex; }
+  .topbar { padding: 0 14px; }
+  .topbar-brand { font-size: 12px; letter-spacing: 2px; }
+}
+
+/* ── TOC DRAWER ── */
+.toc-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(26, 21, 16, 0.45);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.toc-overlay.open { opacity: 1; pointer-events: auto; }
+.toc-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 901;
+  width: min(360px, 92vw);
+  background: var(--bg2);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  transform: translateX(102%); transition: transform 0.3s cubic-bezier(0.3, 0.1, 0.2, 1);
+  display: flex; flex-direction: column;
+}
+.toc-panel.open { transform: translateX(0); }
+.toc-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; border-bottom: 1px solid var(--line2);
+}
+.toc-title { font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 3px; text-transform: uppercase; }
+.toc-close { font-size: 22px; line-height: 1; color: var(--cream-dim); padding: 4px 8px; }
+.toc-list { flex: 1; overflow-y: auto; padding: 10px 0 calc(14px + env(safe-area-inset-bottom)); }
+.toc-item {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; text-align: left;
+  padding: 9px 20px;
+}
+.toc-item:hover, .toc-item:focus-visible { background: rgba(201,168,76,0.08); }
+.toc-thumb {
+  flex: 0 0 auto; width: 42px; height: 42px;
+  background: var(--surface); border: 1px solid var(--line2); border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 13px;
+}
+.toc-thumb img { width: 36px; height: 36px; object-fit: contain; }
+.toc-name {
+  flex: 1 1 auto; min-width: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.toc-folio { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--cream-dim); }
+
+@media (max-width: 600px) {
+  .toc-panel {
+    top: auto; left: 0; right: 0; width: 100%; max-height: 72dvh;
+    border-left: none; border-top: 1px solid var(--line);
+    border-radius: 10px 10px 0 0;
+    transform: translateY(102%);
+  }
+  .toc-panel.open { transform: translateY(0); }
+}
+
+/* Reduced motion: no 3D turns, quick fades handled in JS */
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .book, .toc-panel, .toc-overlay { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-brand" href="/">Gläserne <span>Leidenschaft</span></a>
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="langDe" onclick="setLang('de')">DE</button>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <!-- Pre-book: closed cover doubling as the loading / prepared / error state -->
+  <div class="pre-book" id="preBook">
+    <div class="pre-cover" aria-hidden="true">
+      <img src="/img/logo.png" alt="">
+      <div class="pc-title" data-t="cover_title">The 2026 Collection</div>
+      <div class="pc-sub">✦ Gläserne Leidenschaft ✦</div>
+    </div>
+    <div class="pre-status" id="preStatus" data-t="loading">Opening the collection…</div>
+    <button class="pre-retry" id="preRetry" style="display:none" onclick="loadCatalog()" data-t="retry">Try Again</button>
+  </div>
+
+  <button class="nav-arrow" id="arrowPrev" onclick="prevPage()" aria-label="Previous page">‹</button>
+  <div class="book-scene" id="scene">
+    <div class="book" id="book"></div>
+  </div>
+  <button class="nav-arrow" id="arrowNext" onclick="nextPage()" aria-label="Next page">›</button>
+</main>
+
+<footer class="bookbar" id="bookbar">
+  <button class="nav-arrow" id="arrowPrevM" onclick="prevPage()" aria-label="Previous page">‹</button>
+  <div class="counter" id="counter">–</div>
+  <button class="toc-btn" id="tocBtn" onclick="openToc()" data-t="toc">Contents</button>
+  <button class="nav-arrow" id="arrowNextM" onclick="nextPage()" aria-label="Next page">›</button>
+</footer>
+
+<!-- Table of contents drawer -->
+<div class="toc-overlay" id="tocOverlay" onclick="closeToc()"></div>
+<aside class="toc-panel" id="tocPanel" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+  <div class="toc-head">
+    <div class="toc-title" id="tocTitle" data-t="toc">Contents</div>
+    <button class="toc-close" onclick="closeToc()" aria-label="Close">×</button>
+  </div>
+  <div class="toc-list" id="tocList"></div>
+</aside>
+
+<div class="sr-only" aria-live="polite" id="announce"></div>
+
+<noscript>
+  <div style="position:fixed;inset:0;background:#f5f0e3;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:Georgia,serif;font-size:18px;z-index:9999">
+    This catalog requires JavaScript. / Dieser Katalog benötigt JavaScript.
+  </div>
+</noscript>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+
+// ════════════════════════════════════════════
+// CONFIG (anon key is public by design — RLS + SECURITY DEFINER RPCs
+// protect the data; the catalog RPC never returns prices)
+// ════════════════════════════════════════════
+var SB_URL  = 'https://wjddakdiknuyqchzcdbc.supabase.co';
+var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGRha2Rpa251eXFjaHpjZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjIxMjksImV4cCI6MjA5MTY5ODEyOX0.MKt_gugn0uEuk2EiYHF0e2HU2gNFAmIHDUKgKm_x-Wk';
+var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
+
+// ════════════════════════════════════════════
+// I18N
+// ════════════════════════════════════════════
+var T = {
+  en: {
+    doc_title: 'The 2026 Collection — Gläserne Leidenschaft',
+    cover_title: 'The 2026 Collection',
+    cover_sub: 'Hand-blown glass ornaments from Lauscha',
+    est_line: '✦ Est. 2008 · Germany ✦',
+    intro_eyebrow: 'Lauscha · Germany',
+    intro_heading: 'A Passion for Glass',
+    intro_body: 'Each piece in this collection is imagined, hand-blown, and hand-painted by Dietbert & Ivonne Bätz in their studio in Lauscha — the birthplace of the glass Christmas ornament. One limited collection each year; no two pieces alike.',
+    intro_cta: 'Visit the Website',
+    about_eyebrow: 'About Us',
+    about_heading: 'Our Story',
+    about_s1: 'Welcome to the Gläserne Leidenschaft (Glass Passion) virtual storefront — a celebration of joy, artistry, and the magic of Christmas.',
+    about_s2: 'I\'m Dietbert Bätz, though many collectors know me simply as "Mr. D." My wife, Ivonne, and I make our home and art in Lauscha — a small village in Germany known around the world as the birthplace of mouth-blown glass Christmas ornaments. It\'s a joy and privilege to craft each ornament you see here — each one is a true labor of love and filled with heart.',
+    about_s3: 'So, how did our story begin? With a memory very dear to my heart! At the very early age of 5, sitting on my grandfather\'s lap, I watched as he masterfully created beautiful glass baubles. I was mesmerized and amazed that he could form such intricate and magnificent shapes from just an ordinary tube of glass.',
+    about_s4: 'These memories never left me, and after finishing school, I followed my heart into the world of glassblowing and turned my passion into my profession. I began my career as a glassblower of Christmas decorations and as an art glassblower producing artistic glass. After the reunification of Germany, I developed and manufactured many new glass ornament collections. At first with Krebs Glas, and later with Christborn, I was proud to lead the creation and production of the German-made ornaments for the Christopher Radko line from 1991 to 2007.',
+    about_s5: 'With life comes change, and in 2008, I launched my own independent company, Gläserne Leidenschaft. Both Ivonne and I worked for Christborn for a while, but lost track of each other after she left to pursue other interests. As fate would have it, our paths crossed again in 2013 when Ivonne was working as Sales Assistant at a local boutique. She began painting for me in 2017, and together we have built this company into one known for its exclusive, exquisitely crafted ornaments.',
+    about_s6: 'Our ornaments are all imagined, hand-blown, and hand-painted by just the two of us here in our studio. For this reason, we\'re only able to produce them in very small quantities. But we believe this is what makes them so special — each piece a treasure to be cherished. Our creativity knows no bounds, and we hope to continue to bring our ornaments into your home for many years to come.',
+    about_s7: 'We hope you love this new collection and that this year\'s ornaments will bring a smile to your face and some extra holiday magic to your home this Christmas. Thank you for your interest in our passion and for being part of our Gläserne family. Here\'s to an unforgettably beautiful Christmas tree for years to come.',
+    colophon_quote: '“Handcrafted once a year. Treasured for a lifetime.”',
+    back_heading: 'Thank You',
+    back_contact: 'info@glaserneleidenschaft.com',
+    badge_new: 'New for 2026',
+    badge_le: 'Limited Edition',
+    badge_set: 'Set of {n}',
+    spec_color: 'Color',
+    spec_height: 'Height',
+    style_no: 'Style {n}',
+    view_front: 'Front',
+    view_back: 'Back',
+    view_n: 'View {n}',
+    print_page: 'Print catalogue p. {n}',
+    nav_prev: 'Previous page',
+    nav_next: 'Next page',
+    toc: 'Contents',
+    toc_cover: 'Cover',
+    toc_intro: 'Introduction',
+    toc_about: 'About Us',
+    toc_back: 'Thank You',
+    toc_close: 'Close',
+    loading: 'Opening the collection…',
+    prepared: 'The catalogue is being prepared — please check back soon.',
+    retry: 'Try Again',
+    empty: 'The 2026 collection will be revealed soon.',
+    announce_page: 'Page {a} of {b}',
+    counter_cover: 'Cover',
+  },
+  de: {
+    doc_title: 'Die Kollektion 2026 — Gläserne Leidenschaft',
+    cover_title: 'Die Kollektion 2026',
+    cover_sub: 'Mundgeblasener Glasschmuck aus Lauscha',
+    est_line: '✦ Est. 2008 · Germany ✦',
+    intro_eyebrow: 'Lauscha · Deutschland',
+    intro_heading: 'Leidenschaft für Glas',
+    intro_body: 'Jedes Stück dieser Kollektion wird von Dietbert & Ivonne Bätz in ihrem Atelier in Lauscha — dem Geburtsort des gläsernen Christbaumschmucks — erdacht, von Hand geblasen und von Hand bemalt. Eine limitierte Kollektion pro Jahr; kein Stück gleicht dem anderen.',
+    intro_cta: 'Zur Website',
+    about_eyebrow: 'Über uns',
+    about_heading: 'Unsere Geschichte',
+    about_s1: 'Willkommen bei Gläserne Leidenschaft — eine Feier der Freude, der Kunstfertigkeit und des Weihnachtszaubers.',
+    about_s2: 'Ich bin Dietbert Bätz, vielen Sammlern einfach als „Mr. D“ bekannt. Meine Frau Ivonne und ich leben und arbeiten in Lauscha — einem kleinen Ort in Deutschland, der weltweit als Geburtsort des mundgeblasenen gläsernen Christbaumschmucks bekannt ist. Es ist uns eine Freude und ein Privileg, jedes Stück zu fertigen, das Sie hier sehen — jedes einzelne ein Werk der Liebe, gefertigt mit ganzem Herzen.',
+    about_s3: 'Wie unsere Geschichte begann? Mit einer Erinnerung, die mir sehr am Herzen liegt! Im Alter von gerade einmal fünf Jahren saß ich auf dem Schoß meines Großvaters und sah zu, wie er meisterhaft wunderschöne Glaskugeln fertigte. Ich war fasziniert und staunte, dass er aus einem einfachen Glasrohr so kunstvolle und prachtvolle Formen erschaffen konnte.',
+    about_s4: 'Diese Erinnerungen ließen mich nie los, und nach der Schule folgte ich meinem Herzen in die Welt der Glasbläserei und machte meine Leidenschaft zum Beruf. Ich begann meine Laufbahn als Glasbläser für Weihnachtsschmuck und als Kunstglasbläser. Nach der Wiedervereinigung Deutschlands entwickelte und fertigte ich viele neue Schmuckkollektionen — zunächst bei Krebs Glas, später bei Christborn, wo ich von 1991 bis 2007 mit Stolz die Entwicklung und Fertigung des in Deutschland gefertigten Schmucks für die Linie Christopher Radko leitete.',
+    about_s5: 'Mit dem Leben kommt Veränderung, und 2008 gründete ich mein eigenes, unabhängiges Unternehmen: Gläserne Leidenschaft. Ivonne und ich arbeiteten beide eine Zeit lang bei Christborn, verloren uns jedoch aus den Augen, als sie neue Wege ging. Wie es das Schicksal wollte, kreuzten sich unsere Wege 2013 erneut, als Ivonne in einer örtlichen Boutique tätig war. Seit 2017 bemalt sie für mich, und gemeinsam haben wir dieses Unternehmen zu einem Haus für exklusiven, erlesen gefertigten Schmuck gemacht.',
+    about_s6: 'Unser Schmuck wird ausschließlich von uns beiden hier in unserem Atelier erdacht, mundgeblasen und von Hand bemalt. Daher können wir ihn nur in sehr kleinen Stückzahlen fertigen. Doch gerade das macht ihn so besonders — jedes Stück ein Schatz, den es zu hüten gilt. Unserer Kreativität sind keine Grenzen gesetzt, und wir hoffen, unseren Schmuck noch viele Jahre in Ihr Zuhause bringen zu dürfen.',
+    about_s7: 'Wir hoffen, dass Sie diese neue Kollektion lieben und dass die diesjährigen Stücke Ihnen ein Lächeln schenken und Ihrem Zuhause zusätzlichen Weihnachtszauber verleihen. Vielen Dank für Ihr Interesse an unserer Leidenschaft — und dafür, Teil unserer Gläserne-Familie zu sein. Auf einen unvergesslich schönen Weihnachtsbaum für viele Jahre!',
+    colophon_quote: '„Einmal im Jahr von Hand gefertigt. Ein Leben lang geschätzt.“',
+    back_heading: 'Vielen Dank',
+    back_contact: 'info@glaserneleidenschaft.com',
+    badge_new: 'Neu für 2026',
+    badge_le: 'Limitierte Auflage',
+    badge_set: '{n}er-Set',
+    spec_color: 'Farbe',
+    spec_height: 'Höhe',
+    style_no: 'Artikelnr. {n}',
+    view_front: 'Vorderseite',
+    view_back: 'Rückseite',
+    view_n: 'Ansicht {n}',
+    print_page: 'Druckkatalog S. {n}',
+    nav_prev: 'Vorherige Seite',
+    nav_next: 'Nächste Seite',
+    toc: 'Inhalt',
+    toc_cover: 'Umschlag',
+    toc_intro: 'Einführung',
+    toc_about: 'Über uns',
+    toc_back: 'Vielen Dank',
+    toc_close: 'Schließen',
+    loading: 'Die Kollektion wird geöffnet …',
+    prepared: 'Der Katalog wird derzeit vorbereitet — bitte schauen Sie bald wieder vorbei.',
+    retry: 'Erneut versuchen',
+    empty: 'Die Kollektion 2026 wird in Kürze enthüllt.',
+    announce_page: 'Seite {a} von {b}',
+    counter_cover: 'Umschlag',
+  }
+};
+
+var lang = 'en';
+try {
+  var stored = localStorage.getItem('gl_lang');
+  if (stored === 'de' || stored === 'en') lang = stored;
+  else if ((navigator.language || '').toLowerCase().indexOf('de') === 0) lang = 'de';
+} catch (e) {}
+
+function t(k) { return (T[lang] && T[lang][k]) || T.en[k] || k; }
+function tpl(k, vars) {
+  var s = t(k);
+  Object.keys(vars || {}).forEach(function (v) { s = s.replace('{' + v + '}', vars[v]); });
+  return s;
+}
+
+// Bilingual product fields are stored as "English / German" (index.html pattern)
+function splitByLang(raw, currentLang) {
+  if (!raw) return '';
+  var s = String(raw);
+  var idx = s.indexOf(' / ');
+  if (idx === -1) return s;
+  var english = s.substring(0, idx).trim();
+  var german = s.substring(idx + 3).trim();
+  return currentLang === 'de' ? german : english;
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function imageUrl(f) {
+  if (!f) return null;
+  if (f.charAt(0) === '/') return f;  // local path (demo mode only)
+  return STORAGE_BASE + encodeURIComponent(f);
+}
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+var PRODUCTS = [];
+var PAGES = [];        // [{ el, type:'cover'|'intro'|'orn'|'set'|'filler'|'back', product, folio, tocKey }]
+var sheets = [];       // current .sheet elements
+var curT = 0;          // number of turned sheets
+var targetT = 0;
+var animating = false;
+var built = false;
+var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var mobileMq = window.matchMedia('(max-width: 880px)');
+var single = mobileMq.matches;    // single-page (mobile) mode
+
+var book = document.getElementById('book');
+var scene = document.getElementById('scene');
+
+function maxT() { return single ? PAGES.length - 1 : sheets.length; }
+function primaryIndex(tt) {
+  if (single) return tt;
+  return tt === 0 ? 0 : 2 * tt - 1;
+}
+function tForIndex(p) { return single ? p : Math.ceil(p / 2); }
+function visibleIndices(tt) {
+  if (single) return [tt];
+  if (tt === 0) return [0];
+  var v = [2 * tt - 1];
+  if (2 * tt < PAGES.length) v.push(2 * tt);
+  return v;
+}
+
+// ════════════════════════════════════════════
+// PAGE BUILDERS
+// ════════════════════════════════════════════
+function makePage(cls) {
+  var el = document.createElement('section');
+  el.className = 'pg ' + cls;
+  return el;
+}
+
+function buildCoverPage() {
+  var el = makePage('pg-cover');
+  el.innerHTML =
+    '<img class="cover-logo" src="/img/logo.png" alt="">' +
+    '<div class="cover-est" data-t="est_line"></div>' +
+    '<div class="cover-brand">Gläserne <em>Leidenschaft</em></div>' +
+    '<div class="cover-divider"><span class="cover-diamond">◆</span></div>' +
+    '<div class="cover-title" data-t="cover_title"></div>' +
+    '<div class="cover-sub" data-t="cover_sub"></div>';
+  return { el: el, type: 'cover', tocKey: 'toc_cover' };
+}
+
+function buildIntroPage(emptyCatalog) {
+  var el = makePage('pg-plain');
+  el.innerHTML =
+    '<div class="plain-eyebrow" data-t="intro_eyebrow"></div>' +
+    '<div class="plain-heading" data-t="intro_heading"></div>' +
+    '<div class="cover-divider"><span class="cover-diamond" style="color:var(--gold-ink)">◆</span></div>' +
+    '<p class="plain-body" data-t="intro_body"></p>' +
+    (emptyCatalog ? '<p class="plain-quote" data-t="empty"></p>' : '') +
+    '<a class="plain-cta" href="/" data-t="intro_cta"></a>';
+  return { el: el, type: 'intro', tocKey: 'toc_intro' };
+}
+
+function buildFillerPage() {
+  var el = makePage('pg-plain');
+  el.innerHTML =
+    '<div class="cover-divider"><span class="cover-diamond" style="color:var(--gold-ink)">◆</span></div>' +
+    '<p class="plain-quote" data-t="colophon_quote"></p>' +
+    '<div class="cover-divider"><span class="cover-diamond" style="color:var(--gold-ink)">◆</span></div>';
+  return { el: el, type: 'filler' };
+}
+
+// About Us section: three story pages interleaved with photo pages, so each
+// desktop spread pairs text with a photo. Story text mirrors the main site's
+// About page; photos are the "about us N.png" files in the public bucket.
+function buildAboutTextPage(paraKeys, withHead, withSig) {
+  var el = makePage('pg-about');
+  el.innerHTML =
+    (withHead
+      ? '<div class="about-head">' +
+          '<div class="plain-eyebrow" data-t="about_eyebrow"></div>' +
+          '<div class="plain-heading" data-t="about_heading"></div>' +
+          '<div class="cover-divider"><span class="cover-diamond" style="color:var(--gold-ink)">◆</span></div>' +
+        '</div>'
+      : '') +
+    paraKeys.map(function (k) { return '<p data-t="' + k + '"></p>'; }).join('') +
+    (withSig ? '<div class="about-sig">— Dietbert &amp; Ivonne Bätz</div>' : '');
+  return { el: el, type: 'about', tocKey: withHead ? 'toc_about' : null, skipToc: !withHead };
+}
+
+function buildAboutPhotoPage(files) {
+  var el = makePage('pg-photos');
+  el.innerHTML = files.map(function (f) {
+    return '<figure class="photo-frame">' +
+      '<img data-src="' + esc(imageUrl(f)) + '" alt="Dietbert & Ivonne Bätz — Gläserne Leidenschaft, Lauscha" decoding="async">' +
+    '</figure>';
+  }).join('');
+  return { el: el, type: 'about', skipToc: true };
+}
+
+function buildAboutPages() {
+  return [
+    buildAboutTextPage(['about_s1', 'about_s2', 'about_s3'], true, false),
+    buildAboutPhotoPage(['about us 1.png']),
+    buildAboutTextPage(['about_s4', 'about_s5'], false, false),
+    buildAboutPhotoPage(['about us 2.png']),
+    buildAboutTextPage(['about_s6', 'about_s7'], false, true),
+    buildAboutPhotoPage(['about us 3.png', 'about us 4.png']),
+  ];
+}
+
+function buildBackCoverPage() {
+  var el = makePage('pg-backcover');
+  el.innerHTML =
+    '<img class="cover-logo" src="/img/logo.png" alt="">' +
+    '<div class="plain-heading" style="color:var(--gold-lt)" data-t="back_heading"></div>' +
+    '<div class="cover-divider"><span class="cover-diamond">◆</span></div>' +
+    '<div class="plain-note">' +
+      '<a href="mailto:info@glaserneleidenschaft.com" style="text-decoration:none">info@glaserneleidenschaft.com</a><br>' +
+      '<span data-t="est_line"></span>' +
+    '</div>';
+  return { el: el, type: 'back', tocKey: 'toc_back' };
+}
+
+function badgesHtml(p) {
+  var b = '';
+  if (p.is_new_for_season) b += '<span class="badge badge-new" data-t="badge_new"></span>';
+  if (p.is_limited_edition || p.le) {
+    b += '<span class="badge badge-le">' + (p.le ? esc(p.le) : '<span data-t="badge_le"></span>') + '</span>';
+  }
+  if (p.is_set && p.set_member_count) {
+    b += '<span class="badge badge-set" data-tpl="badge_set" data-tpl-n="' + esc(p.set_member_count) + '"></span>';
+  }
+  return b;
+}
+
+function specsHtml(p) {
+  var s = '';
+  if (p.color) {
+    s += '<div class="spec"><span class="spec-label" data-t="spec_color"></span>' +
+         '<span class="spec-value" data-bi="' + esc(p.color) + '"></span></div>';
+  }
+  if (p.height) {
+    s += '<div class="spec"><span class="spec-label" data-t="spec_height"></span>' +
+         '<span class="spec-value" data-bi="' + esc(p.height) + '"></span></div>';
+  }
+  return s ? '<div class="orn-specs">' + s + '</div>' : '';
+}
+
+// Eyebrow above the name: collection name when the product has one,
+// otherwise the style/model number ("Style 26111" / "Artikelnr. 26111").
+function eyebrowHtml(p) {
+  if (p.collection) return '<div class="orn-style" data-bi="' + esc(p.collection) + '"></div>';
+  if (p.style) return '<div class="orn-style" data-tpl="style_no" data-tpl-n="' + esc(p.style) + '"></div>';
+  return '<div class="orn-style"></div>';
+}
+
+function footHtml(p) {
+  return p.page != null && p.page !== 0
+    ? '<div class="orn-foot" data-tpl="print_page" data-tpl-n="' + esc(p.page) + '"></div>'
+    : '<div class="orn-foot"></div>';
+}
+
+function buildOrnamentPage(p, folio) {
+  var el = makePage('pg-orn' + (p.is_limited_edition || p.le ? ' is-le' : ''));
+  var views = (p.imgs && p.imgs.length ? p.imgs : (p.img ? [p.img] : []));
+
+  var plate;
+  if (views.length === 0) {
+    plate = '<figure class="plate"><div class="plate-empty">✦</div></figure>';
+  } else {
+    var imgsHtml = views.map(function (f, i) {
+      return '<img class="plate-img' + (i === 0 ? ' on' : '') + '" data-src="' + esc(imageUrl(f)) + '"' +
+             ' alt="' + esc(p.name) + '" decoding="async">';
+    }).join('');
+    var dots = '';
+    if (views.length > 1) {
+      dots = '<div class="plate-dots">' + views.map(function (f, i) {
+        return '<button class="plate-dot' + (i === 0 ? ' on' : '') + '" data-view="' + i + '"></button>';
+      }).join('') + '</div>';
+    }
+    plate = '<figure class="plate' + (views.length > 1 ? ' has-views' : '') + '">' + imgsHtml + dots + '</figure>';
+  }
+
+  el.innerHTML =
+    '<div class="orn-top"><div>' + badgesHtml(p) + '</div></div>' +
+    plate +
+    eyebrowHtml(p) +
+    '<h2 class="orn-name">' + esc(p.name) + '</h2>' +
+    specsHtml(p) +
+    (p.description ? '<p class="orn-desc" data-bi="' + esc(p.description) + '"></p>' : '') +
+    footHtml(p);
+
+  wirePlate(el, p, views);
+  return { el: el, type: 'orn', product: p, folio: folio };
+}
+
+function buildSetPage(p, members, folio) {
+  var el = makePage('pg-orn' + (p.is_limited_edition || p.le ? ' is-le' : ''));
+
+  var inner;
+  if (p.img) {
+    // Parent set photo exists → treat like a normal plate
+    inner = '<figure class="plate"><img class="plate-img on" data-src="' + esc(imageUrl(p.img)) + '"' +
+            ' alt="' + esc(p.name) + '" decoding="async"></figure>';
+  } else {
+    inner = '<div class="set-grid">' + members.map(function (m) {
+      var mi = m.img || (m.imgs && m.imgs[0]);
+      return '<div class="set-cell">' +
+        (mi ? '<img data-src="' + esc(imageUrl(mi)) + '" alt="' + esc(m.name) + '" decoding="async">'
+            : '<div class="plate-empty">✦</div>') +
+        '<div class="cell-name">' + esc(m.name) + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  el.innerHTML =
+    '<div class="orn-top"><div>' + badgesHtml(p) + '</div></div>' +
+    inner +
+    eyebrowHtml(p) +
+    '<h2 class="orn-name">' + esc(p.name) + '</h2>' +
+    specsHtml(p) +
+    (p.description ? '<p class="orn-desc" data-bi="' + esc(p.description) + '"></p>' : '') +
+    footHtml(p);
+
+  return { el: el, type: 'set', product: p, folio: folio };
+}
+
+// Front/back view switching on a plate (opacity crossfade — no nested 3D)
+function wirePlate(pageEl, p, views) {
+  if (views.length < 2) return;
+  var plate = pageEl.querySelector('.plate');
+  var imgs = plate.querySelectorAll('.plate-img');
+  var dots = plate.querySelectorAll('.plate-dot');
+  var cur = 0;
+  function show(i) {
+    cur = (i + views.length) % views.length;
+    imgs.forEach(function (im, k) { im.classList.toggle('on', k === cur); });
+    dots.forEach(function (d, k) { d.classList.toggle('on', k === cur); });
+  }
+  plate.addEventListener('click', function (e) {
+    if (e.target.closest('.plate-dot')) return;
+    show(cur + 1);
+  });
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () { show(parseInt(d.dataset.view, 10)); });
+    d.setAttribute('aria-label', viewLabel(parseInt(d.dataset.view, 10), views.length));
+  });
+}
+function viewLabel(i, total) {
+  if (total === 2) return i === 0 ? t('view_front') : t('view_back');
+  return tpl('view_n', { n: i + 1 });
+}
+
+// ════════════════════════════════════════════
+// BOOK ASSEMBLY
+// ════════════════════════════════════════════
+function buildPages(products) {
+  PAGES = [];
+  PAGES.push(buildCoverPage());
+  PAGES.push(buildIntroPage(products.length === 0));
+
+  var standalone = products.filter(function (p) { return !p.is_set_member; });
+  var folio = 0;
+  standalone.forEach(function (p) {
+    folio++;
+    if (p.is_set) {
+      var members = products.filter(function (m) { return m.is_set_member && m.set_id === p.set_id; });
+      PAGES.push(buildSetPage(p, members, folio));
+    } else {
+      PAGES.push(buildOrnamentPage(p, folio));
+    }
+  });
+
+  // The About section must start on a LEFT page (odd index) so its story and
+  // photo pages pair up as spreads — pad with the colophon page if needed.
+  // Because the section itself is 6 pages, this also guarantees the back
+  // cover lands on the back face of the last leaf (even total).
+  if (PAGES.length % 2 === 0) PAGES.push(buildFillerPage());
+  buildAboutPages().forEach(function (pg) { PAGES.push(pg); });
+
+  PAGES.push(buildBackCoverPage());
+  if (PAGES.length % 2 !== 0) PAGES.splice(PAGES.length - 1, 0, buildFillerPage());
+
+  // Folio corner numbers
+  PAGES.forEach(function (pg) {
+    if (pg.folio) {
+      var f = document.createElement('span');
+      f.className = 'folio';
+      f.textContent = pg.folio;
+      pg.el.appendChild(f);
+    }
+  });
+}
+
+function buildSheets() {
+  book.innerHTML = '';
+  sheets = [];
+  var i, sheet, front, back;
+  if (single) {
+    for (i = 0; i < PAGES.length; i++) {
+      sheet = document.createElement('div');
+      sheet.className = 'sheet';
+      front = document.createElement('div'); front.className = 'face front';
+      back  = document.createElement('div'); back.className = 'face back blank';
+      back.innerHTML = '<span aria-hidden="true">✦</span>';
+      front.appendChild(PAGES[i].el);
+      sheet.appendChild(front); sheet.appendChild(back);
+      book.appendChild(sheet);
+      sheets.push(sheet);
+    }
+  } else {
+    for (i = 0; i < PAGES.length; i += 2) {
+      sheet = document.createElement('div');
+      sheet.className = 'sheet';
+      front = document.createElement('div'); front.className = 'face front';
+      back  = document.createElement('div'); back.className = 'face back';
+      front.appendChild(PAGES[i].el);
+      if (PAGES[i + 1]) back.appendChild(PAGES[i + 1].el);
+      sheet.appendChild(front); sheet.appendChild(back);
+      book.appendChild(sheet);
+      sheets.push(sheet);
+    }
+  }
+}
+
+function applyZ() {
+  var S = sheets.length;
+  sheets.forEach(function (sh, s) {
+    if (sh.classList.contains('turning')) { sh.style.zIndex = String(2 * S + 10); return; }
+    sh.style.zIndex = sh.classList.contains('turned') ? String(s + 1) : String(S - s + 1);
+  });
+}
+
+function snapTo(tt) {
+  curT = targetT = Math.max(0, Math.min(maxT(), tt));
+  book.classList.add('no-anim');
+  sheets.forEach(function (sh, s) { sh.classList.toggle('turned', s < curT); });
+  applyBookShift();
+  applyZ();
+  updateChrome();
+  // Keep transitions disabled until the snapped state has actually painted —
+  // a synchronous reflow alone can still leak one animated frame.
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { book.classList.remove('no-anim'); });
+  });
+}
+
+function applyBookShift() {
+  book.classList.toggle('at-start', curT === 0);
+  book.classList.toggle('at-end', !single && curT === maxT());
+}
+
+function requestT(tt) {
+  targetT = Math.max(0, Math.min(maxT(), tt));
+  if (!animating) step();
+}
+
+function step() {
+  if (curT === targetT) { updateChrome(); return; }
+  if (reduceMotion || Math.abs(targetT - curT) > 2) {
+    // Long jumps snap (with a soft fade so it doesn't feel like a glitch)
+    scene.style.transition = 'opacity 0.15s';
+    scene.style.opacity = '0.25';
+    setTimeout(function () {
+      snapTo(targetT);
+      scene.style.opacity = '1';
+      setTimeout(function () { scene.style.transition = ''; }, 200);
+    }, reduceMotion ? 0 : 150);
+    return;
+  }
+  var fwd = targetT > curT;
+  var s = fwd ? curT : curT - 1;
+  var sheet = sheets[s];
+  animating = true;
+  sheet.classList.add('turning');
+  applyZ();
+  void sheet.offsetWidth;
+  sheet.classList.toggle('turned', fwd);
+  curT += fwd ? 1 : -1;
+  applyBookShift();
+
+  var done = false;
+  function finish() {
+    if (done) return;
+    done = true;
+    sheet.classList.remove('turning');
+    animating = false;
+    applyZ();
+    updateChrome();
+    step();   // continue toward target if more turns are queued
+  }
+  sheet.addEventListener('transitionend', function h(e) {
+    if (e.target !== sheet || e.propertyName !== 'transform') return;
+    sheet.removeEventListener('transitionend', h);
+    finish();
+  });
+  setTimeout(finish, 950);  // fallback — transitionend can be swallowed
+}
+
+function nextPage() { requestT(targetT + 1); }
+function prevPage() { requestT(targetT - 1); }
+
+// ════════════════════════════════════════════
+// CHROME (counter, arrows, hash, a11y, hydration)
+// ════════════════════════════════════════════
+function updateChrome() {
+  var vis = visibleIndices(curT);
+  var N = PAGES.length;
+
+  // Counter
+  var label;
+  if (!single && curT === 0) label = t('counter_cover');
+  else if (vis.length === 2) label = (vis[0] + 1) + '–' + (vis[1] + 1) + ' / ' + N;
+  else label = (vis[0] + 1) + ' / ' + N;
+  document.getElementById('counter').textContent = label;
+
+  // Arrows
+  var atStart = curT === 0, atEnd = curT >= maxT();
+  ['arrowPrev', 'arrowPrevM'].forEach(function (id) {
+    document.getElementById(id).setAttribute('aria-disabled', atStart ? 'true' : 'false');
+  });
+  ['arrowNext', 'arrowNextM'].forEach(function (id) {
+    document.getElementById(id).setAttribute('aria-disabled', atEnd ? 'true' : 'false');
+  });
+
+  // Deep link (sequential flips replace, never push)
+  var p = primaryIndex(curT);
+  try { history.replaceState(null, '', '#page=' + (p + 1)); } catch (e) {}
+
+  // a11y: only the visible pages are reachable
+  PAGES.forEach(function (pg, i) {
+    var hidden = vis.indexOf(i) === -1;
+    if (hidden) { pg.el.setAttribute('aria-hidden', 'true'); pg.el.setAttribute('inert', ''); }
+    else { pg.el.removeAttribute('aria-hidden'); pg.el.removeAttribute('inert'); }
+  });
+
+  // Announce
+  var pg = PAGES[p];
+  var name = pg.product ? pg.product.name : t(pg.tocKey || 'toc');
+  document.getElementById('announce').textContent =
+    tpl('announce_page', { a: p + 1, b: N }) + ' — ' + name;
+
+  hydrateWindow(p);
+}
+
+// Manual image hydration: real src only for pages near the current one.
+// (loading="lazy" is unreliable inside 3D-transformed stacks.)
+function hydrateWindow(p) {
+  var from = Math.max(0, p - 2), to = Math.min(PAGES.length - 1, p + 4);
+  for (var i = from; i <= to; i++) {
+    PAGES[i].el.querySelectorAll('img[data-src]').forEach(function (im) {
+      im.addEventListener('load', function () { im.classList.add('ld'); });
+      im.src = im.dataset.src;
+      im.removeAttribute('data-src');
+      if (im.complete) im.classList.add('ld');
+    });
+  }
+}
+
+// ════════════════════════════════════════════
+// TOC DRAWER
+// ════════════════════════════════════════════
+function buildToc() {
+  var list = document.getElementById('tocList');
+  list.innerHTML = '';
+  PAGES.forEach(function (pg, i) {
+    if (pg.type === 'filler' || pg.skipToc) return;
+    var btn = document.createElement('button');
+    btn.className = 'toc-item';
+    var thumbFile = pg.product ? (pg.product.img || (pg.product.imgs && pg.product.imgs[0])) : null;
+    var thumb = thumbFile
+      ? '<span class="toc-thumb"><img src="' + esc(imageUrl(thumbFile)) + '" alt="" loading="lazy"></span>'
+      : '<span class="toc-thumb">✦</span>';
+    var name = pg.product
+      ? '<span class="toc-name">' + esc(pg.product.name) + '</span>'
+      : '<span class="toc-name" data-t="' + pg.tocKey + '"></span>';
+    btn.innerHTML = thumb + name + '<span class="toc-folio">' + (pg.folio || '') + '</span>';
+    btn.addEventListener('click', function () {
+      closeToc();
+      try { history.pushState(null, '', '#page=' + (i + 1)); } catch (e) {}
+      requestT(tForIndex(i));
+    });
+    list.appendChild(btn);
+  });
+}
+
+var tocOpenState = false;
+function openToc() {
+  tocOpenState = true;
+  document.getElementById('tocOverlay').classList.add('open');
+  var panel = document.getElementById('tocPanel');
+  panel.classList.add('open');
+  var first = panel.querySelector('.toc-item');
+  if (first) first.focus();
+}
+function closeToc() {
+  tocOpenState = false;
+  document.getElementById('tocOverlay').classList.remove('open');
+  document.getElementById('tocPanel').classList.remove('open');
+  document.getElementById('tocBtn').focus();
+}
+// Minimal focus trap while the drawer is open
+document.addEventListener('keydown', function (e) {
+  if (!tocOpenState) return;
+  if (e.key === 'Escape') { closeToc(); return; }
+  if (e.key !== 'Tab') return;
+  var panel = document.getElementById('tocPanel');
+  var focusables = panel.querySelectorAll('button, a[href]');
+  if (!focusables.length) return;
+  var first = focusables[0], last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+  else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+});
+
+// ════════════════════════════════════════════
+// INPUT (keyboard, swipe, tap zones)
+// ════════════════════════════════════════════
+document.addEventListener('keydown', function (e) {
+  if (!built || tocOpenState) return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key === 'ArrowRight') { nextPage(); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft') { prevPage(); e.preventDefault(); }
+  else if (e.key === 'Home') { requestT(0); e.preventDefault(); }
+  else if (e.key === 'End') { requestT(maxT()); e.preventDefault(); }
+});
+
+var touchX = null, touchY = null, touchAt = 0;
+scene.addEventListener('touchstart', function (e) {
+  if (e.touches.length !== 1) { touchX = null; return; }
+  touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; touchAt = Date.now();
+}, { passive: true });
+scene.addEventListener('touchend', function (e) {
+  if (touchX == null) return;
+  var dx = e.changedTouches[0].clientX - touchX;
+  var dy = e.changedTouches[0].clientY - touchY;
+  touchX = null;
+  if (Date.now() - touchAt > 600) return;
+  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+  if (dx < 0) nextPage(); else prevPage();
+}, { passive: true });
+
+function addTapZones() {
+  scene.querySelectorAll('.tap-zone').forEach(function (z) { z.remove(); });
+  var left = document.createElement('div');
+  left.className = 'tap-zone left'; left.setAttribute('aria-hidden', 'true');
+  left.addEventListener('click', prevPage);
+  var right = document.createElement('div');
+  right.className = 'tap-zone right'; right.setAttribute('aria-hidden', 'true');
+  right.addEventListener('click', nextPage);
+  book.appendChild(left); book.appendChild(right);
+}
+
+// Hash navigation (typed links, browser back/forward after TOC jumps)
+window.addEventListener('popstate', function () { goToHash(false); });
+function goToHash(snap) {
+  var m = (location.hash || '').match(/page=(\d+)/);
+  if (!m) return;
+  var p = Math.max(0, Math.min(PAGES.length - 1, parseInt(m[1], 10) - 1));
+  if (snap) snapTo(tForIndex(p)); else requestT(tForIndex(p));
+}
+
+// ════════════════════════════════════════════
+// MODE SWITCH (desktop spread ↔ mobile single page)
+// ════════════════════════════════════════════
+function onModeChange() {
+  if (!built) { single = mobileMq.matches; return; }
+  if (mobileMq.matches === single) return;
+  var p = primaryIndex(curT);
+  single = mobileMq.matches;
+  document.body.classList.toggle('single', single);
+  buildSheets();
+  addTapZones();
+  snapTo(tForIndex(p));
+}
+if (mobileMq.addEventListener) mobileMq.addEventListener('change', onModeChange);
+else mobileMq.addListener(onModeChange);
+
+// ════════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════════
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.title = t('doc_title');
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langDe').classList.toggle('active', lang === 'de');
+  document.querySelectorAll('[data-t]').forEach(function (el) {
+    var v = t(el.dataset.t);
+    if (v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-tpl]').forEach(function (el) {
+    el.textContent = tpl(el.dataset.tpl, { n: el.dataset.tplN });
+  });
+  document.querySelectorAll('[data-bi]').forEach(function (el) {
+    el.textContent = splitByLang(el.dataset.bi, lang);
+  });
+  document.querySelectorAll('.plate').forEach(function (plate) {
+    var dots = plate.querySelectorAll('.plate-dot');
+    dots.forEach(function (d, i) { d.setAttribute('aria-label', viewLabel(i, dots.length)); });
+  });
+  ['arrowPrev', 'arrowPrevM'].forEach(function (id) {
+    document.getElementById(id).setAttribute('aria-label', t('nav_prev'));
+  });
+  ['arrowNext', 'arrowNextM'].forEach(function (id) {
+    document.getElementById(id).setAttribute('aria-label', t('nav_next'));
+  });
+  if (built) updateChrome();
+}
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem('gl_lang', l); } catch (e) {}
+  applyLang();
+}
+
+// ════════════════════════════════════════════
+// DATA LOAD
+// ════════════════════════════════════════════
+var sb = null;
+
+function showPrepared() {
+  var status = document.getElementById('preStatus');
+  status.dataset.t = 'prepared';
+  status.textContent = t('prepared');
+  status.classList.add('static');
+  document.getElementById('preRetry').style.display = '';
+}
+
+function buildBook(products) {
+  PRODUCTS = products;
+  single = mobileMq.matches;
+  document.body.classList.toggle('single', single);
+  buildPages(products);
+  buildSheets();
+  addTapZones();
+  buildToc();
+  built = true;
+
+  document.getElementById('preBook').style.display = 'none';
+  scene.classList.add('ready');
+  document.getElementById('bookbar').classList.add('ready');
+
+  // Read any deep link BEFORE the first snap — snapTo() rewrites the hash.
+  var m = (location.hash || '').match(/page=(\d+)/);
+  var p0 = m ? Math.max(0, Math.min(PAGES.length - 1, parseInt(m[1], 10) - 1)) : 0;
+  snapTo(tForIndex(p0));
+  applyLang();
+}
+
+// Local flip-engine test data: /catalog.html?demo=1 — localhost only,
+// inert in production.
+function demoProducts() {
+  var d = [
+    { id:'D1', name:'Glitz Happens', style:'Kugel', color:'Gold / Gold', height:'9 cm', imgs:['about us 1.png','about us 2.png'], description:'A shimmering sphere of golden light. / Eine schimmernde Kugel aus goldenem Licht.', is_new_for_season:true },
+    { id:'D2', name:'Prism Break', style:'Zapfen', color:'Ice Blue / Eisblau', height:'12 cm', img:'about us 3.png', description:'Light bends. Rules break. / Das Licht bricht sich seine Bahn.' },
+    { id:'D3', name:'Reindeer Revelry', style:'Figur', color:'Champagne / Champagner', height:'10 cm', img:'/img/logo.png', is_limited_edition:true, le:'LE 2026' },
+    { id:'D4', name:'Gem Fatale', style:'Tropfen', color:'Ruby / Rubinrot', height:'11 cm', img:'about us 4.png', description:'Dangerously beautiful. / Gefährlich schön.' },
+    { id:'D5', name:'Winter Trio', style:'Kugel', is_set:true, set_id:'SET-D5', set_member_count:3, height:'8 cm', description:'Three companions for the season. / Drei Gefährten für die Saison.' },
+    { id:'D5a', name:'Trio Gold', is_set_member:true, set_id:'SET-D5', img:'about us 1.png' },
+    { id:'D5b', name:'Trio Red', is_set_member:true, set_id:'SET-D5', img:'about us 2.png' },
+    { id:'D5c', name:'Trio Silver', is_set_member:true, set_id:'SET-D5', img:'about us 3.png' },
+    { id:'D6', name:'Berry Had a Little Glam', style:'Figur', color:'Berry Red / Beerenrot', height:'9 cm' },
+    { id:'D7', name:'BLINGO STAR', style:'Stern', color:'Gold / Gold', height:'10 cm', img:'about us 2.png', is_new_for_season:true },
+    { id:'D8', name:'Gettin’ Dizzy with It', style:'Kugel', color:'Emerald / Smaragdgrün', height:'9 cm', img:'about us 1.png' }
+  ];
+  return d;
+}
+
+function isDemo() {
+  return /(^|[?&])demo=1/.test(location.search) &&
+         (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+}
+
+function loadCatalog() {
+  var status = document.getElementById('preStatus');
+  status.dataset.t = 'loading';
+  status.textContent = t('loading');
+  status.classList.remove('static');
+  document.getElementById('preRetry').style.display = 'none';
+
+  if (isDemo()) { buildBook(demoProducts()); return; }
+
+  try {
+    if (!sb) {
+      // Isolated storage key: never touch the main site's auth session.
+      sb = window.supabase.createClient(SB_URL, SB_ANON, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'sb-catalog-noop' }
+      });
+    }
+    sb.rpc('get_public_catalog').then(function (res) {
+      if (res.error || !res.data || res.data.enabled !== true) { showPrepared(); return; }
+      buildBook(res.data.products || []);
+    }, function () { showPrepared(); });
+  } catch (e) {
+    showPrepared();
+  }
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+applyLang();
+loadCatalog();
+</script>
+</body>
+</html>

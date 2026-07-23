@@ -4350,9 +4350,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
   </div>
   <nav class="topbar-nav">
     <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
-    <!-- Phase 6.19: Collection page hidden from public nav. Restore by uncommenting.
-    <button class="nav-link" id="nav-collection" onclick="showPage('collection')">Collection</button>
-    -->
+    <!-- Phase 6.57: Collection links to the public e-book catalog page (/catalog). -->
+    <a class="nav-link" id="nav-collection" href="/catalog">Collection</a>
     <button class="nav-link" id="nav-about" onclick="showPage('about')">About</button>
     <button class="nav-link" id="nav-howitworks" onclick="showPage('howitworks')" data-t="nav_howitworks">How It Works</button>
     <button class="nav-link order-btn" onclick="goToOrder()" id="navOrderBtn">Place Order</button>
@@ -4379,9 +4378,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
   </div>
   <div class="mobile-nav">
     <button class="nav-link" id="mNav-home" onclick="mobileNavTo('home')">Home</button>
-    <!-- Phase 6.19: Collection hidden from mobile nav. Restore by uncommenting.
-    <button class="nav-link" id="mNav-collection" onclick="mobileNavTo('collection')">Collection</button>
-    -->
+    <!-- Phase 6.57: Collection links to the public e-book catalog page (/catalog). -->
+    <a class="nav-link" id="mNav-collection" href="/catalog">Collection</a>
     <button class="nav-link" id="mNav-about" onclick="mobileNavTo('about')">About</button>
     <button class="nav-link" id="mNav-howitworks" onclick="mobileNavTo('howitworks')" data-t="nav_howitworks">How It Works</button>
     <button class="nav-link" id="mNavAuthBtn" onclick="mobileNavAuth()" style="display:none">Sign In</button>
@@ -4406,10 +4404,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
       <p class="hero-sub" data-t="tagline"></p>
       <div class="hero-divider"><span class="hero-diamond">◆</span></div>
       <div class="hero-btns">
-        <!-- Phase 6.19: Collection button removed since Collection page is hidden.
-             Restore by uncommenting the line below.
-        <button class="btn btn-gold" onclick="showPage('collection')" id="heroViewBtn">View Collection</button>
-        -->
+        <!-- Phase 6.57: hero button links to the public e-book catalog page (/catalog). -->
+        <a class="btn btn-gold" id="heroViewBtn" href="/catalog" style="text-decoration:none">View Collection</a>
         <button class="btn btn-outline" onclick="goToOrder()" id="heroOrderBtn">Place Order</button>
       </div>
     </div>
@@ -4473,10 +4469,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
         <p class="section-body" style="margin-top:20px">With life comes change, and in 2008, I launched my own independent company, Gläserne Leidenschaft. Both Ivonne and I worked for Christborn for a while, but lost track of each other after she left to pursue other interests. As fate would have it, our paths crossed again in 2013 when Ivonne was working as Sales Assistant at a local boutique. She began painting for me in 2017, and together we have built this company into one known for its exclusive, exquisitely crafted ornaments.</p>
         <p class="section-body" style="margin-top:20px">Our ornaments are all imagined, hand-blown, and hand-painted by just the two of us here in our studio. For this reason, we're only able to produce them in very small quantities. But we believe this is what makes them so special — each piece a treasure to be cherished. Our creativity knows no bounds, and we hope to continue to bring our ornaments into your home for many years to come.</p>
         <p class="section-body" style="margin-top:20px">We hope you love this new collection and that this year's ornaments will bring a smile to your face and some extra holiday magic to your home this Christmas. Thank you for your interest in our passion and for being part of our Gläserne family. Here's to an unforgettably beautiful Christmas tree for years to come.</p>
-        <!-- Phase 6.19: View Collection CTA removed since Collection page is hidden.
-             Restore by uncommenting the line below.
-        <button class="btn btn-outline" style="margin-top:32px" onclick="showPage('collection')" data-t="btn_view_collection"></button>
-        -->
+        <!-- Phase 6.57: About CTA links to the public e-book catalog page (/catalog). -->
+        <a class="btn btn-outline" style="margin-top:32px;text-decoration:none" href="/catalog" data-t="btn_view_collection"></a>
         <button class="btn btn-gold" style="margin-top:32px" onclick="goToOrder()">Place Order</button>
       </div>
       <div class="about-image-column">

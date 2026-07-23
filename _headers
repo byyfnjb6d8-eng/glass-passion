@@ -17,3 +17,11 @@
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
+
+# Phase 6.57: public e-book catalog — same revalidation rule so a deploy
+# after a product change is picked up immediately.
+/catalog
+  Cache-Control: public, max-age=0, must-revalidate
+
+/catalog.html
+  Cache-Control: public, max-age=0, must-revalidate
