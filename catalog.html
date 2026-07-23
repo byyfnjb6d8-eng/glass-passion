@@ -48,15 +48,13 @@
     src:url('/fonts/dm-mono-v16-latin-regular.woff2') format('woff2'); }
 </style>
 <script>
-/* Set the theme before first paint so dark-preferring visitors get no cream
-   flash. The main script below reads this attribute as its initial state. */
+/* Set the theme before first paint so returning dark-mode visitors get no
+   cream flash. Default is LIGHT (the catalog's signature look) — dark is
+   opt-in via the toggle. The main script reads this attribute as its state. */
 (function () {
   var t = null;
   try { t = localStorage.getItem('gl_theme'); } catch (e) {}
-  if (t !== 'dark' && t !== 'light') {
-    t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
 })();
 </script>
 <style>
@@ -1448,17 +1446,8 @@ function toggleTheme() {
   try { localStorage.setItem('gl_theme', theme); } catch (e) {}
   applyTheme();
 }
-// Follow live system changes only while the visitor hasn't chosen explicitly.
-var themeMq = window.matchMedia('(prefers-color-scheme: dark)');
-function onSystemTheme(e) {
-  var stored = null;
-  try { stored = localStorage.getItem('gl_theme'); } catch (err) {}
-  if (stored === 'dark' || stored === 'light') return;
-  theme = e.matches ? 'dark' : 'light';
-  applyTheme();
-}
-if (themeMq.addEventListener) themeMq.addEventListener('change', onSystemTheme);
-else if (themeMq.addListener) themeMq.addListener(onSystemTheme);
+// Light is always the default — dark mode is a deliberate visitor choice
+// (persisted in localStorage), never inferred from the system setting.
 
 // ════════════════════════════════════════════
 // LANGUAGE
