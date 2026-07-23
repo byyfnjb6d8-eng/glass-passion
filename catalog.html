@@ -270,6 +270,10 @@ a { color: inherit; }
 }
 .sheet.turning { will-change: transform; }
 .sheet.turned { transform: rotateY(-180deg); }
+/* Memory guard: each 3D face costs a GPU layer on iOS Safari, and dozens of
+   large layers crash the renderer ("A problem repeatedly occurred"). Sheets
+   far from the current spread are fully buried in a stack anyway — cull them. */
+.sheet.far { visibility: hidden; }
 .face {
   position: absolute; inset: 0;
   overflow: hidden;
@@ -485,14 +489,17 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
   text-transform: uppercase; color: var(--cream-dim);
 }
 .spec-value { font-size: clamp(13px, 1.6vw, 16px); font-weight: 400; }
+/* Never truncated: the plate (photo) above flexes smaller to make room.
+   Long descriptions (.long, toggled per language in applyLang) step the
+   font down so the photo keeps its presence. */
 .orn-desc {
   font-style: italic; font-size: clamp(11.5px, 1.5vw, 14px); line-height: 1.5;
   color: var(--cream);
   padding: 2px 0 2px 12px;
   border-left: 2px solid var(--gold);
-  align-self: center; max-width: 46ch;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  align-self: center; max-width: 48ch;
 }
+.orn-desc.long { font-size: clamp(10.5px, 1.3vw, 12.5px); line-height: 1.45; max-width: 56ch; }
 .orn-foot {
   font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
   text-transform: uppercase; color: var(--cream-dim); opacity: 0.7; text-align: center;
@@ -1161,7 +1168,11 @@ function buildSheets() {
 function applyZ() {
   var S = sheets.length;
   sheets.forEach(function (sh, s) {
-    if (sh.classList.contains('turning')) { sh.style.zIndex = String(2 * S + 10); return; }
+    var turning = sh.classList.contains('turning');
+    // Compositor culling (see .sheet.far): only the few sheets around the
+    // current position exist as layers; buried ones are hidden entirely.
+    sh.classList.toggle('far', !turning && Math.abs(s - curT) > 3);
+    if (turning) { sh.style.zIndex = String(2 * S + 10); return; }
     sh.style.zIndex = sh.classList.contains('turned') ? String(s + 1) : String(S - s + 1);
   });
 }
@@ -1278,18 +1289,28 @@ function updateChrome() {
   hydrateWindow(p);
 }
 
-// Manual image hydration: real src only for pages near the current one.
-// (loading="lazy" is unreliable inside 3D-transformed stacks.)
+// Manual image hydration: real src only for pages near the current one
+// (loading="lazy" is unreliable inside 3D-transformed stacks) — and
+// DEhydration for pages far behind/ahead, so decoded photos don't pile up
+// until iOS Safari kills the page. Revisits refetch from browser cache.
 function hydrateWindow(p) {
   var from = Math.max(0, p - 2), to = Math.min(PAGES.length - 1, p + 4);
-  for (var i = from; i <= to; i++) {
-    PAGES[i].el.querySelectorAll('img[data-src]').forEach(function (im) {
-      im.addEventListener('load', function () { im.classList.add('ld'); });
-      im.src = im.dataset.src;
-      im.removeAttribute('data-src');
-      if (im.complete) im.classList.add('ld');
-    });
-  }
+  PAGES.forEach(function (pg, i) {
+    if (i >= from && i <= to) {
+      pg.el.querySelectorAll('img[data-src]').forEach(function (im) {
+        if (im.getAttribute('src')) return;
+        im.onload = function () { im.classList.add('ld'); };
+        im.src = im.dataset.src;
+        if (im.complete) im.classList.add('ld');
+      });
+    } else if (i < p - 8 || i > p + 10) {
+      pg.el.querySelectorAll('img[data-src]').forEach(function (im) {
+        if (!im.getAttribute('src')) return;
+        im.classList.remove('ld');
+        im.removeAttribute('src');
+      });
+    }
+  });
 }
 
 // ════════════════════════════════════════════
@@ -1456,6 +1477,11 @@ function applyLang() {
   });
   document.querySelectorAll('[data-bi]').forEach(function (el) {
     el.textContent = splitByLang(el.dataset.bi, lang);
+  });
+  // Long descriptions get a smaller size — re-evaluated per language,
+  // since the German half often runs longer than the English.
+  document.querySelectorAll('.orn-desc').forEach(function (el) {
+    el.classList.toggle('long', el.textContent.length > 220);
   });
   document.querySelectorAll('.plate').forEach(function (plate) {
     var dots = plate.querySelectorAll('.plate-dot');
