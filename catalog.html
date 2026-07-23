@@ -1579,21 +1579,6 @@ function imgToJpeg(im, maxPx) {
   catch (e) { return null; }
 }
 
-// Top-anchored cover-crop JPEG for the About photos (mirrors object-fit:
-// cover + object-position: top on screen)
-function imgToJpegCover(im, aspect, maxPx) {
-  var sw = im.naturalWidth, sh = Math.min(im.naturalHeight, sw / aspect);
-  if (sh === im.naturalHeight) sw = sh * aspect;
-  var sc = Math.min(1, maxPx / Math.max(sw, sh));
-  var w = Math.round(sw * sc), h = Math.round(sh * sc);
-  var c = _canvas(); c.width = w; c.height = h;
-  var ctx = c.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(im, (im.naturalWidth - sw) / 2, 0, sw, sh, 0, 0, w, h);
-  try { return { data: c.toDataURL('image/jpeg', 0.82), w: w, h: h }; }
-  catch (e) { return null; }
-}
-
 // PNG with alpha kept (the stag logo on dark boards)
 function imgToPng(im, maxPx) {
   var sc = Math.min(1, maxPx / Math.max(im.naturalWidth, im.naturalHeight));
@@ -1784,45 +1769,97 @@ function pdfIntroPage(doc) {
   doc.text(lines, 105, y, { align: 'center', lineHeightFactor: 1.5 });
 }
 
-// The whole About story as ONE continuous flow (heading, then all seven
-// paragraphs breaking to a fresh page only when they run out of room),
-// followed by the photos — unlike the e-book, which interleaves them.
-function pdfAboutFlow(doc) {
+// The About story as a magazine spread: the four studio photos sit INSIDE
+// the text pages (alternating right/left, full aspect — never cropped,
+// never standalone) and the story text flows around them via a small
+// line-by-line layout routine. Fits two pages.
+function pdfAboutFlow(doc, jpegs) {
   doc.addPage();
-  var y = 40;
+  var y = 26;
   doc.setFont('DMMono', 'normal'); doc.setFontSize(8); setColor(doc, PC.goldInk);
   doc.setCharSpace(1);
   doc.text(t('about_eyebrow').toUpperCase(), 105, y, { align: 'center' });
   doc.setCharSpace(0);
-  y += 11;
+  y += 10;
   doc.setFont('Cinzel', 'normal'); doc.setFontSize(15); setColor(doc, PC.ink);
   doc.text(t('about_heading'), 105, y, { align: 'center' });
-  y += 8;
+  y += 7;
   pdfDivider(doc, y, PC.goldInk);
-  y += 13;
+
+  var LEFT = 25, WIDTH = 160, LH = 5.7, GAP = 4.5, BOTTOM = 283, PAD = 6;
+
+  // Image placements per page: width fixed, height from the photo's own
+  // aspect ratio (contain — nothing cropped).
+  function place(j, x, w, top) { return { j: j, x: x, y: top, w: w, h: w * j.h / j.w }; }
+  // Three photos woven into page 1 (right / left / right), the fourth on
+  // page 2 beside the closing paragraphs — none ever standalone.
+  var p1 = [], p2 = [];
+  if (jpegs[0]) p1.push({ r: place(jpegs[0], 127, 56, 50), side: 'right' });
+  if (jpegs[1]) p1.push({ r: place(jpegs[1], 25, 56, (p1[0] ? p1[0].r.y + p1[0].r.h : 42) + 16), side: 'left' });
+  if (jpegs[2]) p1.push({ r: place(jpegs[2], 139, 46, (p1[1] ? p1[1].r.y + p1[1].r.h : 158) + 12), side: 'right' });
+  if (jpegs[3]) p2.push({ r: place(jpegs[3], 25, 54, 26), side: 'left' });
+
+  function drawImgs(list) {
+    list.forEach(function (f) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(PC.line[0], PC.line[1], PC.line[2]);
+      doc.setLineWidth(0.3);
+      doc.rect(f.r.x - 2, f.r.y - 2, f.r.w + 4, f.r.h + 4, 'FD');
+      doc.addImage(f.r.j.data, 'JPEG', f.r.x, f.r.y, f.r.w, f.r.h);
+    });
+  }
+
   function bodyFont() {
     doc.setFont('Cormorant', 'normal'); doc.setFontSize(11.5); setColor(doc, PC.ink);
   }
-  bodyFont();
-  ['about_s1', 'about_s2', 'about_s3', 'about_s4', 'about_s5', 'about_s6', 'about_s7'].forEach(function (k) {
-    var lines = doc.splitTextToSize(t(k), 155);
-    var need = lines.length * 5.7 + 4.5;
-    if (y + need > 283) { doc.addPage(); y = 40; bodyFont(); }
-    doc.text(lines, 28, y, { lineHeightFactor: 1.4 });
-    y += need;
-  });
-  if (y > 286) { doc.addPage(); y = 40; }
-  doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.goldInk);
-  doc.text('— Dietbert & Ivonne Bätz', 182, y + 5, { align: 'right' });
-}
 
-function pdfPhotoPage(doc, jpegs) {
-  if (jpegs.length === 1) {
-    pdfPlate(doc, jpegs[0], 30, 35, 150, 225);
-  } else {
-    pdfPlate(doc, jpegs[0], 30, 25, 150, 122);
-    pdfPlate(doc, jpegs[1], 30, 152, 150, 122);
+  var pageNo = 1, excl = p1;
+  drawImgs(p1);
+  bodyFont();
+  y = 50;
+
+  function newPage() {
+    doc.addPage();
+    pageNo++;
+    excl = pageNo === 2 ? p2 : [];
+    if (pageNo === 2) drawImgs(p2);
+    bodyFont();
+    y = 30;
   }
+
+  // Text segment available at baseline yy, shrunk beside any image band
+  function segAt(yy) {
+    var x = LEFT, w = WIDTH;
+    excl.forEach(function (f) {
+      var top = f.r.y - 6, bot = f.r.y + f.r.h + 2;
+      if (yy > top && yy < bot + 4) {
+        if (f.side === 'right') w = (f.r.x - 2 - PAD) - LEFT;
+        else { x = f.r.x + f.r.w + 2 + PAD; w = WIDTH - (f.r.w + 4 + PAD); }
+      }
+    });
+    return { x: x, w: w };
+  }
+
+  ['about_s1', 'about_s2', 'about_s3', 'about_s4', 'about_s5', 'about_s6', 'about_s7'].forEach(function (k, pi) {
+    // Photos 3+4 live on page 2 — make sure text joins them there.
+    if (pageNo === 1 && pi === 5) newPage();
+    var words = t(k).split(/\s+/);
+    var i = 0;
+    while (i < words.length) {
+      if (y > BOTTOM) newPage();
+      var seg = segAt(y);
+      var line = words[i++];
+      while (i < words.length && doc.getTextWidth(line + ' ' + words[i]) <= seg.w) {
+        line += ' ' + words[i++];
+      }
+      doc.text(line, seg.x, y);
+      y += LH;
+    }
+    y += GAP;
+  });
+  if (y > 288) newPage();
+  doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.goldInk);
+  doc.text('— Dietbert & Ivonne Bätz', 185, y + 4, { align: 'right' });
 }
 
 function downloadPdf() {
@@ -1890,24 +1927,17 @@ function downloadPdf() {
         });
       });
 
-      // About Us: continuous story text, then the four photos on two pages
+      // About Us: two magazine-style pages — story text flowing around the
+      // four studio photos.
       chain = chain.then(function () {
-        pdfAboutFlow(doc);
-        var photoSets = [['about us 1.png', 'about us 2.png'], ['about us 3.png', 'about us 4.png']];
-        var pchain = Promise.resolve();
-        photoSets.forEach(function (set) {
-          pchain = pchain.then(function () {
-            return Promise.all(set.map(function (f) {
-              return fetchImg(imageUrl(f)).then(function (im) {
-                return im ? imgToJpegCover(im, 150 / 122, 1100) : null;
-              });
-            })).then(function (js) {
-              doc.addPage();
-              pdfPhotoPage(doc, js);
-            });
+        var files = ['about us 1.png', 'about us 2.png', 'about us 3.png', 'about us 4.png'];
+        return Promise.all(files.map(function (f) {
+          return fetchImg(imageUrl(f)).then(function (im) {
+            return im ? imgToJpeg(im, 900) : null;
           });
+        })).then(function (js) {
+          pdfAboutFlow(doc, js.filter(Boolean));
         });
-        return pchain;
       });
 
       return chain.then(function () {
