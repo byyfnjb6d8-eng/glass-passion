@@ -163,7 +163,11 @@ a { color: inherit; }
   font-family: 'Cinzel', serif;
   font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
   color: var(--cream); text-decoration: none; white-space: nowrap;
+  /* On narrow phones the brand yields to the tools and ellipsizes */
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
 }
+.topbar { gap: 10px; }
+.topbar-tools { flex: 0 0 auto; }
 .topbar-brand span { color: var(--gold-ink); }
 .lang-toggle { display: flex; gap: 2px; }
 .lang-btn {
@@ -174,6 +178,43 @@ a { color: inherit; }
   border: 1px solid transparent; border-radius: var(--r);
 }
 .lang-btn.active { color: var(--gold-ink); border-color: var(--line); }
+/* Phase 6.59: year picker (top-bar select + cover chips). Hidden until the
+   RPC reports more than one available year. */
+.year-sel {
+  display: none;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  color: var(--gold-ink); background: transparent;
+  border: 1px solid var(--line); border-radius: var(--r);
+  padding: 6px 4px; cursor: pointer;
+}
+.year-sel.on { display: block; }
+.cover-years { display: flex; flex-direction: column; align-items: center; gap: 9px; margin-top: clamp(4px, 1.2vh, 14px); }
+.cover-years-label {
+  font-family: 'DM Mono', monospace; font-size: clamp(8px, 1vw, 9.5px);
+  letter-spacing: 2px; text-transform: uppercase; color: rgba(201, 168, 76, 0.75);
+}
+.cover-years-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.year-chip {
+  font-family: 'DM Mono', monospace; font-size: clamp(10px, 1.2vw, 11.5px);
+  letter-spacing: 1px; padding: 7px 16px; border-radius: 2px;
+  text-decoration: none; border: 1px solid var(--gold-dim); color: var(--gold-lt);
+  transition: background 0.2s;
+}
+.year-chip:hover { background: rgba(201, 168, 76, 0.12); }
+/* Small phones: keep the brand + all five tools on one row */
+@media (max-width: 430px) {
+  .topbar { padding: 0 10px; }
+  .topbar-brand { font-size: 11px; letter-spacing: 1.5px; }
+  .topbar-tools { gap: 4px; }
+  .lang-btn { padding: 6px 6px; }
+  .pdf-btn { padding: 6px 6px; letter-spacing: 1px; }
+  .theme-btn { padding: 5px 6px; }
+  .year-sel { -webkit-appearance: none; appearance: none; padding: 6px 5px; font-size: 9.5px; }
+}
+@media (max-width: 360px) {
+  .topbar-brand { font-size: 10px; letter-spacing: 1px; }
+  .topbar-tools { gap: 3px; }
+}
 
 /* ── STAGE ── */
 .stage {
@@ -706,6 +747,7 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 <header class="topbar">
   <a class="topbar-brand" href="/">Gläserne <span>Leidenschaft</span></a>
   <div class="topbar-tools">
+    <select class="year-sel" id="yearSel" onchange="gotoSeason(this.value)" aria-label="Collection year"></select>
     <button class="pdf-btn" id="pdfBtn" onclick="downloadPdf()" aria-label="Download as PDF">PDF</button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Switch to dark mode">☾</button>
     <div class="lang-toggle" role="group" aria-label="Language">
@@ -720,7 +762,7 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
   <div class="pre-book" id="preBook">
     <div class="pre-cover" aria-hidden="true">
       <img src="/img/logo.png" alt="">
-      <div class="pc-title" data-t="cover_title">The 2026 Collection</div>
+      <div class="pc-title" data-tpl="cover_title">The 2026 Collection</div>
       <div class="pc-sub">✦ Gläserne Leidenschaft ✦</div>
     </div>
     <div class="pre-status" id="preStatus" data-t="loading">Opening the collection…</div>
@@ -801,8 +843,10 @@ var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
 // ════════════════════════════════════════════
 var T = {
   en: {
-    doc_title: 'The 2026 Collection — Gläserne Leidenschaft',
-    cover_title: 'The 2026 Collection',
+    doc_title: 'The {y} Collection — Gläserne Leidenschaft',
+    cover_title: 'The {y} Collection',
+    year_pick_label: 'View another year',
+    year_sel_aria: 'Collection year',
     cover_sub: 'Hand-blown glass ornaments from Lauscha',
     est_line: '✦ Est. 2008 · Germany ✦',
     intro_eyebrow: 'Lauscha · Germany',
@@ -821,7 +865,7 @@ var T = {
     colophon_quote: '“Handcrafted once a year. Treasured for a lifetime.”',
     back_heading: 'Thank You',
     back_contact: 'info@glaserneleidenschaft.com',
-    badge_new: 'New for 2026',
+    badge_new: 'New for {y}',
     badge_le: 'Limited Edition',
     badge_set: 'Set of {n}',
     spec_color: 'Color',
@@ -850,13 +894,15 @@ var T = {
     loading: 'Opening the collection…',
     prepared: 'The catalogue is being prepared — please check back soon.',
     retry: 'Try Again',
-    empty: 'The 2026 collection will be revealed soon.',
+    empty: 'The {y} collection will be revealed soon.',
     announce_page: 'Page {a} of {b}',
     counter_cover: 'Cover',
   },
   de: {
-    doc_title: 'Die Kollektion 2026 — Gläserne Leidenschaft',
-    cover_title: 'Die Kollektion 2026',
+    doc_title: 'Die Kollektion {y} — Gläserne Leidenschaft',
+    cover_title: 'Die Kollektion {y}',
+    year_pick_label: 'Einen anderen Jahrgang ansehen',
+    year_sel_aria: 'Jahrgang',
     cover_sub: 'Mundgeblasener Glasschmuck aus Lauscha',
     est_line: '✦ Est. 2008 · Germany ✦',
     intro_eyebrow: 'Lauscha · Deutschland',
@@ -875,7 +921,7 @@ var T = {
     colophon_quote: '„Einmal im Jahr von Hand gefertigt. Ein Leben lang geschätzt.“',
     back_heading: 'Vielen Dank',
     back_contact: 'info@glaserneleidenschaft.com',
-    badge_new: 'Neu für 2026',
+    badge_new: 'Neu für {y}',
     badge_le: 'Limitierte Auflage',
     badge_set: '{n}er-Set',
     spec_color: 'Farbe',
@@ -904,7 +950,7 @@ var T = {
     loading: 'Die Kollektion wird geöffnet …',
     prepared: 'Der Katalog wird derzeit vorbereitet — bitte schauen Sie bald wieder vorbei.',
     retry: 'Erneut versuchen',
-    empty: 'Die Kollektion 2026 wird in Kürze enthüllt.',
+    empty: 'Die Kollektion {y} wird in Kürze enthüllt.',
     announce_page: 'Seite {a} von {b}',
     counter_cover: 'Umschlag',
   }
@@ -951,6 +997,11 @@ function imageUrl(f) {
 // STATE
 // ════════════════════════════════════════════
 var PRODUCTS = [];
+// Phase 6.59: selected season + available years (from the RPC; the picker
+// stays hidden while only one year is available)
+var SEASON = '2026';
+var YEARS = ['2026'];
+var seasonParam = (location.search.match(/[?&]season=(\d{4})/) || [])[1] || null;
 var PAGES = [];        // [{ el, type:'cover'|'intro'|'orn'|'set'|'filler'|'back', product, folio, tocKey }]
 var sheets = [];       // current .sheet elements
 var curT = 0;          // number of turned sheets
@@ -987,15 +1038,39 @@ function makePage(cls) {
   return el;
 }
 
+// href that switches season (keeps demo mode; current year = clean URL)
+function seasonHref(y) {
+  var q = [];
+  if (isDemo()) q.push('demo=1');
+  if (y !== YEARS[0]) q.push('season=' + encodeURIComponent(y));
+  return location.pathname + (q.length ? '?' + q.join('&') : '');
+}
+function gotoSeason(y) {
+  if (y === SEASON) return;
+  location.href = seasonHref(y);
+}
+
 function buildCoverPage() {
   var el = makePage('pg-cover');
+  // "View another year" switcher: only the OTHER years, so the cover title
+  // (this edition's year) is never contradicted.
+  var others = YEARS.filter(function (y) { return y !== SEASON; });
+  var switcher = others.length
+    ? '<div class="cover-years">' +
+        '<div class="cover-years-label" data-t="year_pick_label"></div>' +
+        '<div class="cover-years-row">' + others.map(function (y) {
+          return '<a class="year-chip" href="' + esc(seasonHref(y)) + '">' + esc(y) + '</a>';
+        }).join('') + '</div>' +
+      '</div>'
+    : '';
   el.innerHTML =
     '<img class="cover-logo" src="/img/logo.png" alt="">' +
     '<div class="cover-est" data-t="est_line"></div>' +
     '<div class="cover-brand">Gläserne <em>Leidenschaft</em></div>' +
     '<div class="cover-divider"><span class="cover-diamond">◆</span></div>' +
-    '<div class="cover-title" data-t="cover_title"></div>' +
-    '<div class="cover-sub" data-t="cover_sub"></div>';
+    '<div class="cover-title" data-tpl="cover_title"></div>' +
+    '<div class="cover-sub" data-t="cover_sub"></div>' +
+    switcher;
   return { el: el, type: 'cover', tocKey: 'toc_cover' };
 }
 
@@ -1006,7 +1081,7 @@ function buildIntroPage(emptyCatalog) {
     '<div class="plain-heading" data-t="intro_heading"></div>' +
     '<div class="cover-divider"><span class="cover-diamond" style="color:var(--gold-ink)">◆</span></div>' +
     '<p class="plain-body" data-t="intro_body"></p>' +
-    (emptyCatalog ? '<p class="plain-quote" data-t="empty"></p>' : '') +
+    (emptyCatalog ? '<p class="plain-quote" data-tpl="empty"></p>' : '') +
     '<a class="plain-cta" href="/" data-t="intro_cta"></a>';
   return { el: el, type: 'intro', tocKey: 'toc_intro' };
 }
@@ -1074,7 +1149,7 @@ function buildBackCoverPage() {
 
 function badgesHtml(p) {
   var b = '';
-  if (p.is_new_for_season) b += '<span class="badge badge-new" data-t="badge_new"></span>';
+  if (p.is_new_for_season) b += '<span class="badge badge-new" data-tpl="badge_new"></span>';
   if (p.is_limited_edition || p.le) {
     b += '<span class="badge badge-le">' + (p.le ? esc(p.le) : '<span data-t="badge_le"></span>') + '</span>';
   }
@@ -1664,7 +1739,7 @@ function pdfPlate(doc, jpeg, x, y, w, h) {
 
 function pdfBadges(doc, p, y) {
   var parts = [];
-  if (p.is_new_for_season) parts.push({ txt: t('badge_new').toUpperCase(), style: 'outline' });
+  if (p.is_new_for_season) parts.push({ txt: tpl('badge_new', { y: SEASON }).toUpperCase(), style: 'outline' });
   if (p.is_limited_edition || p.le) parts.push({ txt: (p.le || t('badge_le')).toUpperCase(), style: 'fill' });
   if (p.is_set && p.set_member_count) parts.push({ txt: tpl('badge_set', { n: p.set_member_count }).toUpperCase(), style: 'outline' });
   if (!parts.length) return;
@@ -1784,7 +1859,7 @@ function pdfCoverPage(doc, logo, isBack) {
   pdfDivider(doc, 141, PC.goldLt);
   doc.setFont('Cinzel', 'normal'); doc.setFontSize(14); setColor(doc, PC.goldLt);
   doc.setCharSpace(1.5);
-  doc.text(t('cover_title').toUpperCase(), 105, 153, { align: 'center' });
+  doc.text(tpl('cover_title', { y: SEASON }).toUpperCase(), 105, 153, { align: 'center' });
   doc.setCharSpace(0);
   doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.boardSub);
   doc.text(t('cover_sub'), 105, 163, { align: 'center' });
@@ -1982,8 +2057,8 @@ function downloadPdf() {
         doc.addPage();
         pdfCoverPage(doc, logo, true);
         var fname = lang === 'de'
-          ? 'Glaeserne-Leidenschaft-Kollektion-2026.pdf'
-          : 'Glass-Passion-2026-Collection.pdf';
+          ? 'Glaeserne-Leidenschaft-Kollektion-' + SEASON + '.pdf'
+          : 'Glass-Passion-' + SEASON + '-Collection.pdf';
         doc.save(fname);
       });
     });
@@ -2095,7 +2170,7 @@ function toggleTheme() {
 // ════════════════════════════════════════════
 function applyLang() {
   document.documentElement.lang = lang;
-  document.title = t('doc_title');
+  document.title = tpl('doc_title', { y: SEASON });
   document.getElementById('langEn').classList.toggle('active', lang === 'en');
   document.getElementById('langDe').classList.toggle('active', lang === 'de');
   document.querySelectorAll('[data-t]').forEach(function (el) {
@@ -2103,8 +2178,9 @@ function applyLang() {
     if (v) el.textContent = v;
   });
   document.querySelectorAll('[data-tpl]').forEach(function (el) {
-    el.textContent = tpl(el.dataset.tpl, { n: el.dataset.tplN });
+    el.textContent = tpl(el.dataset.tpl, { n: el.dataset.tplN, y: SEASON });
   });
+  document.getElementById('yearSel').setAttribute('aria-label', t('year_sel_aria'));
   document.querySelectorAll('[data-bi]').forEach(function (el) {
     el.textContent = splitByLang(el.dataset.bi, lang);
   });
@@ -2160,6 +2236,17 @@ function buildBook(products) {
   buildToc();
   built = true;
 
+  // Year dropdown in the top bar (hidden while only one year exists)
+  var sel = document.getElementById('yearSel');
+  if (YEARS.length > 1) {
+    sel.innerHTML = YEARS.map(function (y) {
+      return '<option value="' + esc(y) + '"' + (y === SEASON ? ' selected' : '') + '>' + esc(y) + '</option>';
+    }).join('');
+    sel.classList.add('on');
+  } else {
+    sel.classList.remove('on');
+  }
+
   document.getElementById('preBook').style.display = 'none';
   scene.classList.add('ready');
   document.getElementById('bookbar').classList.add('ready');
@@ -2172,8 +2259,8 @@ function buildBook(products) {
 }
 
 // Local flip-engine test data: /catalog.html?demo=1 — localhost only,
-// inert in production.
-function demoProducts() {
+// inert in production. Pass a season to emulate a prior-year edition.
+function demoProducts(season) {
   var d = [
     { id:'D1', name:'Glitz Happens', style:'Kugel', color:'Gold / Gold', height:'9 cm', imgs:['about us 1.png','about us 2.png'], description:'A shimmering sphere of golden light. / Eine schimmernde Kugel aus goldenem Licht.', is_new_for_season:true },
     { id:'D2', name:'Prism Break', style:'Zapfen', color:'Ice Blue / Eisblau', height:'12 cm', img:'about us 3.png', description:'Light bends. Rules break. / Das Licht bricht sich seine Bahn.' },
@@ -2187,6 +2274,14 @@ function demoProducts() {
     { id:'D7', name:'BLINGO STAR', style:'Stern', color:'Gold / Gold', height:'10 cm', img:'about us 2.png', is_new_for_season:true },
     { id:'D8', name:'Gettin’ Dizzy with It', style:'Kugel', color:'Emerald / Smaragdgrün', height:'9 cm', img:'about us 1.png' }
   ];
+  if (season && season !== '2026') {
+    d = d.slice(0, 4).map(function (p) {
+      var c = {}; for (var k in p) c[k] = p[k];
+      c.name = p.name + ' (' + season + ')';
+      c.is_new_for_season = false;
+      return c;
+    });
+  }
   return d;
 }
 
@@ -2202,7 +2297,12 @@ function loadCatalog() {
   status.classList.remove('static');
   document.getElementById('preRetry').style.display = 'none';
 
-  if (isDemo()) { buildBook(demoProducts()); return; }
+  if (isDemo()) {
+    YEARS = ['2026', '2025', '2024'];
+    SEASON = (seasonParam && YEARS.indexOf(seasonParam) !== -1) ? seasonParam : '2026';
+    buildBook(demoProducts(SEASON));
+    return;
+  }
 
   try {
     if (!sb) {
@@ -2211,8 +2311,15 @@ function loadCatalog() {
         auth: { persistSession: false, autoRefreshToken: false, storageKey: 'sb-catalog-noop' }
       });
     }
-    sb.rpc('get_public_catalog').then(function (res) {
+    // Only send the season argument when one was requested — a plain call
+    // stays compatible with the pre-6.59 zero-argument RPC.
+    var call = seasonParam
+      ? sb.rpc('get_public_catalog', { p_season: seasonParam })
+      : sb.rpc('get_public_catalog');
+    call.then(function (res) {
       if (res.error || !res.data || res.data.enabled !== true) { showPrepared(); return; }
+      SEASON = res.data.season || '2026';
+      YEARS = (res.data.years || ['2026']).map(String);
       buildBook(res.data.products || []);
     }, function () { showPrepared(); });
   } catch (e) {

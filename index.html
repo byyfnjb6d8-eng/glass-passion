@@ -5742,6 +5742,8 @@ let siteSettings = {
   enforceOrnamentLimits: false,
   showPrices: false,         // Phase 6.56k: master toggle — prices hidden until ready
   showPageNumbers: false,    // Phase 6.56k: master toggle — page column hidden until ready
+  publicCatalogEnabled: true,   // Phase 6.59: public /catalog e-book kill-switch
+  publicArchiveEnabled: false,  // Phase 6.59: prior years in /catalog (OFF until audited)
   maxQuantities: {},
   capCounts: {},   // Phase 6.24: per-set cap count overrides
   exclusiveGroups: [],   // Pick-one groups: [{id,name,products:[productId,...]}]
@@ -7236,6 +7238,16 @@ const T = {
     schedule_prelaunch_saving: "Saving…",
     schedule_prelaunch_failed: "Save failed:",
     // Phase 6.56k — independent price + page-number visibility toggles
+    schedule_pubcat_section: "Public Catalog (/catalog)",
+    schedule_pubcat_desc: "The public e-book catalog at glass-passion.com/catalog — no login needed. Turning it off shows visitors a 'catalogue is being prepared' notice instead.",
+    schedule_pubcat_currently_on: "Catalog public",
+    schedule_pubcat_show_btn: "Make catalog public",
+    schedule_pubcat_hide_btn: "Take catalog offline",
+    schedule_pubarchive_section: "Public Archive (Prior Years)",
+    schedule_pubarchive_desc: "Adds prior-year collections to the public catalog with a year picker. Keep OFF until the prior-year products are audited — visitors see only 2026 while this is off.",
+    schedule_pubarchive_currently_on: "Prior years public",
+    schedule_pubarchive_show_btn: "Show prior years",
+    schedule_pubarchive_hide_btn: "Hide prior years",
     schedule_prices_section: "Prices",
     schedule_prices_desc: "Show or hide product prices everywhere — catalog, Limited Edition Showcase, and lottery. Keep hidden until the 2026 prices are confirmed. Works independently of pre-launch mode.",
     schedule_prices_currently_on: "Prices visible",
@@ -8462,6 +8474,16 @@ admin_lottery: "Lottery",
     schedule_prelaunch_saving: "Wird gespeichert…",
     schedule_prelaunch_failed: "Speichern fehlgeschlagen:",
     // Phase 6.56k — unabhängige Sichtbarkeit von Preisen + Seitenzahlen
+    schedule_pubcat_section: "Öffentlicher Katalog (/catalog)",
+    schedule_pubcat_desc: "Der öffentliche E-Book-Katalog unter glass-passion.com/catalog — ohne Anmeldung. Beim Ausschalten sehen Besucher stattdessen den Hinweis „Der Katalog wird vorbereitet“.",
+    schedule_pubcat_currently_on: "Katalog öffentlich",
+    schedule_pubcat_show_btn: "Katalog veröffentlichen",
+    schedule_pubcat_hide_btn: "Katalog offline nehmen",
+    schedule_pubarchive_section: "Öffentliches Archiv (Vorjahre)",
+    schedule_pubarchive_desc: "Ergänzt den öffentlichen Katalog um Vorjahres-Kollektionen mit Jahrgangsauswahl. AUS lassen, bis die Vorjahresdaten geprüft sind — Besucher sehen solange nur 2026.",
+    schedule_pubarchive_currently_on: "Vorjahre öffentlich",
+    schedule_pubarchive_show_btn: "Vorjahre anzeigen",
+    schedule_pubarchive_hide_btn: "Vorjahre ausblenden",
     schedule_prices_section: "Preise",
     schedule_prices_desc: "Produktpreise überall ein- oder ausblenden — Katalog, SE-Vitrine und Verlosung. Ausgeblendet lassen, bis die Preise für 2026 feststehen. Unabhängig vom Vor-Start-Modus.",
     schedule_prices_currently_on: "Preise sichtbar",
@@ -9500,6 +9522,9 @@ async function loadSiteSettings() {
       // Phase 6.56k: independent display toggles (default hidden until data ready)
       showPrices: !!data.show_prices,
       showPageNumbers: !!data.show_page_numbers,
+      // Phase 6.59: public catalog + public archive (prior years) toggles
+      publicCatalogEnabled: data.public_catalog_enabled !== false,
+      publicArchiveEnabled: !!data.public_archive_enabled,
       // Phase 6.50b: global ornament cap (null = no cap)
       globalOrnamentCap: data.global_ornament_cap != null ? Number(data.global_ornament_cap) : null,
       adminTimezone: data.admin_timezone || 'America/New_York',
@@ -15838,6 +15863,33 @@ async function renderAdminSchedule() {
              <button class="btn btn-outline btn-sm" onclick="adminToggleDisplaySetting('show_page_numbers', false)" data-t="schedule_pages_hide_btn"></button>
            </div>`
         : `<button class="btn btn-outline btn-sm" style="color:var(--gold-ink);border-color:rgba(196,154,108,0.5)" onclick="adminToggleDisplaySetting('show_page_numbers', true)" data-t="schedule_pages_show_btn"></button>`
+      }
+    </div>
+
+    <!-- Phase 6.59: Public catalog (/catalog) master switch. -->
+    <div style="margin-bottom:24px;padding:16px;border:1px solid ${siteSettings.publicCatalogEnabled ? 'var(--gold)' : 'var(--line2)'};border-radius:var(--r);background:${siteSettings.publicCatalogEnabled ? 'rgba(196,154,108,0.06)' : 'transparent'}">
+      <h4 style="margin:0 0 10px;font-family:'Cinzel',serif;color:${siteSettings.publicCatalogEnabled ? 'var(--gold)' : 'var(--cream)'};font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-t="schedule_pubcat_section"></h4>
+      <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0 0 14px" data-t="schedule_pubcat_desc"></p>
+      ${siteSettings.publicCatalogEnabled
+        ? `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+             <span style="display:inline-block;padding:4px 10px;background:rgba(196,154,108,0.18);color:var(--gold-ink);border:1px solid rgba(196,154,108,0.5);border-radius:4px;font-size:11px;letter-spacing:1px;text-transform:uppercase" data-t="schedule_pubcat_currently_on"></span>
+             <button class="btn btn-outline btn-sm" onclick="adminToggleDisplaySetting('public_catalog_enabled', false)" data-t="schedule_pubcat_hide_btn"></button>
+           </div>`
+        : `<button class="btn btn-outline btn-sm" style="color:var(--gold-ink);border-color:rgba(196,154,108,0.5)" onclick="adminToggleDisplaySetting('public_catalog_enabled', true)" data-t="schedule_pubcat_show_btn"></button>`
+      }
+    </div>
+
+    <!-- Phase 6.59: Public archive — prior-year collections in /catalog.
+         Default OFF until the prior-year data audit is complete. -->
+    <div style="margin-bottom:24px;padding:16px;border:1px solid ${siteSettings.publicArchiveEnabled ? 'var(--gold)' : 'var(--line2)'};border-radius:var(--r);background:${siteSettings.publicArchiveEnabled ? 'rgba(196,154,108,0.06)' : 'transparent'}">
+      <h4 style="margin:0 0 10px;font-family:'Cinzel',serif;color:${siteSettings.publicArchiveEnabled ? 'var(--gold)' : 'var(--cream)'};font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-t="schedule_pubarchive_section"></h4>
+      <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0 0 14px" data-t="schedule_pubarchive_desc"></p>
+      ${siteSettings.publicArchiveEnabled
+        ? `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+             <span style="display:inline-block;padding:4px 10px;background:rgba(196,154,108,0.18);color:var(--gold-ink);border:1px solid rgba(196,154,108,0.5);border-radius:4px;font-size:11px;letter-spacing:1px;text-transform:uppercase" data-t="schedule_pubarchive_currently_on"></span>
+             <button class="btn btn-outline btn-sm" onclick="adminToggleDisplaySetting('public_archive_enabled', false)" data-t="schedule_pubarchive_hide_btn"></button>
+           </div>`
+        : `<button class="btn btn-outline btn-sm" style="color:var(--gold-ink);border-color:rgba(196,154,108,0.5)" onclick="adminToggleDisplaySetting('public_archive_enabled', true)" data-t="schedule_pubarchive_show_btn"></button>`
       }
     </div>
 
