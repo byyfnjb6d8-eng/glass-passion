@@ -802,6 +802,7 @@ var T = {
     search_none: 'No matches — try another word.',
     pdf: 'Download as PDF',
     pdf_wait: 'Preparing…',
+    pdf_err: 'PDF failed — try again',
     toc: 'Contents',
     toc_cover: 'Cover',
     toc_intro: 'Introduction',
@@ -855,6 +856,7 @@ var T = {
     search_none: 'Keine Treffer — versuchen Sie ein anderes Wort.',
     pdf: 'Als PDF herunterladen',
     pdf_wait: 'Einen Moment …',
+    pdf_err: 'PDF fehlgeschlagen — bitte erneut',
     toc: 'Inhalt',
     toc_cover: 'Umschlag',
     toc_intro: 'Einführung',
@@ -1497,46 +1499,430 @@ function buildPrintRoot() {
   return { root: root, waits: waits };
 }
 
-var printing = false;
+// ── True .pdf download via jsPDF (the house PDF library — index.html uses
+// it for order confirmations/invoices). Brand fonts are embedded from
+// /fonts/*.ttf (self-hosted, GDPR); photos are downscaled to JPEG on a
+// canvas so the file stays around 10 MB instead of 100+.
+var PDF_LIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+var pdfFontsCache = null;
+var pdfBusy = false;
+
+// Palette for the PDF (always the light look)
+var PC = {
+  ink: [26, 21, 16], dim: [58, 48, 38], goldInk: [128, 102, 38],
+  gold: [176, 141, 64], goldLt: [201, 168, 76], board: [42, 31, 21],
+  boardText: [233, 221, 192], boardSub: [219, 208, 180], line: [214, 207, 192]
+};
+
+function loadScript(src) {
+  return new Promise(function (res, rej) {
+    var s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function bufToB64(buf) {
+  var bytes = new Uint8Array(buf), bin = '', CH = 0x8000;
+  for (var i = 0; i < bytes.length; i += CH) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  }
+  return btoa(bin);
+}
+
+function loadPdfFonts(doc) {
+  var files = [
+    ['cinzel-500.ttf', 'Cinzel', 'normal'],
+    ['cormorant-400.ttf', 'Cormorant', 'normal'],
+    ['cormorant-italic.ttf', 'Cormorant', 'italic'],
+    ['dm-mono-400.ttf', 'DMMono', 'normal']
+  ];
+  var p = pdfFontsCache
+    ? Promise.resolve(pdfFontsCache)
+    : Promise.all(files.map(function (f) {
+        return fetch('/fonts/' + f[0]).then(function (r) {
+          if (!r.ok) throw new Error('font ' + f[0]);
+          return r.arrayBuffer();
+        }).then(function (buf) { return [f[0], f[1], f[2], bufToB64(buf)]; });
+      })).then(function (loaded) { pdfFontsCache = loaded; return loaded; });
+  return p.then(function (fonts) {
+    fonts.forEach(function (f) {
+      doc.addFileToVFS(f[0], f[3]);
+      doc.addFont(f[0], f[1], f[2]);
+    });
+  });
+}
+
+function fetchImg(url) {
+  return new Promise(function (res) {
+    var im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = function () { res(im); };
+    im.onerror = function () { res(null); };
+    im.src = url;
+  });
+}
+
+var _pdfCanvas = null;
+function _canvas() { return _pdfCanvas || (_pdfCanvas = document.createElement('canvas')); }
+
+// Downscaled JPEG on white (product shots are on white; JPEG has no alpha)
+function imgToJpeg(im, maxPx) {
+  var sc = Math.min(1, maxPx / Math.max(im.naturalWidth, im.naturalHeight));
+  var w = Math.max(1, Math.round(im.naturalWidth * sc));
+  var h = Math.max(1, Math.round(im.naturalHeight * sc));
+  var c = _canvas(); c.width = w; c.height = h;
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(im, 0, 0, w, h);
+  try { return { data: c.toDataURL('image/jpeg', 0.82), w: w, h: h }; }
+  catch (e) { return null; }
+}
+
+// Top-anchored cover-crop JPEG for the About photos (mirrors object-fit:
+// cover + object-position: top on screen)
+function imgToJpegCover(im, aspect, maxPx) {
+  var sw = im.naturalWidth, sh = Math.min(im.naturalHeight, sw / aspect);
+  if (sh === im.naturalHeight) sw = sh * aspect;
+  var sc = Math.min(1, maxPx / Math.max(sw, sh));
+  var w = Math.round(sw * sc), h = Math.round(sh * sc);
+  var c = _canvas(); c.width = w; c.height = h;
+  var ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(im, (im.naturalWidth - sw) / 2, 0, sw, sh, 0, 0, w, h);
+  try { return { data: c.toDataURL('image/jpeg', 0.82), w: w, h: h }; }
+  catch (e) { return null; }
+}
+
+// PNG with alpha kept (the stag logo on dark boards)
+function imgToPng(im, maxPx) {
+  var sc = Math.min(1, maxPx / Math.max(im.naturalWidth, im.naturalHeight));
+  var w = Math.max(1, Math.round(im.naturalWidth * sc));
+  var h = Math.max(1, Math.round(im.naturalHeight * sc));
+  var c = _canvas(); c.width = w; c.height = h;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+  ctx.drawImage(im, 0, 0, w, h);
+  try { return { data: c.toDataURL('image/png'), w: w, h: h }; }
+  catch (e) { return null; }
+}
+
+function setColor(doc, rgb) { doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
+
+function pdfDiamond(doc, x, y, r, rgb) {
+  doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+  doc.triangle(x - r, y, x, y - r, x + r, y, 'F');
+  doc.triangle(x - r, y, x, y + r, x + r, y, 'F');
+}
+
+function pdfDivider(doc, y, rgb) {
+  doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
+  doc.setLineWidth(0.25);
+  doc.line(83, y, 100, y);
+  doc.line(110, y, 127, y);
+  pdfDiamond(doc, 105, y, 1.3, rgb);
+}
+
+// Draw an image fitted (contain) inside a white framed box
+function pdfPlate(doc, jpeg, x, y, w, h) {
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(PC.line[0], PC.line[1], PC.line[2]);
+  doc.setLineWidth(0.3);
+  doc.rect(x, y, w, h, 'FD');
+  if (!jpeg) {
+    pdfDiamond(doc, x + w / 2, y + h / 2, 3, PC.gold);
+    return;
+  }
+  var pad = 5;
+  var sc = Math.min((w - 2 * pad) / jpeg.w, (h - 2 * pad) / jpeg.h);
+  var iw = jpeg.w * sc, ih = jpeg.h * sc;
+  doc.addImage(jpeg.data, 'JPEG', x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+}
+
+function pdfBadges(doc, p, y) {
+  var parts = [];
+  if (p.is_new_for_season) parts.push({ txt: t('badge_new').toUpperCase(), style: 'outline' });
+  if (p.is_limited_edition || p.le) parts.push({ txt: (p.le || t('badge_le')).toUpperCase(), style: 'fill' });
+  if (p.is_set && p.set_member_count) parts.push({ txt: tpl('badge_set', { n: p.set_member_count }).toUpperCase(), style: 'outline' });
+  if (!parts.length) return;
+  doc.setFont('DMMono', 'normal'); doc.setFontSize(6.5);
+  var x = 25;
+  parts.forEach(function (b) {
+    var tw = doc.getTextWidth(b.txt);
+    if (b.style === 'fill') {
+      doc.setFillColor(PC.gold[0], PC.gold[1], PC.gold[2]);
+      doc.roundedRect(x, y - 3.4, tw + 4, 5, 0.5, 0.5, 'F');
+      setColor(doc, [255, 255, 255]);
+    } else {
+      doc.setDrawColor(PC.goldInk[0], PC.goldInk[1], PC.goldInk[2]);
+      doc.setLineWidth(0.25);
+      doc.roundedRect(x, y - 3.4, tw + 4, 5, 0.5, 0.5, 'D');
+      setColor(doc, PC.goldInk);
+    }
+    doc.text(b.txt, x + 2, y);
+    x += tw + 8;
+  });
+}
+
+function pdfSpecs(doc, p, y) {
+  var segs = [];
+  if (p.color) segs.push([t('spec_color').toUpperCase(), splitByLang(p.color, lang)]);
+  if (p.height) segs.push([t('spec_height').toUpperCase(), splitByLang(p.height, lang)]);
+  if (!segs.length) return y;
+  var widths = [], total = 0;
+  segs.forEach(function (s, i) {
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(6.5);
+    var lw = doc.getTextWidth(s[0]) + 2;
+    doc.setFont('Cormorant', 'normal'); doc.setFontSize(12);
+    var vw = doc.getTextWidth(s[1]);
+    widths.push([lw, vw]);
+    total += lw + vw + (i ? 9 : 0);
+  });
+  var x = 105 - total / 2;
+  segs.forEach(function (s, i) {
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(6.5); setColor(doc, PC.dim);
+    doc.text(s[0], x, y);
+    x += widths[i][0];
+    doc.setFont('Cormorant', 'normal'); doc.setFontSize(12); setColor(doc, PC.ink);
+    doc.text(s[1], x, y);
+    x += widths[i][1] + 9;
+  });
+  return y + 9;
+}
+
+function pdfOrnamentPage(doc, pg, jpeg, memberJpegs) {
+  var p = pg.product;
+  pdfBadges(doc, p, 20);
+
+  if (memberJpegs) {
+    // Set page: 2×2 member grid in the plate area
+    var gx = 25, gy = 26, cw = 78, chh = 71, gap = 4;
+    memberJpegs.forEach(function (m, i) {
+      var cx = gx + (i % 2) * (cw + gap), cy = gy + Math.floor(i / 2) * (chh + gap);
+      pdfPlate(doc, m.jpeg, cx, cy, cw, chh);
+      doc.setFont('DMMono', 'normal'); doc.setFontSize(5.5); setColor(doc, PC.dim);
+      doc.text(m.name.toUpperCase(), cx + cw / 2, cy + chh - 2.5, { align: 'center' });
+    });
+  } else {
+    pdfPlate(doc, jpeg, 25, 26, 160, 148);
+  }
+
+  var y = 184;
+  var eyebrow = p.collection ? splitByLang(p.collection, lang)
+              : (p.style ? tpl('style_no', { n: p.style }) : '');
+  if (eyebrow) {
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(7.5); setColor(doc, PC.goldInk);
+    doc.setCharSpace(0.8);
+    doc.text(eyebrow.toUpperCase(), 105, y, { align: 'center' });
+    doc.setCharSpace(0);
+  }
+  y += 9;
+  doc.setFont('Cinzel', 'normal'); doc.setFontSize(16); setColor(doc, PC.ink);
+  var nameLines = doc.splitTextToSize(p.name, 165);
+  doc.text(nameLines, 105, y, { align: 'center' });
+  y += nameLines.length * 7.5 + 3;
+  y = pdfSpecs(doc, p, y);
+  var desc = splitByLang(p.description, lang);
+  if (desc) {
+    doc.setFont('Cormorant', 'italic'); doc.setFontSize(11); setColor(doc, PC.ink);
+    var dl = doc.splitTextToSize(desc, 145);
+    doc.text(dl, 105, y + 1, { align: 'center' });
+  }
+  if (pg.folio) {
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(7.5); setColor(doc, PC.dim);
+    doc.text(String(pg.folio), 190, 288, { align: 'right' });
+  }
+}
+
+function pdfCoverPage(doc, logo, isBack) {
+  doc.setFillColor(PC.board[0], PC.board[1], PC.board[2]);
+  doc.rect(0, 0, 210, 297, 'F');
+  if (logo) {
+    var lw = isBack ? 26 : 42, lh = lw * logo.h / logo.w;
+    doc.addImage(logo.data, 'PNG', 105 - lw / 2, isBack ? 78 : 62, lw, lh);
+  }
+  if (isBack) {
+    doc.setFont('Cinzel', 'normal'); doc.setFontSize(17); setColor(doc, PC.goldLt);
+    doc.setCharSpace(1);
+    doc.text(t('back_heading').toUpperCase(), 105, 128, { align: 'center' });
+    doc.setCharSpace(0);
+    pdfDivider(doc, 137, PC.goldLt);
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(7.5); setColor(doc, PC.boardSub);
+    doc.text('INFO@GLASERNELEIDENSCHAFT.COM', 105, 150, { align: 'center' });
+    doc.text('EST. 2008 · GERMANY', 105, 157, { align: 'center' });
+    return;
+  }
+  doc.setFont('DMMono', 'normal'); doc.setFontSize(7.5); setColor(doc, PC.goldLt);
+  doc.text('EST. 2008 · GERMANY', 105, 116, { align: 'center' });
+  doc.setFont('Cinzel', 'normal'); doc.setFontSize(21); setColor(doc, PC.boardText);
+  doc.setCharSpace(1.2);
+  doc.text('GLÄSERNE LEIDENSCHAFT', 105, 132, { align: 'center' });
+  doc.setCharSpace(0);
+  pdfDivider(doc, 141, PC.goldLt);
+  doc.setFont('Cinzel', 'normal'); doc.setFontSize(14); setColor(doc, PC.goldLt);
+  doc.setCharSpace(1.5);
+  doc.text(t('cover_title').toUpperCase(), 105, 153, { align: 'center' });
+  doc.setCharSpace(0);
+  doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.boardSub);
+  doc.text(t('cover_sub'), 105, 163, { align: 'center' });
+}
+
+function pdfIntroPage(doc) {
+  var y = 70;
+  doc.setFont('DMMono', 'normal'); doc.setFontSize(8); setColor(doc, PC.goldInk);
+  doc.setCharSpace(1);
+  doc.text(t('intro_eyebrow').toUpperCase(), 105, y, { align: 'center' });
+  doc.setCharSpace(0);
+  y += 12;
+  doc.setFont('Cinzel', 'normal'); doc.setFontSize(16); setColor(doc, PC.ink);
+  doc.text(t('intro_heading'), 105, y, { align: 'center' });
+  y += 9;
+  pdfDivider(doc, y, PC.goldInk);
+  y += 15;
+  doc.setFont('Cormorant', 'normal'); doc.setFontSize(12.5); setColor(doc, PC.ink);
+  var lines = doc.splitTextToSize(t('intro_body'), 140);
+  doc.text(lines, 105, y, { align: 'center', lineHeightFactor: 1.5 });
+}
+
+function pdfAboutTextPage(doc, keys, withHead, withSig) {
+  var y = 40;
+  if (withHead) {
+    doc.setFont('DMMono', 'normal'); doc.setFontSize(8); setColor(doc, PC.goldInk);
+    doc.setCharSpace(1);
+    doc.text(t('about_eyebrow').toUpperCase(), 105, y, { align: 'center' });
+    doc.setCharSpace(0);
+    y += 11;
+    doc.setFont('Cinzel', 'normal'); doc.setFontSize(15); setColor(doc, PC.ink);
+    doc.text(t('about_heading'), 105, y, { align: 'center' });
+    y += 8;
+    pdfDivider(doc, y, PC.goldInk);
+    y += 13;
+  }
+  doc.setFont('Cormorant', 'normal'); doc.setFontSize(11.5); setColor(doc, PC.ink);
+  keys.forEach(function (k) {
+    var lines = doc.splitTextToSize(t(k), 155);
+    doc.text(lines, 28, y, { lineHeightFactor: 1.45 });
+    y += lines.length * 5.9 + 6;
+  });
+  if (withSig) {
+    doc.setFont('Cormorant', 'italic'); doc.setFontSize(12); setColor(doc, PC.goldInk);
+    doc.text('— Dietbert & Ivonne Bätz', 182, y + 4, { align: 'right' });
+  }
+}
+
+function pdfPhotoPage(doc, jpegs) {
+  if (jpegs.length === 1) {
+    pdfPlate(doc, jpegs[0], 30, 35, 150, 225);
+  } else {
+    pdfPlate(doc, jpegs[0], 30, 25, 150, 122);
+    pdfPlate(doc, jpegs[1], 30, 152, 150, 122);
+  }
+}
+
 function downloadPdf() {
-  if (!built || printing) return;
-  printing = true;
+  if (!built || pdfBusy) return;
+  pdfBusy = true;
   var btn = document.getElementById('pdfBtn');
   btn.disabled = true;
   btn.textContent = t('pdf_wait');
 
-  var pr = buildPrintRoot();
-  var prevTheme = theme;
+  var work = (window.jspdf ? Promise.resolve() : loadScript(PDF_LIB_URL)).then(function () {
+    var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    return loadPdfFonts(doc).then(function () {
+      return fetchImg('/img/logo.png');
+    }).then(function (logoIm) {
+      var logo = logoIm ? imgToPng(logoIm, 400) : null;
 
-  function cleanup() {
-    if (!pr.root.isConnected) return;
-    pr.root.remove();
-    document.documentElement.setAttribute('data-theme', prevTheme);
-    btn.disabled = false;
-    btn.textContent = 'PDF';
-    printing = false;
-  }
+      // Sequential page rendering (one image decoded at a time — kind to
+      // phone memory). Chain a promise per PAGES entry, in book order.
+      var productPages = PAGES.filter(function (pg) { return pg.type === 'orn' || pg.type === 'set'; });
+      var count = 0;
+      var chain = Promise.resolve();
 
-  var started = false;
-  function go() {
-    if (started) return;
-    started = true;
-    // Always print the light look; restore the visitor's theme after.
-    document.documentElement.setAttribute('data-theme', 'light');
-    setTimeout(function () {
-      window.addEventListener('afterprint', function h() {
-        window.removeEventListener('afterprint', h);
-        cleanup();
+      pdfCoverPage(doc, logo, false);
+      doc.addPage();
+      pdfIntroPage(doc);
+
+      PAGES.forEach(function (pg) {
+        if (pg.type === 'cover' || pg.type === 'intro' || pg.type === 'filler' || pg.type === 'back') return;
+        chain = chain.then(function () {
+          if (pg.type === 'orn') {
+            var views = (pg.product.imgs && pg.product.imgs.length ? pg.product.imgs : (pg.product.img ? [pg.product.img] : []));
+            var get = views.length ? fetchImg(imageUrl(views[0])) : Promise.resolve(null);
+            return get.then(function (im) {
+              doc.addPage();
+              pdfOrnamentPage(doc, pg, im ? imgToJpeg(im, 1100) : null, null);
+              count++;
+              btn.textContent = count + '/' + productPages.length;
+            });
+          }
+          if (pg.type === 'set') {
+            var p = pg.product;
+            if (p.img) {
+              return fetchImg(imageUrl(p.img)).then(function (im) {
+                doc.addPage();
+                pdfOrnamentPage(doc, pg, im ? imgToJpeg(im, 1100) : null, null);
+                count++;
+                btn.textContent = count + '/' + productPages.length;
+              });
+            }
+            var members = PRODUCTS.filter(function (m) { return m.is_set_member && m.set_id === p.set_id; }).slice(0, 4);
+            return Promise.all(members.map(function (m) {
+              var f = m.img || (m.imgs && m.imgs[0]);
+              return (f ? fetchImg(imageUrl(f)) : Promise.resolve(null)).then(function (im) {
+                return { name: m.name, jpeg: im ? imgToJpeg(im, 700) : null };
+              });
+            })).then(function (mj) {
+              doc.addPage();
+              pdfOrnamentPage(doc, pg, null, mj);
+              count++;
+              btn.textContent = count + '/' + productPages.length;
+            });
+          }
+          if (pg.type === 'about') {
+            var el = pg.el;
+            if (el.classList.contains('pg-photos')) {
+              var files = Array.prototype.map.call(el.querySelectorAll('img'), function (im) {
+                return im.dataset.src || im.getAttribute('src');
+              });
+              var single = files.length === 1;
+              return Promise.all(files.map(function (u) {
+                return fetchImg(u).then(function (im) {
+                  return im ? imgToJpegCover(im, single ? 150 / 225 : 150 / 122, 1100) : null;
+                });
+              })).then(function (js) {
+                doc.addPage();
+                pdfPhotoPage(doc, js);
+              });
+            }
+            doc.addPage();
+            var keys = Array.prototype.map.call(el.querySelectorAll('p[data-t]'), function (n) { return n.dataset.t; });
+            pdfAboutTextPage(doc, keys, !!el.querySelector('.about-head'), !!el.querySelector('.about-sig'));
+            return;
+          }
+        });
       });
-      window.print();
-      // Desktop print() blocks until the dialog closes; iOS returns at once
-      // and fires afterprint when the sheet is dismissed. Late fallback for
-      // anything that fires neither:
-      setTimeout(cleanup, 4000);
-    }, 80);
-  }
-  Promise.all(pr.waits).then(go);
-  setTimeout(go, 12000);   // never hang on a stalled image
+
+      return chain.then(function () {
+        doc.addPage();
+        pdfCoverPage(doc, logo, true);
+        var fname = lang === 'de'
+          ? 'Glaeserne-Leidenschaft-Kollektion-2026.pdf'
+          : 'Glass-Passion-2026-Collection.pdf';
+        doc.save(fname);
+      });
+    });
+  });
+
+  work.then(function () {
+    btn.textContent = 'PDF';
+    btn.disabled = false;
+    pdfBusy = false;
+  }, function (e) {
+    console.error('[pdf]', e);
+    btn.textContent = t('pdf_err');
+    setTimeout(function () { btn.textContent = 'PDF'; btn.disabled = false; pdfBusy = false; }, 3500);
+  });
 }
 
 // Direct Cmd/Ctrl+P without the button: build the print layout on the fly
