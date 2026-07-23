@@ -43,6 +43,18 @@
   @font-face { font-family:'DM Mono'; font-style:normal; font-weight:400; font-display:swap;
     src:url('/fonts/dm-mono-v16-latin-regular.woff2') format('woff2'); }
 </style>
+<script>
+/* Set the theme before first paint so dark-preferring visitors get no cream
+   flash. The main script below reads this attribute as its initial state. */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('gl_theme'); } catch (e) {}
+  if (t !== 'dark' && t !== 'light') {
+    t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
    Phase 6.57 — Public e-book catalog. Standalone page (order.html pattern),
@@ -65,7 +77,37 @@
   --line:      rgba(42, 31, 21, 0.2);
   --line2:     rgba(42, 31, 21, 0.08);
   --shadow:    0 8px 48px rgba(42, 31, 21, 0.12);
+  --bar:       rgba(245, 240, 227, 0.9);
   --r:         2px;
+}
+
+/* Phase 6.57c — dark theme. Same warm-gold language on deep chocolate.
+   NOTE: --surface stays WHITE in dark mode on purpose: product photos are
+   shot on white, so plates read as mounted prints instead of glowing blobs. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:        #14100c;
+  --bg2:       #201912;
+  --gold-ink:  #c9a84c;   /* text gold lightens for contrast on dark */
+  --gold-lt:   #d9bc6a;
+  --cream:     #ece2cd;   /* body ink flips to light cream */
+  --cream-dim: #b5a68c;
+  --line:      rgba(236, 226, 205, 0.22);
+  --line2:     rgba(236, 226, 205, 0.10);
+  --shadow:    0 8px 48px rgba(0, 0, 0, 0.55);
+  --bar:       rgba(20, 16, 12, 0.9);
+}
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(201,168,76,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 90% 100%, rgba(0,0,0,0.3) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='3' height='3' fill='%2314100c'/%3E%3Ccircle cx='1' cy='1' r='0.3' fill='rgba(236,226,205,0.04)'/%3E%3C/svg%3E");
+}
+html[data-theme="dark"] .book::after {
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.25) 46%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.25) 54%, transparent);
+}
+html[data-theme="dark"] .face::after {
+  background: linear-gradient(to right, rgba(0,0,0,0.35), transparent 45%);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -74,6 +116,7 @@ html, body { height: 100%; }
 body {
   font-family: 'Cormorant Garamond', Georgia, serif;
   background: var(--bg);
+  transition: background 0.3s ease;
   color: var(--cream);
   display: flex;
   flex-direction: column;
@@ -104,8 +147,16 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: space-between;
   height: 56px; padding: 0 20px;
   border-bottom: 1px solid var(--line2);
-  background: rgba(245, 240, 227, 0.9);
+  background: var(--bar);
 }
+.topbar-tools { display: flex; align-items: center; gap: 10px; }
+.theme-btn {
+  font-size: 15px; line-height: 1; padding: 5px 10px;
+  color: var(--cream-dim);
+  border: 1px solid transparent; border-radius: var(--r);
+  transition: color 0.2s;
+}
+.theme-btn:hover { color: var(--gold-ink); }
 .topbar-brand {
   font-family: 'Cinzel', serif;
   font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
@@ -379,11 +430,13 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
   width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
 }
+/* Literal gold, not var(--gold-ink): dots sit on the always-white plate,
+   so they must not lighten with the dark theme. */
 .plate-dot::after {
   content: ''; width: 6px; height: 6px; border-radius: 50%;
-  border: 1px solid var(--gold-ink); background: transparent;
+  border: 1px solid #806626; background: transparent;
 }
-.plate-dot.on::after { background: var(--gold-ink); }
+.plate-dot.on::after { background: #806626; }
 /* Set member grid takes the plate's place */
 .set-grid {
   flex: 1 1 auto; min-height: 0;
@@ -406,7 +459,7 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 .set-cell .cell-name {
   position: absolute; left: 0; right: 0; bottom: 3px; text-align: center;
   font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.5px;
-  text-transform: uppercase; color: var(--cream-dim);
+  text-transform: uppercase; color: #3a3026; /* on always-white cell */
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;
 }
 
@@ -570,9 +623,12 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 
 <header class="topbar">
   <a class="topbar-brand" href="/">Gläserne <span>Leidenschaft</span></a>
-  <div class="lang-toggle" role="group" aria-label="Language">
-    <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" id="langDe" onclick="setLang('de')">DE</button>
+  <div class="topbar-tools">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Switch to dark mode">☾</button>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="langDe" onclick="setLang('de')">DE</button>
+    </div>
   </div>
 </header>
 
@@ -669,6 +725,8 @@ var T = {
     print_page: 'Print catalogue p. {n}',
     nav_prev: 'Previous page',
     nav_next: 'Next page',
+    theme_dark: 'Switch to dark mode',
+    theme_light: 'Switch to light mode',
     toc: 'Contents',
     toc_cover: 'Cover',
     toc_intro: 'Introduction',
@@ -715,6 +773,8 @@ var T = {
     print_page: 'Druckkatalog S. {n}',
     nav_prev: 'Vorherige Seite',
     nav_next: 'Nächste Seite',
+    theme_dark: 'Zum dunklen Modus wechseln',
+    theme_light: 'Zum hellen Modus wechseln',
     toc: 'Inhalt',
     toc_cover: 'Umschlag',
     toc_intro: 'Einführung',
@@ -1347,6 +1407,35 @@ if (mobileMq.addEventListener) mobileMq.addEventListener('change', onModeChange)
 else mobileMq.addListener(onModeChange);
 
 // ════════════════════════════════════════════
+// THEME (light / dark)
+// ════════════════════════════════════════════
+// The head script already set data-theme before first paint; adopt it here.
+var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', theme);
+  var b = document.getElementById('themeBtn');
+  b.textContent = theme === 'dark' ? '☀' : '☾';
+  b.setAttribute('aria-label', t(theme === 'dark' ? 'theme_light' : 'theme_dark'));
+}
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('gl_theme', theme); } catch (e) {}
+  applyTheme();
+}
+// Follow live system changes only while the visitor hasn't chosen explicitly.
+var themeMq = window.matchMedia('(prefers-color-scheme: dark)');
+function onSystemTheme(e) {
+  var stored = null;
+  try { stored = localStorage.getItem('gl_theme'); } catch (err) {}
+  if (stored === 'dark' || stored === 'light') return;
+  theme = e.matches ? 'dark' : 'light';
+  applyTheme();
+}
+if (themeMq.addEventListener) themeMq.addEventListener('change', onSystemTheme);
+else if (themeMq.addListener) themeMq.addListener(onSystemTheme);
+
+// ════════════════════════════════════════════
 // LANGUAGE
 // ════════════════════════════════════════════
 function applyLang() {
@@ -1374,6 +1463,7 @@ function applyLang() {
   ['arrowNext', 'arrowNextM'].forEach(function (id) {
     document.getElementById(id).setAttribute('aria-label', t('nav_next'));
   });
+  applyTheme();   // refresh the theme button's localized aria-label
   if (built) updateChrome();
 }
 function setLang(l) {
