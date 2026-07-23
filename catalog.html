@@ -559,6 +559,21 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
   padding: 8px 16px;
 }
 .toc-btn:hover { background: rgba(201,168,76,0.08); }
+.search-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 32px;
+  color: var(--gold-ink);
+  border: 1px solid var(--line); border-radius: var(--r);
+}
+.search-btn:hover { background: rgba(201,168,76,0.08); }
+.search-btn svg { width: 14px; height: 14px; display: block; }
+.pdf-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 6px 10px; color: var(--cream-dim);
+  border: 1px solid transparent; border-radius: var(--r);
+}
+.pdf-btn:hover { color: var(--gold-ink); }
+.pdf-btn:disabled { opacity: 0.5; cursor: wait; }
 .bookbar .nav-arrow { display: none; width: 40px; height: 40px; }
 
 @media (max-width: 880px) {
@@ -591,6 +606,22 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 }
 .toc-title { font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 3px; text-transform: uppercase; }
 .toc-close { font-size: 22px; line-height: 1; color: var(--cream-dim); padding: 4px 8px; }
+.toc-search {
+  padding: 12px 20px; border-bottom: 1px solid var(--line2);
+}
+.toc-search input {
+  width: 100%; padding: 10px 12px;
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px;
+  color: var(--cream); background: var(--surface2, var(--bg));
+  background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--r);
+}
+.toc-search input:focus { outline: none; border-color: var(--gold-ink); }
+.toc-search input::placeholder { color: var(--cream-dim); opacity: 0.7; font-style: italic; }
+.toc-empty {
+  display: none; padding: 24px 20px; text-align: center;
+  font-style: italic; color: var(--cream-dim); font-size: 15px;
+}
 .toc-list { flex: 1; overflow-y: auto; padding: 10px 0 calc(14px + env(safe-area-inset-bottom)); }
 .toc-item {
   display: flex; align-items: center; gap: 14px;
@@ -626,6 +657,28 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .sheet, .book, .toc-panel, .toc-overlay { transition: none !important; }
 }
+
+/* ── PRINT / PDF ──
+   The "PDF" button clones every page into #printRoot (plain flow layout,
+   one catalog page per printed sheet) and opens the print dialog, where
+   "Save as PDF" produces the download. Hidden on screen. */
+#printRoot { display: none; }
+@media print {
+  body > :not(#printRoot) { display: none !important; }
+  body::before { display: none; }
+  body { display: block; height: auto; overflow: visible; background: #fff; }
+  #printRoot { display: block; }
+  #printRoot .pg {
+    position: relative; inset: auto;
+    height: 96vh;                    /* one catalog page per printed page */
+    page-break-after: always; break-after: page;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  #printRoot img { opacity: 1 !important; transition: none !important; }
+  #printRoot .plate-dots { display: none; }
+  #printRoot .plain-cta { display: none; }  /* web-only buttons */
+}
 </style>
 </head>
 <body>
@@ -633,6 +686,7 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
 <header class="topbar">
   <a class="topbar-brand" href="/">Gläserne <span>Leidenschaft</span></a>
   <div class="topbar-tools">
+    <button class="pdf-btn" id="pdfBtn" onclick="downloadPdf()" aria-label="Download as PDF">PDF</button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Switch to dark mode">☾</button>
     <div class="lang-toggle" role="group" aria-label="Language">
       <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
@@ -664,6 +718,9 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
   <button class="nav-arrow" id="arrowPrevM" onclick="prevPage()" aria-label="Previous page">‹</button>
   <div class="counter" id="counter">–</div>
   <button class="toc-btn" id="tocBtn" onclick="openToc()" data-t="toc">Contents</button>
+  <button class="search-btn" id="searchBtn" onclick="openToc(true)" aria-label="Search">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="6.8" cy="6.8" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/></svg>
+  </button>
   <button class="nav-arrow" id="arrowNextM" onclick="nextPage()" aria-label="Next page">›</button>
 </footer>
 
@@ -674,6 +731,10 @@ body.single .sheet.turned:not(.turning) { visibility: hidden; }
     <div class="toc-title" id="tocTitle" data-t="toc">Contents</div>
     <button class="toc-close" onclick="closeToc()" aria-label="Close">×</button>
   </div>
+  <div class="toc-search">
+    <input type="search" id="tocSearch" autocomplete="off" spellcheck="false" placeholder="Search the collection…" oninput="filterToc()">
+  </div>
+  <div class="toc-empty" id="tocEmpty" data-t="search_none">No matches — try another word.</div>
   <div class="toc-list" id="tocList"></div>
 </aside>
 
@@ -736,6 +797,11 @@ var T = {
     nav_next: 'Next page',
     theme_dark: 'Switch to dark mode',
     theme_light: 'Switch to light mode',
+    search: 'Search',
+    search_placeholder: 'Search the collection…',
+    search_none: 'No matches — try another word.',
+    pdf: 'Download as PDF',
+    pdf_wait: 'Preparing…',
     toc: 'Contents',
     toc_cover: 'Cover',
     toc_intro: 'Introduction',
@@ -784,6 +850,11 @@ var T = {
     nav_next: 'Nächste Seite',
     theme_dark: 'Zum dunklen Modus wechseln',
     theme_light: 'Zum hellen Modus wechseln',
+    search: 'Suche',
+    search_placeholder: 'Kollektion durchsuchen …',
+    search_none: 'Keine Treffer — versuchen Sie ein anderes Wort.',
+    pdf: 'Als PDF herunterladen',
+    pdf_wait: 'Einen Moment …',
     toc: 'Inhalt',
     toc_cover: 'Umschlag',
     toc_intro: 'Einführung',
@@ -1314,6 +1385,11 @@ function hydrateWindow(p) {
 // ════════════════════════════════════════════
 // TOC DRAWER
 // ════════════════════════════════════════════
+// Accent-insensitive search normalization ("turkis" matches "Türkis")
+function norm(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function buildToc() {
   var list = document.getElementById('tocList');
   list.innerHTML = '';
@@ -1321,6 +1397,13 @@ function buildToc() {
     if (pg.type === 'filler' || pg.skipToc) return;
     var btn = document.createElement('button');
     btn.className = 'toc-item';
+    // Searchable haystack: every describing field, both language halves —
+    // plus a punctuation-stripped variant so "nick" matches "N.I.C.K.".
+    var p = pg.product;
+    var hay = norm(p
+      ? [p.name, p.id, p.style, p.collection, p.color, p.height, p.le, p.description].join(' ')
+      : (T.en[pg.tocKey] || '') + ' ' + (T.de[pg.tocKey] || ''));
+    btn.dataset.search = hay + ' ' + hay.replace(/[^a-z0-9 ]/g, '');
     var thumbFile = pg.product ? (pg.product.img || (pg.product.imgs && pg.product.imgs[0])) : null;
     var thumb = thumbFile
       ? '<span class="toc-thumb"><img src="' + esc(imageUrl(thumbFile)) + '" alt="" loading="lazy"></span>'
@@ -1338,12 +1421,29 @@ function buildToc() {
   });
 }
 
+function filterToc() {
+  var q = norm(document.getElementById('tocSearch').value.trim());
+  var qs = q.replace(/[^a-z0-9 ]/g, '');
+  var any = false;
+  document.querySelectorAll('#tocList .toc-item').forEach(function (b) {
+    var hit = !q || b.dataset.search.indexOf(q) !== -1 ||
+              (qs && b.dataset.search.indexOf(qs) !== -1);
+    b.style.display = hit ? '' : 'none';
+    if (hit) any = true;
+  });
+  document.getElementById('tocEmpty').style.display = any ? 'none' : 'block';
+}
+
 var tocOpenState = false;
-function openToc() {
+function openToc(focusSearch) {
   tocOpenState = true;
   document.getElementById('tocOverlay').classList.add('open');
   var panel = document.getElementById('tocPanel');
   panel.classList.add('open');
+  if (focusSearch) {
+    document.getElementById('tocSearch').focus();
+    return;
+  }
   var first = panel.querySelector('.toc-item');
   if (first) first.focus();
 }
@@ -1351,6 +1451,8 @@ function closeToc() {
   tocOpenState = false;
   document.getElementById('tocOverlay').classList.remove('open');
   document.getElementById('tocPanel').classList.remove('open');
+  var s = document.getElementById('tocSearch');
+  if (s.value) { s.value = ''; filterToc(); }
   document.getElementById('tocBtn').focus();
 }
 // Minimal focus trap while the drawer is open
@@ -1364,6 +1466,84 @@ document.addEventListener('keydown', function (e) {
   var first = focusables[0], last = focusables[focusables.length - 1];
   if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
   else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+});
+
+// ════════════════════════════════════════════
+// PDF DOWNLOAD (print-based: "Save as PDF" in the dialog)
+// ════════════════════════════════════════════
+// Clones every page into #printRoot — plain flow layout, one catalog page
+// per printed sheet (see the @media print block). Keeps the real fonts and
+// design, which a client-side PDF library could not.
+function buildPrintRoot() {
+  var old = document.getElementById('printRoot');
+  if (old) old.remove();
+  var root = document.createElement('div');
+  root.id = 'printRoot';
+  var waits = [];
+  PAGES.forEach(function (pg) {
+    var clone = pg.el.cloneNode(true);
+    clone.removeAttribute('aria-hidden');
+    clone.removeAttribute('inert');
+    clone.querySelectorAll('img[data-src]').forEach(function (im) {
+      if (!im.getAttribute('src')) im.src = im.dataset.src;
+      im.classList.add('ld');
+      if (!im.complete) {
+        waits.push(new Promise(function (res) { im.onload = im.onerror = res; }));
+      }
+    });
+    root.appendChild(clone);
+  });
+  document.body.appendChild(root);
+  return { root: root, waits: waits };
+}
+
+var printing = false;
+function downloadPdf() {
+  if (!built || printing) return;
+  printing = true;
+  var btn = document.getElementById('pdfBtn');
+  btn.disabled = true;
+  btn.textContent = t('pdf_wait');
+
+  var pr = buildPrintRoot();
+  var prevTheme = theme;
+
+  function cleanup() {
+    if (!pr.root.isConnected) return;
+    pr.root.remove();
+    document.documentElement.setAttribute('data-theme', prevTheme);
+    btn.disabled = false;
+    btn.textContent = 'PDF';
+    printing = false;
+  }
+
+  var started = false;
+  function go() {
+    if (started) return;
+    started = true;
+    // Always print the light look; restore the visitor's theme after.
+    document.documentElement.setAttribute('data-theme', 'light');
+    setTimeout(function () {
+      window.addEventListener('afterprint', function h() {
+        window.removeEventListener('afterprint', h);
+        cleanup();
+      });
+      window.print();
+      // Desktop print() blocks until the dialog closes; iOS returns at once
+      // and fires afterprint when the sheet is dismissed. Late fallback for
+      // anything that fires neither:
+      setTimeout(cleanup, 4000);
+    }, 80);
+  }
+  Promise.all(pr.waits).then(go);
+  setTimeout(go, 12000);   // never hang on a stalled image
+}
+
+// Direct Cmd/Ctrl+P without the button: build the print layout on the fly
+// (images near the current page are already hydrated; the rest may still
+// be loading while the preview is generated).
+window.addEventListener('beforeprint', function () {
+  if (built && !document.getElementById('printRoot')) buildPrintRoot();
 });
 
 // ════════════════════════════════════════════
@@ -1483,6 +1663,11 @@ function applyLang() {
     document.getElementById(id).setAttribute('aria-label', t('nav_next'));
   });
   applyTheme();   // refresh the theme button's localized aria-label
+  var pdfBtn = document.getElementById('pdfBtn');
+  pdfBtn.setAttribute('aria-label', t('pdf'));
+  pdfBtn.setAttribute('title', t('pdf'));
+  document.getElementById('searchBtn').setAttribute('aria-label', t('search'));
+  document.getElementById('tocSearch').setAttribute('placeholder', t('search_placeholder'));
   if (built) updateChrome();
 }
 function setLang(l) {
