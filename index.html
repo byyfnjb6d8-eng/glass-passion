@@ -4085,6 +4085,21 @@ body.locked > *:not(#constructionGate) { display: none !important; }
 .gate-error {
   font-size: 13px; color: #8b2a2a; margin-top: 14px; min-height: 18px;
 }
+/* Phase 6.57b: public catalog link on the gate — lets visitors browse the
+   collection without an access code (minimizes "how do I get in?" emails). */
+.gate-catalog-link {
+  display: block; width: 100%; margin-top: 4px; padding: 13px;
+  border: 1px solid var(--gold-dim); border-radius: 6px;
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-ink); text-decoration: none; transition: background 0.2s;
+}
+.gate-catalog-link:hover { background: rgba(201, 168, 76, 0.1); }
+.gate-catalog-link .gate-catalog-de {
+  display: block; margin-top: 5px; font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 13px; font-weight: 400; font-style: italic; letter-spacing: 0.5px;
+  text-transform: none; opacity: 0.75;
+}
 .gate-footer {
   font-size: 11px; color: rgba(245,239,228,0.4); margin-top: 24px;
   letter-spacing: 0.5px;
@@ -4141,6 +4156,8 @@ body.locked > *:not(#constructionGate) { display: none !important; }
     </label>
     <button id="gateBtn" class="gate-btn">Enter Site · Seite betreten</button>
     <div class="gate-error" id="gateError"></div>
+    <!-- Phase 6.57b: no code needed to browse the public catalog -->
+    <a class="gate-catalog-link" href="/catalog">View the 2026 Catalog · Katalog ansehen<span class="gate-catalog-de">No access code needed · Kein Zugangscode nötig</span></a>
     <div class="gate-footer">If you need access, please contact us · Wenn Sie Zugang benötigen, schreiben Sie uns:<br><a href="mailto:info@glaserneleidenschaft.com" style="color:inherit">info@glaserneleidenschaft.com</a></div>
   </div>
 </div>
