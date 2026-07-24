@@ -1149,7 +1149,9 @@ function buildBackCoverPage() {
 
 function badgesHtml(p) {
   var b = '';
-  if (p.is_new_for_season) b += '<span class="badge badge-new" data-tpl="badge_new"></span>';
+  // "New for {year}" always uses the PRODUCT's own season (falls back to
+  // the book's season only if the product has none recorded).
+  if (p.is_new_for_season) b += '<span class="badge badge-new" data-tpl="badge_new" data-tpl-y="' + esc(p.season || '') + '"></span>';
   if (p.is_limited_edition || p.le) {
     b += '<span class="badge badge-le">' + (p.le ? esc(p.le) : '<span data-t="badge_le"></span>') + '</span>';
   }
@@ -1739,7 +1741,7 @@ function pdfPlate(doc, jpeg, x, y, w, h) {
 
 function pdfBadges(doc, p, y) {
   var parts = [];
-  if (p.is_new_for_season) parts.push({ txt: tpl('badge_new', { y: SEASON }).toUpperCase(), style: 'outline' });
+  if (p.is_new_for_season) parts.push({ txt: tpl('badge_new', { y: p.season || SEASON }).toUpperCase(), style: 'outline' });
   if (p.is_limited_edition || p.le) parts.push({ txt: (p.le || t('badge_le')).toUpperCase(), style: 'fill' });
   if (p.is_set && p.set_member_count) parts.push({ txt: tpl('badge_set', { n: p.set_member_count }).toUpperCase(), style: 'outline' });
   if (!parts.length) return;
@@ -2178,7 +2180,7 @@ function applyLang() {
     if (v) el.textContent = v;
   });
   document.querySelectorAll('[data-tpl]').forEach(function (el) {
-    el.textContent = tpl(el.dataset.tpl, { n: el.dataset.tplN, y: SEASON });
+    el.textContent = tpl(el.dataset.tpl, { n: el.dataset.tplN, y: el.dataset.tplY || SEASON });
   });
   document.getElementById('yearSel').setAttribute('aria-label', t('year_sel_aria'));
   document.querySelectorAll('[data-bi]').forEach(function (el) {
