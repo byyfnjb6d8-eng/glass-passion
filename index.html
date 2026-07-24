@@ -3313,6 +3313,21 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   cursor: pointer;
   transition: all 0.15s;
 }
+/* Phase 6.60: season filter dropdown — styled to match the filter chips */
+#adminProducts .products-year-sel {
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  color: var(--ink);
+  cursor: pointer;
+}
+#adminProducts .products-year-sel.filtering {
+  border-color: var(--gold);
+  color: var(--gold-ink);
+}
 #adminProducts .products-filter button:hover { background: var(--surface2); }
 #adminProducts .products-filter button.active {
   background: var(--gold);
@@ -7859,6 +7874,8 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   admin_products_filter_all: 'All',
   admin_products_filter_active: 'Active only',
   admin_products_filter_prior: 'Prior Year only',
+  admin_products_year_all: 'All years',
+  admin_products_year_title: 'Filter by year',
   admin_products_search_ph: 'Search by SKU, name, or color…',
   admin_products_empty: 'No products match your filter.',
   admin_products_form_id_label: 'SKU / Product ID *',
@@ -9054,6 +9071,8 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   admin_products_filter_all: 'Alle',
   admin_products_filter_active: 'Nur aktive',
   admin_products_filter_prior: 'Nur Vorjahre',
+  admin_products_year_all: 'Alle Jahrgänge',
+  admin_products_year_title: 'Nach Jahrgang filtern',
   admin_products_search_ph: 'Suche nach Artikel-Nr., Name oder Farbe…',
   admin_products_empty: 'Keine Produkte entsprechen Ihrem Filter.',
   admin_products_form_id_label: 'Artikel-Nr. *',
@@ -20168,6 +20187,7 @@ function onLotteryOptInToggle() {
 // ═══════════════════════════════════════════════════════════════════════
 const _productsAdminState = {
   filter: 'all',
+  season: 'all',   // Phase 6.60: 'all' | a season string ('2026', '2025', …)
   search: '',
   mode: null,
   editId: null,
@@ -20200,7 +20220,17 @@ function _renderAdminProductsView() {
   const s = _productsAdminState;
   const subHtml = `<p style="color:var(--cream-dim, var(--ink));opacity:0.75;font-size:13px;margin:0 0 8px 0" data-t="admin_products_sub"></p>`;
 
-  // Toolbar (search + filter + add button)
+  // Phase 6.60: season dropdown — every distinct year in the data, newest
+  // first, so prior years are separable ("Prior Year" alone lumps them all).
+  const seasonsInData = [...new Set(PRODUCTS.map(p => String(p.season || '').trim()).filter(Boolean))]
+    .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  const yearSel = `
+    <select class="products-year-sel ${s.season !== 'all' ? 'filtering' : ''}" onchange="_adminProductsSetSeason(this.value)" title="${escapeHtml(t('admin_products_year_title'))}">
+      <option value="all" ${s.season==='all'?'selected':''}>${escapeHtml(t('admin_products_year_all'))}</option>
+      ${seasonsInData.map(y => `<option value="${escapeHtml(y)}" ${s.season===y?'selected':''}>${escapeHtml(y)}</option>`).join('')}
+    </select>`;
+
+  // Toolbar (search + filter + year + add button)
   const toolbar = `
     <div class="products-toolbar">
       <input class="products-search" id="adminProductsSearch" placeholder="${escapeHtml(t('admin_products_search_ph'))}" value="${escapeHtml(s.search)}" oninput="_adminProductsOnSearch(this.value)">
@@ -20208,6 +20238,7 @@ function _renderAdminProductsView() {
         <button class="${s.filter==='all'?'active':''}" onclick="_adminProductsSetFilter('all')" data-t="admin_products_filter_all"></button>
         <button class="${s.filter==='active'?'active':''}" onclick="_adminProductsSetFilter('active')" data-t="admin_products_filter_active"></button>
         <button class="${s.filter==='prior_year'?'active':''}" onclick="_adminProductsSetFilter('prior_year')" data-t="admin_products_filter_prior"></button>
+        ${yearSel}
       </div>
       <button class="btn btn-outline btn-sm" onclick="_adminProductsStartAdd()" data-t="admin_products_btn_add"></button>
     </div>`;
@@ -20216,6 +20247,7 @@ function _renderAdminProductsView() {
   const filtered = PRODUCTS.filter(p => {
     if (s.filter === 'active' && p.status !== 'active') return false;
     if (s.filter === 'prior_year' && p.status !== 'prior_year') return false;
+    if (s.season !== 'all' && String(p.season || '').trim() !== s.season) return false;
     if (s.search) {
       const needle = s.search.toLowerCase();
       const hay = [p.id, p.name, p.color, p.style].filter(Boolean).join(' ').toLowerCase();
@@ -20255,7 +20287,7 @@ function _renderAdminProductsView() {
         <tr>
           <td style="font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(p.id)}</td>
           <td>${thumb}</td>
-          <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : ''}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${escapeHtml(p.color || '')}</div></td>
+          <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : ''}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${p.season ? `<span style="color:var(--gold-ink);opacity:1">${escapeHtml(p.season)}</span>` : ''}${p.season && p.color ? ' · ' : ''}${escapeHtml(p.color || '')}</div></td>
           <td style="font-family:'DM Mono',monospace">€${Number(p.euros || 0).toFixed(2)}</td>
           <td>${statusSelect}</td>
           <td style="text-align:center;font-family:'DM Mono',monospace">${photoCountLabel}</td>
@@ -20309,6 +20341,13 @@ function _adminProductsOnSearch(val) {
 
 function _adminProductsSetFilter(f) {
   _productsAdminState.filter = f;
+  _renderAdminProductsView();
+}
+
+// Phase 6.60: season filter (composes with the status chips — e.g. Prior
+// Year + 2024 shows only the 2024 archive)
+function _adminProductsSetSeason(y) {
+  _productsAdminState.season = y || 'all';
   _renderAdminProductsView();
 }
 
