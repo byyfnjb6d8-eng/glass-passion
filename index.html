@@ -20507,6 +20507,21 @@ function _adminProductsSetSeason(y) {
   _renderAdminProductsView();
 }
 
+// Phase 6.61c: the product list scrolls inside .products-list-wrap (fixed
+// max-height), so replacing the table via innerHTML resets that container
+// to the top. Every re-render triggered from WITHIN the list (checkbox
+// ticks, drops, quick status flips) must go through this wrapper so the
+// admin stays where they were scrolled.
+function _adminProductsRerenderKeepScroll() {
+  const wrap = document.querySelector('#adminProducts .products-list-wrap');
+  const wrapTop = wrap ? wrap.scrollTop : 0;
+  const winY = window.scrollY;
+  _renderAdminProductsView();
+  const fresh = document.querySelector('#adminProducts .products-list-wrap');
+  if (fresh) fresh.scrollTop = wrapTop;
+  window.scrollTo(0, winY);
+}
+
 // ─── Phase 6.61b: row multi-select (group drag-reorder) ────────────────
 // Both the clicked row and the shift-range anchor are resolved from SKUs at
 // click time, never stored as positions — indices embedded at render time
@@ -20529,13 +20544,13 @@ function _adminProductsToggleSelect(event, sku) {
     if (checked) s.selectedSkus.add(sku); else s.selectedSkus.delete(sku);
   }
   s.lastSelSku = sku;
-  _renderAdminProductsView();
+  _adminProductsRerenderKeepScroll();
 }
 
 function _adminProductsClearSelection(rerender = true) {
   _productsAdminState.selectedSkus.clear();
   _productsAdminState.lastSelSku = null;
-  if (rerender) _renderAdminProductsView();
+  if (rerender) _adminProductsRerenderKeepScroll();
 }
 
 // ─── Add / Edit mode entry points ──────────────────────────────────────
@@ -21301,23 +21316,20 @@ async function _adminProductsSave() {
 async function _adminProductsQuickStatusChange(sku, newStatus) {
   const valid = ['active', 'prior_year'];
   if (!valid.includes(newStatus)) return;
-  const savedScroll = window.scrollY;
   try {
     const { error } = await sb.from('products')
       .update({ status: newStatus })
       .eq('id', sku);
     if (error) throw error;
     await loadProducts();
-    _renderAdminProductsView();
-    // Restore scroll AFTER the re-render so the page lands where it was
-    window.scrollTo(0, savedScroll);
+    // Phase 6.61c: restores BOTH the window and the list wrap's own scroll
+    _adminProductsRerenderKeepScroll();
   } catch (err) {
     console.error('[products] quick status change failed:', err);
     alert(t('admin_products_save_failed') + (err.message || err));
     // Refresh to revert dropdown to actual DB state
     await loadProducts();
-    _renderAdminProductsView();
-    window.scrollTo(0, savedScroll);
+    _adminProductsRerenderKeepScroll();
   }
 }
 
@@ -21400,7 +21412,6 @@ async function _adminProductsRowDrop(event, targetSku) {
 }
 
 async function _adminProductsPersistOrder(orderedIds) {
-  const savedScroll = window.scrollY;
   _productsPersistBusy = true;
   const tableWrap = document.querySelector('#adminProducts .products-list-wrap');
   if (tableWrap) tableWrap.style.opacity = '0.5';
@@ -21414,15 +21425,13 @@ async function _adminProductsPersistOrder(orderedIds) {
     const failed = results.find(r => r.error);
     if (failed) throw failed.error;
     await loadProducts();
-    _renderAdminProductsView();
-    window.scrollTo(0, savedScroll);
+    _adminProductsRerenderKeepScroll();
   } catch (err) {
     console.error('[products] reorder failed:', err);
     alert(t('admin_products_reorder_failed') + (err.message || err));
     // Reload so the table reflects whatever actually persisted.
     await loadProducts();
-    _renderAdminProductsView();
-    window.scrollTo(0, savedScroll);
+    _adminProductsRerenderKeepScroll();
   } finally {
     _productsPersistBusy = false;
     const wrap = document.querySelector('#adminProducts .products-list-wrap');
