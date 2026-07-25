@@ -3055,6 +3055,9 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 #adminProducts .admin-table tbody tr.being-dragged { opacity: 0.4; }
 #adminProducts .admin-table tbody tr.drop-above td { border-top: 2px solid var(--gold); }
 #adminProducts .admin-table tbody tr.drop-below td { border-bottom: 2px solid var(--gold); }
+/* Phase 6.61b: multi-select rows travel together on drag */
+#adminProducts .admin-table tbody tr.row-selected td { background: rgba(196,154,108,0.08); }
+#adminProducts .prod-sel-cb { cursor: pointer; }
 
 /* Move-folder picker tree */
 .vault-move-tree { list-style: none; padding: 0; margin: 0; }
@@ -7835,9 +7838,11 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   admin_products_col_status: 'Status',
   admin_products_col_photos: 'Photos',
   admin_products_col_order: 'Display Order',
-  admin_products_reorder_hint_on: 'Drag rows to set the catalog page order (lowest number first). Changes save immediately.',
+  admin_products_reorder_hint_on: 'Drag rows to set the catalog page order (lowest number first). Tick boxes to move several rows at once — Shift-click selects a range. Changes save immediately.',
   admin_products_reorder_hint_off: 'To drag-reorder catalog pages, pick a single year and clear the search and status filter.',
   admin_products_reorder_failed: 'Reorder failed: ',
+  admin_products_sel_count: '{n} selected — drag any ticked row to move them together.',
+  admin_products_sel_clear: 'Clear selection',
   admin_products_col_actions: 'Actions',
   admin_products_btn_edit: 'Edit',
   // Phase 6.49c: delete + quick status change
@@ -9039,9 +9044,11 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   admin_products_col_status: 'Status',
   admin_products_col_photos: 'Fotos',
   admin_products_col_order: 'Reihenfolge',
-  admin_products_reorder_hint_on: 'Zeilen per Drag & Drop in die gewünschte Katalog-Reihenfolge ziehen (kleinste Nummer zuerst). Änderungen werden sofort gespeichert.',
+  admin_products_reorder_hint_on: 'Zeilen per Drag & Drop in die gewünschte Katalog-Reihenfolge ziehen (kleinste Nummer zuerst). Kästchen anhaken, um mehrere Zeilen gleichzeitig zu verschieben — Shift-Klick wählt einen Bereich. Änderungen werden sofort gespeichert.',
   admin_products_reorder_hint_off: 'Zum Umsortieren der Katalogseiten bitte einen einzelnen Jahrgang wählen und Suche sowie Statusfilter leeren.',
   admin_products_reorder_failed: 'Umsortieren fehlgeschlagen: ',
+  admin_products_sel_count: '{n} ausgewählt — eine angehakte Zeile ziehen, um alle gemeinsam zu verschieben.',
+  admin_products_sel_clear: 'Auswahl aufheben',
   admin_products_col_actions: 'Aktionen',
   admin_products_btn_edit: 'Bearbeiten',
   // Phase 6.49c: Löschen + Schnellstatusänderung
@@ -20293,6 +20300,12 @@ const _productsAdminState = {
   deletedExpanded: false,
   deletedLoaded: false,
   deletedRows: [],
+  // Phase 6.61b: multi-select for group drag-reorder (whole-season view).
+  // Selection is view-scoped — cleared whenever season/filter/search change.
+  // The shift-range anchor is a SKU (not an index): row positions go stale
+  // whenever the list reloads or reorders (deletes, status flips, drops).
+  selectedSkus: new Set(),
+  lastSelSku: null,
 };
 
 async function renderAdminProducts() {
@@ -20361,11 +20374,16 @@ function _renderAdminProductsView() {
   // season (single year, no search, no status filter) — renumbering a partial
   // view would silently interleave with the hidden rows.
   const canReorder = _adminProductsReorderEligible();
+  // Phase 6.61b: prune selection of rows no longer in the view (deleted etc.)
+  if (canReorder && s.selectedSkus.size) {
+    const visible = new Set(filtered.map(p => p.id));
+    [...s.selectedSkus].forEach(id => { if (!visible.has(id)) s.selectedSkus.delete(id); });
+  }
 
   // List table
   let listBody;
   if (!filtered.length) {
-    listBody = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--cream-dim, var(--ink));opacity:0.6" data-t="admin_products_empty"></td></tr>`;
+    listBody = `<tr><td colspan="${canReorder ? 9 : 8}" style="text-align:center;padding:24px;color:var(--cream-dim, var(--ink));opacity:0.6" data-t="admin_products_empty"></td></tr>`;
   } else {
     listBody = filtered.map(p => {
       const imgUrl = productImageUrl(p.img);
@@ -20394,8 +20412,15 @@ function _renderAdminProductsView() {
       const dragAttrs = canReorder
         ? ` draggable="true" ondragstart="_adminProductsDragStart(event, '${safeId}')" ondragend="_adminProductsDragEnd(event)" ondragover="_adminProductsRowDragOver(event)" ondragleave="_adminProductsRowDragLeave(event)" ondrop="_adminProductsRowDrop(event, '${safeId}')"`
         : '';
+      // Phase 6.61b: selection checkbox — ticked rows move together when any
+      // of them is dragged. Shift-click selects a range.
+      const isSel = canReorder && s.selectedSkus.has(p.id);
+      const selTd = canReorder
+        ? `<td style="text-align:center"><input type="checkbox" class="prod-sel-cb" ${isSel ? 'checked' : ''} onclick="_adminProductsToggleSelect(event, '${safeId}')"></td>`
+        : '';
       return `
-        <tr${dragAttrs}>
+        <tr data-sku="${escapeHtml(p.id)}"${dragAttrs}${isSel ? ' class="row-selected"' : ''}>
+          ${selTd}
           <td style="font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(p.id)}</td>
           <td>${thumb}</td>
           <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : ''}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${p.season ? `<span style="color:var(--gold-ink);opacity:1">${escapeHtml(p.season)}</span>` : ''}${p.season && p.color ? ' · ' : ''}${escapeHtml(p.color || '')}</div></td>
@@ -20414,12 +20439,24 @@ function _renderAdminProductsView() {
   // dragging when the current view is filtered.
   const reorderHint = `<p style="font-size:12px;color:var(--cream-dim, var(--ink));opacity:0.7;font-weight:300;margin:0 0 8px" data-t="${canReorder ? 'admin_products_reorder_hint_on' : 'admin_products_reorder_hint_off'}"></p>`;
 
+  // Phase 6.61b: live selection indicator with a clear affordance. Rendered
+  // with resolved text (not data-t) because of the {n} substitution.
+  const selCount = canReorder ? s.selectedSkus.size : 0;
+  const selBar = selCount
+    ? `<p style="font-size:12px;color:var(--gold-ink);font-weight:400;margin:0 0 8px">
+         ${escapeHtml(t('admin_products_sel_count').replace('{n}', selCount))}
+         <a href="#" onclick="_adminProductsClearSelection();return false" style="color:var(--gold-ink);margin-left:8px">${escapeHtml(t('admin_products_sel_clear'))}</a>
+       </p>`
+    : '';
+
   const listHtml = `
     ${reorderHint}
+    ${selBar}
     <div class="products-list-wrap">
       <table class="admin-table">
         <thead>
           <tr>
+            ${canReorder ? '<th style="width:34px"></th>' : ''}
             <th data-t="admin_products_col_sku"></th>
             <th style="width:60px"></th>
             <th data-t="admin_products_col_name"></th>
@@ -20446,6 +20483,7 @@ function _renderAdminProductsView() {
 
 function _adminProductsOnSearch(val) {
   _productsAdminState.search = val || '';
+  _adminProductsClearSelection(false);
   _renderAdminProductsView();
   // Restore focus to the search box after re-render
   const el = document.getElementById('adminProductsSearch');
@@ -20457,6 +20495,7 @@ function _adminProductsOnSearch(val) {
 
 function _adminProductsSetFilter(f) {
   _productsAdminState.filter = f;
+  _adminProductsClearSelection(false);
   _renderAdminProductsView();
 }
 
@@ -20464,7 +20503,39 @@ function _adminProductsSetFilter(f) {
 // Year + 2024 shows only the 2024 archive)
 function _adminProductsSetSeason(y) {
   _productsAdminState.season = y || 'all';
+  _adminProductsClearSelection(false);
   _renderAdminProductsView();
+}
+
+// ─── Phase 6.61b: row multi-select (group drag-reorder) ────────────────
+// Both the clicked row and the shift-range anchor are resolved from SKUs at
+// click time, never stored as positions — indices embedded at render time
+// (or cached across renders) go stale the moment the list reloads or
+// reorders, and a stale range would tick rows the admin never spanned.
+function _adminProductsToggleSelect(event, sku) {
+  const s = _productsAdminState;
+  const checked = event.currentTarget.checked;
+  const ids = _adminProductsFiltered().map(p => p.id);
+  const idx = ids.indexOf(sku);
+  const anchorIdx = (event.shiftKey && s.lastSelSku) ? ids.indexOf(s.lastSelSku) : -1;
+  if (idx !== -1 && anchorIdx !== -1) {
+    // Shift-click: apply the clicked box's new state to the whole range.
+    const a = Math.min(anchorIdx, idx), b = Math.max(anchorIdx, idx);
+    for (let i = a; i <= b; i++) {
+      if (checked) s.selectedSkus.add(ids[i]); else s.selectedSkus.delete(ids[i]);
+    }
+  } else {
+    // Plain click — also the fallback when the anchor row is gone.
+    if (checked) s.selectedSkus.add(sku); else s.selectedSkus.delete(sku);
+  }
+  s.lastSelSku = sku;
+  _renderAdminProductsView();
+}
+
+function _adminProductsClearSelection(rerender = true) {
+  _productsAdminState.selectedSkus.clear();
+  _productsAdminState.lastSelSku = null;
+  if (rerender) _renderAdminProductsView();
 }
 
 // ─── Add / Edit mode entry points ──────────────────────────────────────
@@ -21256,7 +21327,9 @@ async function _adminProductsQuickStatusChange(sku, newStatus) {
 // rows are renumbered 1..N in their new table order, so ties and legacy
 // numbering (e.g. 2023's 1001+) normalize on first use. Set members keep
 // their relative order, which is what orders them inside their set's page.
-let _productsDragSku = null;
+// Phase 6.61b: the drag carries one row OR the whole ticked selection when
+// the grabbed row is part of it. Null when no internal drag is in progress.
+let _productsDragSkus = null;
 // Reentrancy guard: while a reorder persist + reload is in flight the old
 // table is still on screen — a second drag in that window would compute
 // against stale numbers and could write duplicate display_order values.
@@ -21264,25 +21337,30 @@ let _productsPersistBusy = false;
 
 function _adminProductsDragStart(event, sku) {
   if (_productsPersistBusy) { event.preventDefault(); return; }
-  _productsDragSku = sku;
+  const sel = _productsAdminState.selectedSkus;
+  _productsDragSkus = sel.has(sku) ? [...sel] : [sku];
   event.dataTransfer.effectAllowed = 'move';
   // Mark the drag as an internal row move (not an external file drop).
   event.dataTransfer.setData('application/x-gl-product', sku);
-  event.currentTarget.classList.add('being-dragged');
+  // Dim every row that travels with this drag.
+  document.querySelectorAll('#adminProducts tr[data-sku]').forEach(tr => {
+    if (_productsDragSkus.includes(tr.dataset.sku)) tr.classList.add('being-dragged');
+  });
 }
 
 function _adminProductsDragEnd(event) {
-  _productsDragSku = null;
-  event.currentTarget.classList.remove('being-dragged');
-  document.querySelectorAll('#adminProducts tr.drop-above, #adminProducts tr.drop-below')
-    .forEach(el => el.classList.remove('drop-above', 'drop-below'));
+  _productsDragSkus = null;
+  document.querySelectorAll('#adminProducts tr.being-dragged, #adminProducts tr.drop-above, #adminProducts tr.drop-below')
+    .forEach(el => el.classList.remove('being-dragged', 'drop-above', 'drop-below'));
 }
 
 function _adminProductsRowDragOver(event) {
-  if (!_productsDragSku || _productsPersistBusy) return;
+  if (!_productsDragSkus || _productsPersistBusy) return;
   // Only react to our own row drags — an OS file dragged across the table
   // must never light up (or trigger) the reorder path.
   if (!event.dataTransfer.types.includes('application/x-gl-product')) return;
+  // No indicator over rows that are travelling with the drag.
+  if (_productsDragSkus.includes(event.currentTarget.dataset.sku)) return;
   event.preventDefault();
   event.dataTransfer.dropEffect = 'move';
   const tr = event.currentTarget;
@@ -21301,21 +21379,24 @@ async function _adminProductsRowDrop(event, targetSku) {
   const tr = event.currentTarget;
   const below = tr.classList.contains('drop-below');
   tr.classList.remove('drop-above', 'drop-below');
-  const sku = _productsDragSku;
-  _productsDragSku = null;
+  const dragged = _productsDragSkus;
+  _productsDragSkus = null;
   if (_productsPersistBusy) return;
   if (!event.dataTransfer.types.includes('application/x-gl-product')) return;
-  if (!sku || sku === targetSku) return;
+  if (!dragged || !dragged.length || dragged.includes(targetSku)) return;
   if (!requireCapability('can_edit_products')) return;
   if (!_adminProductsReorderEligible()) return;
 
+  // Lift the dragged rows out (keeping their on-screen relative order) and
+  // splice them back in as one block at the drop point.
   const ids = _adminProductsFiltered().map(p => p.id);
-  const from = ids.indexOf(sku);
-  if (from === -1 || ids.indexOf(targetSku) === -1) return;
-  ids.splice(from, 1);
-  const to = ids.indexOf(targetSku);
-  ids.splice(below ? to + 1 : to, 0, sku);
-  await _adminProductsPersistOrder(ids);
+  const block = ids.filter(id => dragged.includes(id));
+  if (!block.length) return;
+  const rest = ids.filter(id => !dragged.includes(id));
+  const to = rest.indexOf(targetSku);
+  if (to === -1) return;
+  rest.splice(below ? to + 1 : to, 0, ...block);
+  await _adminProductsPersistOrder(rest);
 }
 
 async function _adminProductsPersistOrder(orderedIds) {
