@@ -3049,6 +3049,13 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 #adminVault .admin-table tbody tr[draggable="true"]:active { cursor: grabbing; }
 #adminVault .admin-table tbody tr.being-dragged { opacity: 0.4; }
 
+/* Phase 6.61: product catalog-order drag-reorder (Products tab) */
+#adminProducts .admin-table tbody tr[draggable="true"] { cursor: grab; }
+#adminProducts .admin-table tbody tr[draggable="true"]:active { cursor: grabbing; }
+#adminProducts .admin-table tbody tr.being-dragged { opacity: 0.4; }
+#adminProducts .admin-table tbody tr.drop-above td { border-top: 2px solid var(--gold); }
+#adminProducts .admin-table tbody tr.drop-below td { border-bottom: 2px solid var(--gold); }
+
 /* Move-folder picker tree */
 .vault-move-tree { list-style: none; padding: 0; margin: 0; }
 .vault-move-tree ul { list-style: none; padding-left: 18px; margin: 4px 0 0 0; }
@@ -7263,6 +7270,10 @@ const T = {
     schedule_pubarchive_currently_on: "Prior years public",
     schedule_pubarchive_show_btn: "Show prior years",
     schedule_pubarchive_hide_btn: "Hide prior years",
+    schedule_pubarchive_years_label: "Visible prior years",
+    schedule_pubarchive_years_hint: "Only ticked years appear in the public year picker while the archive is on. Ticking saves immediately; the current season is always shown.",
+    schedule_pubarchive_years_saved: "Saved.",
+    schedule_pubarchive_years_none: "No prior-year products found yet.",
     schedule_prices_section: "Prices",
     schedule_prices_desc: "Show or hide product prices everywhere — catalog, Limited Edition Showcase, and lottery. Keep hidden until the 2026 prices are confirmed. Works independently of pre-launch mode.",
     schedule_prices_currently_on: "Prices visible",
@@ -7824,6 +7835,9 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   admin_products_col_status: 'Status',
   admin_products_col_photos: 'Photos',
   admin_products_col_order: 'Display Order',
+  admin_products_reorder_hint_on: 'Drag rows to set the catalog page order (lowest number first). Changes save immediately.',
+  admin_products_reorder_hint_off: 'To drag-reorder catalog pages, pick a single year and clear the search and status filter.',
+  admin_products_reorder_failed: 'Reorder failed: ',
   admin_products_col_actions: 'Actions',
   admin_products_btn_edit: 'Edit',
   // Phase 6.49c: delete + quick status change
@@ -8501,6 +8515,10 @@ admin_lottery: "Lottery",
     schedule_pubarchive_currently_on: "Vorjahre öffentlich",
     schedule_pubarchive_show_btn: "Vorjahre anzeigen",
     schedule_pubarchive_hide_btn: "Vorjahre ausblenden",
+    schedule_pubarchive_years_label: "Sichtbare Vorjahre",
+    schedule_pubarchive_years_hint: "Nur angehakte Jahrgänge erscheinen in der öffentlichen Jahrgangsauswahl, solange das Archiv aktiv ist. Anhaken speichert sofort; die aktuelle Saison ist immer sichtbar.",
+    schedule_pubarchive_years_saved: "Gespeichert.",
+    schedule_pubarchive_years_none: "Noch keine Vorjahres-Produkte vorhanden.",
     schedule_prices_section: "Preise",
     schedule_prices_desc: "Produktpreise überall ein- oder ausblenden — Katalog, SE-Vitrine und Verlosung. Ausgeblendet lassen, bis die Preise für 2026 feststehen. Unabhängig vom Vor-Start-Modus.",
     schedule_prices_currently_on: "Preise sichtbar",
@@ -9021,6 +9039,9 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   admin_products_col_status: 'Status',
   admin_products_col_photos: 'Fotos',
   admin_products_col_order: 'Reihenfolge',
+  admin_products_reorder_hint_on: 'Zeilen per Drag & Drop in die gewünschte Katalog-Reihenfolge ziehen (kleinste Nummer zuerst). Änderungen werden sofort gespeichert.',
+  admin_products_reorder_hint_off: 'Zum Umsortieren der Katalogseiten bitte einen einzelnen Jahrgang wählen und Suche sowie Statusfilter leeren.',
+  admin_products_reorder_failed: 'Umsortieren fehlgeschlagen: ',
   admin_products_col_actions: 'Aktionen',
   admin_products_btn_edit: 'Bearbeiten',
   // Phase 6.49c: Löschen + Schnellstatusänderung
@@ -9544,6 +9565,8 @@ async function loadSiteSettings() {
       // Phase 6.59: public catalog + public archive (prior years) toggles
       publicCatalogEnabled: data.public_catalog_enabled !== false,
       publicArchiveEnabled: !!data.public_archive_enabled,
+      // Phase 6.61: which prior years are publicly visible (null = all, legacy)
+      publicArchiveYears: Array.isArray(data.public_archive_years) ? data.public_archive_years.map(String) : null,
       // Phase 6.50b: global ornament cap (null = no cap)
       globalOrnamentCap: data.global_ornament_cap != null ? Number(data.global_ornament_cap) : null,
       adminTimezone: data.admin_timezone || 'America/New_York',
@@ -15807,6 +15830,34 @@ async function renderAdminSchedule() {
     }
   };
 
+  // Phase 6.61: per-year visibility checkboxes for the public archive.
+  // Years come from prior_year products (already loaded for the shop) UNIONED
+  // with the stored selection, so a saved year whose products are temporarily
+  // flipped to another status still renders (and survives the next save).
+  // Ticking a box saves immediately — there is no unsaved local state for a
+  // sibling toggle's re-render to silently discard. Stored NULL = all prior
+  // years (legacy 6.59 behaviour); the first tick writes the explicit list.
+  const archiveYearsSel = siteSettings.publicArchiveYears;   // null = all
+  const archiveYearsAvailable = [...new Set([
+    ...PRODUCTS.filter(p => p.status === 'prior_year' && p.season)
+      .map(p => String(p.season).trim()).filter(Boolean),
+    ...(archiveYearsSel || []),
+  ])].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  const archiveYearsHtml = !archiveYearsAvailable.length
+    ? `<p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:14px 0 0" data-t="schedule_pubarchive_years_none"></p>`
+    : `
+      <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2)">
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:8px" data-t="schedule_pubarchive_years_label"></div>
+        <div style="margin-bottom:10px">${archiveYearsAvailable.map(y => `
+          <label style="display:inline-flex;align-items:center;gap:6px;margin:0 16px 6px 0;font-size:13px;color:var(--cream);cursor:pointer">
+            <input type="checkbox" class="archive-year-cb" value="${escapeHtml(y)}" onchange="adminSaveArchiveYears()" ${(archiveYearsSel == null || archiveYearsSel.includes(y)) ? 'checked' : ''}>
+            <span style="font-family:'DM Mono',monospace">${escapeHtml(y)}</span>
+          </label>`).join('')}
+        </div>
+        <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0" data-t="schedule_pubarchive_years_hint"></p>
+        <span id="scheduleArchiveYearsStatus" style="font-size:13px;color:var(--cream-dim)"></span>
+      </div>`;
+
   el.innerHTML = `
     <h3 style="margin:0 0 8px;font-family:'Cinzel',serif;color:var(--gold-ink);letter-spacing:2px;text-transform:uppercase;font-size:14px" data-t="schedule_title"></h3>
     <p style="color:var(--cream-dim);font-size:13px;font-weight:300;margin-bottom:24px" data-t="schedule_sub"></p>
@@ -15910,6 +15961,7 @@ async function renderAdminSchedule() {
            </div>`
         : `<button class="btn btn-outline btn-sm" style="color:var(--gold-ink);border-color:rgba(196,154,108,0.5)" onclick="adminToggleDisplaySetting('public_archive_enabled', true)" data-t="schedule_pubarchive_show_btn"></button>`
       }
+      ${archiveYearsHtml}
     </div>
 
     <!-- Phase 6.57: Hard-START section. Manual "go live" switch — opens
@@ -16067,6 +16119,44 @@ async function adminToggleDisplaySetting(field, enable) {
   } catch (e) {
     console.error('[display-toggle] failed:', e);
     alert((t('schedule_prelaunch_failed') || 'Save failed:') + ' ' + (e.message || e));
+  }
+}
+
+// Phase 6.61: persist which prior years are publicly visible in /catalog.
+// The stored NULL (legacy) means "all prior years"; the UI always writes the
+// explicit list of ticked years, so after the first save the selection is
+// unambiguous. The server-side get_public_catalog enforces the same list.
+async function adminSaveArchiveYears() {
+  if (!requireCapability('can_manage_season')) return;
+  const cbs = document.querySelectorAll('#adminSchedule .archive-year-cb');
+  const years = [...cbs].filter(cb => cb.checked).map(cb => cb.value);
+  const statusEl = document.getElementById('scheduleArchiveYearsStatus');
+  try {
+    const { error } = await sb.from('site_settings')
+      .update({
+        public_archive_years: years,
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser?.email || null,
+      })
+      .eq('id', 'global');
+    if (error) throw error;
+    await loadSiteSettings();
+    await renderAdminSchedule();
+    // The re-render recreated the status span — fetch it again to confirm.
+    const fresh = document.getElementById('scheduleArchiveYearsStatus');
+    if (fresh) {
+      fresh.textContent = t('schedule_pubarchive_years_saved');
+      fresh.style.color = '#2a5535';
+      setTimeout(() => { if (fresh.isConnected) fresh.textContent = ''; }, 3000);
+    }
+  } catch (e) {
+    console.error('[archive-years] save failed:', e);
+    if (statusEl && statusEl.isConnected) {
+      statusEl.textContent = (t('schedule_prelaunch_failed') || 'Save failed:') + ' ' + (e.message || e);
+      statusEl.style.color = '#8b2a2a';
+    } else {
+      alert((t('schedule_prelaunch_failed') || 'Save failed:') + ' ' + (e.message || e));
+    }
   }
 }
 
@@ -20214,6 +20304,28 @@ async function renderAdminProducts() {
   _renderAdminProductsView();
 }
 
+// Phase 6.61: the list filter, shared between the table render and the
+// drag-reorder drop handler (both must see the exact same row list).
+function _adminProductsFiltered() {
+  const s = _productsAdminState;
+  return PRODUCTS.filter(p => {
+    if (s.filter === 'active' && p.status !== 'active') return false;
+    if (s.filter === 'prior_year' && p.status !== 'prior_year') return false;
+    if (s.season !== 'all' && String(p.season || '').trim() !== s.season) return false;
+    if (s.search) {
+      const needle = s.search.toLowerCase();
+      const hay = [p.id, p.name, p.color, p.style].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(needle)) return false;
+    }
+    return true;
+  });
+}
+
+function _adminProductsReorderEligible() {
+  const s = _productsAdminState;
+  return s.season !== 'all' && s.filter === 'all' && !s.search;
+}
+
 function _renderAdminProductsView() {
   const host = document.getElementById('adminProducts');
   if (!host) return;
@@ -20244,22 +20356,16 @@ function _renderAdminProductsView() {
     </div>`;
 
   // Filter + search products
-  const filtered = PRODUCTS.filter(p => {
-    if (s.filter === 'active' && p.status !== 'active') return false;
-    if (s.filter === 'prior_year' && p.status !== 'prior_year') return false;
-    if (s.season !== 'all' && String(p.season || '').trim() !== s.season) return false;
-    if (s.search) {
-      const needle = s.search.toLowerCase();
-      const hay = [p.id, p.name, p.color, p.style].filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(needle)) return false;
-    }
-    return true;
-  });
+  const filtered = _adminProductsFiltered();
+  // Phase 6.61: drag-reorder is offered only while the table shows one whole
+  // season (single year, no search, no status filter) — renumbering a partial
+  // view would silently interleave with the hidden rows.
+  const canReorder = _adminProductsReorderEligible();
 
   // List table
   let listBody;
   if (!filtered.length) {
-    listBody = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--cream-dim, var(--ink));opacity:0.6" data-t="admin_products_empty"></td></tr>`;
+    listBody = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--cream-dim, var(--ink));opacity:0.6" data-t="admin_products_empty"></td></tr>`;
   } else {
     listBody = filtered.map(p => {
       const imgUrl = productImageUrl(p.img);
@@ -20283,8 +20389,13 @@ function _renderAdminProductsView() {
           <option value="active" ${curStatus==='active'?'selected':''}>${escapeHtml(t('admin_products_status_active'))}</option>
           <option value="prior_year" ${curStatus==='prior_year'?'selected':''}>${escapeHtml(t('admin_products_status_prior'))}</option>
         </select>`;
+      // Phase 6.61: rows drag-reorder the catalog page order (whole-season
+      // view only). Handlers are inert unless a drag started on a row.
+      const dragAttrs = canReorder
+        ? ` draggable="true" ondragstart="_adminProductsDragStart(event, '${safeId}')" ondragend="_adminProductsDragEnd(event)" ondragover="_adminProductsRowDragOver(event)" ondragleave="_adminProductsRowDragLeave(event)" ondrop="_adminProductsRowDrop(event, '${safeId}')"`
+        : '';
       return `
-        <tr>
+        <tr${dragAttrs}>
           <td style="font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(p.id)}</td>
           <td>${thumb}</td>
           <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : ''}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${p.season ? `<span style="color:var(--gold-ink);opacity:1">${escapeHtml(p.season)}</span>` : ''}${p.season && p.color ? ' · ' : ''}${escapeHtml(p.color || '')}</div></td>
@@ -20299,7 +20410,12 @@ function _renderAdminProductsView() {
         </tr>`;
     }).join('');
   }
+  // Phase 6.61: reorder affordance hint — tells the admin how to enable
+  // dragging when the current view is filtered.
+  const reorderHint = `<p style="font-size:12px;color:var(--cream-dim, var(--ink));opacity:0.7;font-weight:300;margin:0 0 8px" data-t="${canReorder ? 'admin_products_reorder_hint_on' : 'admin_products_reorder_hint_off'}"></p>`;
+
   const listHtml = `
+    ${reorderHint}
     <div class="products-list-wrap">
       <table class="admin-table">
         <thead>
@@ -21131,6 +21247,105 @@ async function _adminProductsQuickStatusChange(sku, newStatus) {
     await loadProducts();
     _renderAdminProductsView();
     window.scrollTo(0, savedScroll);
+  }
+}
+
+// ─── Phase 6.61: drag-and-drop catalog page reorder ─────────────────────
+// Mirrors the Vault file-move drag pattern (vaultFileDragStart et al).
+// Only offered while the table shows one whole season; on drop the season's
+// rows are renumbered 1..N in their new table order, so ties and legacy
+// numbering (e.g. 2023's 1001+) normalize on first use. Set members keep
+// their relative order, which is what orders them inside their set's page.
+let _productsDragSku = null;
+// Reentrancy guard: while a reorder persist + reload is in flight the old
+// table is still on screen — a second drag in that window would compute
+// against stale numbers and could write duplicate display_order values.
+let _productsPersistBusy = false;
+
+function _adminProductsDragStart(event, sku) {
+  if (_productsPersistBusy) { event.preventDefault(); return; }
+  _productsDragSku = sku;
+  event.dataTransfer.effectAllowed = 'move';
+  // Mark the drag as an internal row move (not an external file drop).
+  event.dataTransfer.setData('application/x-gl-product', sku);
+  event.currentTarget.classList.add('being-dragged');
+}
+
+function _adminProductsDragEnd(event) {
+  _productsDragSku = null;
+  event.currentTarget.classList.remove('being-dragged');
+  document.querySelectorAll('#adminProducts tr.drop-above, #adminProducts tr.drop-below')
+    .forEach(el => el.classList.remove('drop-above', 'drop-below'));
+}
+
+function _adminProductsRowDragOver(event) {
+  if (!_productsDragSku || _productsPersistBusy) return;
+  // Only react to our own row drags — an OS file dragged across the table
+  // must never light up (or trigger) the reorder path.
+  if (!event.dataTransfer.types.includes('application/x-gl-product')) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  const tr = event.currentTarget;
+  const rect = tr.getBoundingClientRect();
+  const below = (event.clientY - rect.top) > rect.height / 2;
+  tr.classList.toggle('drop-above', !below);
+  tr.classList.toggle('drop-below', below);
+}
+
+function _adminProductsRowDragLeave(event) {
+  event.currentTarget.classList.remove('drop-above', 'drop-below');
+}
+
+async function _adminProductsRowDrop(event, targetSku) {
+  event.preventDefault();
+  const tr = event.currentTarget;
+  const below = tr.classList.contains('drop-below');
+  tr.classList.remove('drop-above', 'drop-below');
+  const sku = _productsDragSku;
+  _productsDragSku = null;
+  if (_productsPersistBusy) return;
+  if (!event.dataTransfer.types.includes('application/x-gl-product')) return;
+  if (!sku || sku === targetSku) return;
+  if (!requireCapability('can_edit_products')) return;
+  if (!_adminProductsReorderEligible()) return;
+
+  const ids = _adminProductsFiltered().map(p => p.id);
+  const from = ids.indexOf(sku);
+  if (from === -1 || ids.indexOf(targetSku) === -1) return;
+  ids.splice(from, 1);
+  const to = ids.indexOf(targetSku);
+  ids.splice(below ? to + 1 : to, 0, sku);
+  await _adminProductsPersistOrder(ids);
+}
+
+async function _adminProductsPersistOrder(orderedIds) {
+  const savedScroll = window.scrollY;
+  _productsPersistBusy = true;
+  const tableWrap = document.querySelector('#adminProducts .products-list-wrap');
+  if (tableWrap) tableWrap.style.opacity = '0.5';
+  try {
+    // Always write the full 1..N renumber. Writing every row (instead of a
+    // changed-rows delta) means any write that slips through a race degrades
+    // to last-drop-wins with a consistent sequence — never duplicate numbers
+    // computed against stale data.
+    const results = await Promise.all(orderedIds.map((id, i) =>
+      sb.from('products').update({ display_order: i + 1 }).eq('id', id)));
+    const failed = results.find(r => r.error);
+    if (failed) throw failed.error;
+    await loadProducts();
+    _renderAdminProductsView();
+    window.scrollTo(0, savedScroll);
+  } catch (err) {
+    console.error('[products] reorder failed:', err);
+    alert(t('admin_products_reorder_failed') + (err.message || err));
+    // Reload so the table reflects whatever actually persisted.
+    await loadProducts();
+    _renderAdminProductsView();
+    window.scrollTo(0, savedScroll);
+  } finally {
+    _productsPersistBusy = false;
+    const wrap = document.querySelector('#adminProducts .products-list-wrap');
+    if (wrap) wrap.style.opacity = '';
   }
 }
 
