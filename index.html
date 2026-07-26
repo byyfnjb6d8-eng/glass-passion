@@ -3059,6 +3059,21 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 #adminProducts .admin-table tbody tr.row-selected td { background: rgba(196,154,108,0.08); }
 #adminProducts .prod-sel-cb { cursor: pointer; }
 
+/* Wichtel (Secret Santa) admin tab */
+#adminWichtel .ww-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-family: 'DM Mono', monospace; border: 1px solid transparent; white-space: nowrap; }
+#adminWichtel .ww-badge.draft { background: rgba(138,120,101,0.12); color: #8a7865; border-color: rgba(138,120,101,0.3); }
+#adminWichtel .ww-badge.open { background: rgba(30,77,48,0.15); color: #2a5535; border-color: rgba(30,77,48,0.3); }
+#adminWichtel .ww-badge.drawn { background: rgba(201,168,76,0.12); color: var(--gold-ink); border-color: rgba(201,168,76,0.3); }
+#adminWichtel .ww-badge.released { background: rgba(196,154,108,0.18); color: var(--gold-ink); border-color: rgba(196,154,108,0.5); }
+#adminWichtel .ww-badge.closed { background: rgba(139,42,42,0.10); color: #8b2a2a; border-color: rgba(139,42,42,0.35); }
+#adminWichtel .ww-section { margin-bottom: 24px; padding: 16px; border: 1px solid var(--line2); border-radius: var(--r); }
+#adminWichtel .ww-section-title { margin: 0 0 10px; font-family: 'Cinzel', serif; color: var(--cream); font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; }
+#adminWichtel .ww-label { display: block; font-size: 12px; color: var(--cream-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+#adminWichtel .ww-input { width: 100%; padding: 8px; background: var(--surface2); color: var(--cream); border: 1px solid var(--line2); border-radius: 4px; font-size: 13px; }
+#adminWichtel .ww-input-sm { padding: 6px 8px; font-size: 12px; }
+#adminWichtel textarea.ww-input { font-family: inherit; resize: vertical; min-height: 70px; }
+#adminWichtel .admin-table td { vertical-align: middle; }
+
 /* Move-folder picker tree */
 .vault-move-tree { list-style: none; padding: 0; margin: 0; }
 .vault-move-tree ul { list-style: none; padding-left: 18px; margin: 4px 0 0 0; }
@@ -4989,6 +5004,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
           <button class="btn btn-ghost btn-sm" onclick="adminTab('reports')" id="adminTabReports" data-t="admin_tab_reports"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('products')" id="adminTabProducts" data-t="admin_tab_products"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('lottery')" id="adminTabLottery" data-t="admin_lottery"></button>
+          <button class="btn btn-ghost btn-sm" onclick="adminTab('wichtel')" id="adminTabWichtel" data-t="admin_tab_wichtel"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('admins')" id="adminTabAdmins" data-t="admin_tab_admins" style="display:none"></button>
         </div>
         <div id="adminAccounts"></div>
@@ -5002,6 +5018,7 @@ body.locked > *:not(#constructionGate) { display: none !important; }
         <div id="adminReports" style="display:none"></div>
         <div id="adminProducts" style="display:none"></div>
         <div id="adminLottery" style="display:none"></div>
+        <div id="adminWichtel" style="display:none"></div>
         <div id="adminAdmins" style="display:none"></div>
         <!-- Phase 6.38.1: Vault file detail modal -->
         <div id="vaultDetailModal" class="modal-bg" style="display:none">
@@ -7843,6 +7860,110 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   admin_products_reorder_failed: 'Reorder failed: ',
   admin_products_sel_count: '{n} selected — drag any ticked row to move them together.',
   admin_products_sel_clear: 'Clear selection',
+  // Wichtel (Secret Santa) admin tab
+  admin_tab_wichtel: 'Wichtel',
+  ww_remove_locked: 'This participant is part of the drawn result. Use "Back to open" first (this clears the draw), then remove them and redraw.',
+  ww_swap_adjacent: 'These two can\'t be swapped directly — one of them already gives to the other, so the swap would make someone their own Wichtel. Swap each of them with a third person instead, or go back to open and redraw.',
+  ww_swap_excl_warn: 'Careful: this swap creates a pairing that the exclusion list forbids. Proceed anyway?',
+  ww_release_mismatch: 'Cannot release: {a} assignments for {p} joined participants. Someone joined after the draw — go back to open and redraw so everyone has a Wichtel.',
+  ww_admin_sub: 'Manage Secret Santa exchanges: create an unlisted exchange, curate the wish book, run the draw and release the assignments.',
+  ww_btn_new: '+ New Exchange',
+  ww_list_empty: 'No exchanges yet. Create the first one!',
+  ww_col_name: 'Exchange',
+  ww_col_status: 'Status',
+  ww_col_seats: 'Seats',
+  ww_col_dates: 'Dates',
+  ww_col_link: 'Invite Link',
+  ww_col_actions: 'Actions',
+  ww_col_deadline_prefix: 'RSVP by',
+  ww_btn_manage: 'Open',
+  ww_btn_edit: 'Edit',
+  ww_copy_link: 'Copy invite link',
+  ww_copy_link_done: 'Copied!',
+  ww_copy_link_manual: 'Copy this link:',
+  ww_status_draft: 'Draft',
+  ww_status_open: 'Open',
+  ww_status_drawn: 'Drawn',
+  ww_status_released: 'Released',
+  ww_status_closed: 'Closed',
+  ww_form_title_new: 'New Exchange',
+  ww_form_title_edit: 'Edit Exchange',
+  ww_form_name: 'Name',
+  ww_form_slug: 'Slug (URL key)',
+  ww_form_slug_hint: 'Lowercase letters, numbers and hyphens. Part of the invite link — changing it breaks links already sent.',
+  ww_form_cap: 'Max participants (hard cap)',
+  ww_form_cap_hint: 'Hard cap enforced by the database — joins beyond this number are rejected. Minimum 2.',
+  ww_form_date: 'Exchange date',
+  ww_form_deadline: 'RSVP deadline',
+  ww_form_budget: 'Budget label',
+  ww_form_note_en: 'Note (English)',
+  ww_form_note_de: 'Note (German)',
+  ww_form_cover: 'Cover image filename',
+  ww_form_cover_hint: 'Filename in the product-images bucket (e.g. wichtel-cover.png).',
+  ww_form_status: 'Status',
+  ww_form_status_locked: 'Names have been drawn — status changes now happen via the buttons in the Draw section (Release / Back to open).',
+  ww_form_save: 'Save',
+  ww_form_cancel: 'Cancel',
+  ww_err_name_required: 'Name is required.',
+  ww_err_slug_required: 'Slug is required.',
+  ww_err_slug_format: 'Slug may only contain lowercase letters, numbers and hyphens (e.g. wichteln-2026).',
+  ww_err_cap_required: 'Max participants is required (a whole number of at least 2).',
+  ww_err_slug_taken: 'This slug is already in use — pick another one.',
+  ww_err_cap_locked: 'The cap cannot be raised after the draw.',
+  ww_err_cap_below: 'The cap cannot be lower than the current number of participants.',
+  ww_err_full: 'This exchange is full.',
+  ww_save_failed: 'Save failed',
+  ww_load_failed: 'Could not load Wichtel data',
+  ww_detail_back: '← All exchanges',
+  ww_seats_label: 'joined',
+  ww_participants_title: 'Participants',
+  ww_participants_empty: 'No participants yet — share the invite link.',
+  ww_col_p_name: 'Name',
+  ww_col_p_email: 'Email',
+  ww_col_p_status: 'Status',
+  ww_col_p_wishes: 'Wishes',
+  ww_p_status_invited: 'Invited',
+  ww_p_status_joined: 'Joined',
+  ww_p_status_declined: 'Declined',
+  ww_btn_remove: 'Remove',
+  ww_remove_confirm: 'Remove {name} from this exchange?',
+  ww_exclusions_title: 'Exclusions',
+  ww_exclusions_sub: 'Pairs that must not draw each other (applies in both directions).',
+  ww_exclusions_empty: 'No exclusions.',
+  ww_btn_add: '+ Add',
+  ww_excl_same: 'Pick two different participants.',
+  ww_excl_dup: 'This pair is already excluded.',
+  ww_btn_delete: 'Delete',
+  ww_wishbook_title: 'Wish Book',
+  ww_wishbook_sub: 'The Glass Passion special list participants pick their wishes from. Participants only see rows marked active.',
+  ww_wishbook_empty: 'No wish book items yet — add the first one in the bottom row.',
+  ww_wb_col_name: 'Name',
+  ww_wb_col_color: 'Color',
+  ww_wb_col_height: 'Height',
+  ww_wb_col_price: 'Price',
+  ww_wb_col_img: 'Image file',
+  ww_wb_col_order: 'Order',
+  ww_wb_col_active: 'Active',
+  ww_btn_save: 'Save',
+  ww_wb_name_required: 'Item name is required.',
+  ww_wb_delete_confirm: 'Delete "{name}" from the wish book? Wishes pointing at it will be removed as well.',
+  ww_draw_title: 'Draw & Assignments',
+  ww_draw_sub: 'Requires status Open and at least 2 joined participants. The draw honors all exclusions and never lets anyone draw themselves.',
+  ww_btn_draw: 'Draw names',
+  ww_draw_need_open: 'The exchange must be Open to draw names.',
+  ww_draw_need_two: 'At least 2 joined participants are needed to draw.',
+  ww_draw_confirm: 'Draw names for {n} participants? Any existing assignments will be replaced.',
+  ww_draw_unsolvable: 'No valid assignment found after 500 attempts. The exclusions probably make a solution impossible — remove some and try again.',
+  ww_col_giver: 'Giver',
+  ww_col_receiver: 'Receiver',
+  ww_col_swap: 'Swap',
+  ww_swap_placeholder: 'Swap receiver with…',
+  ww_swap_confirm: 'Swap receivers: {a} and {b} will exchange who they give to. Continue?',
+  ww_btn_release: 'Release assignments',
+  ww_release_confirm: 'Release the assignments now? Every joined participant will immediately see who they drew, along with their wishes. This is a one-way door — once seen, it cannot be unseen. Continue?',
+  ww_btn_back_open: 'Back to open (discard draw)',
+  ww_back_open_confirm: 'Discard the current draw and set the exchange back to Open? All assignments will be deleted.',
+  ww_released_note: 'Assignments are released — participants can see who they drew. Swapping is no longer available.',
   admin_products_col_actions: 'Actions',
   admin_products_btn_edit: 'Edit',
   // Phase 6.49c: delete + quick status change
@@ -9049,6 +9170,110 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   admin_products_reorder_failed: 'Umsortieren fehlgeschlagen: ',
   admin_products_sel_count: '{n} ausgewählt — eine angehakte Zeile ziehen, um alle gemeinsam zu verschieben.',
   admin_products_sel_clear: 'Auswahl aufheben',
+  // Wichtel-Admin-Tab
+  admin_tab_wichtel: 'Wichteln',
+  ww_remove_locked: 'Diese Person ist Teil der Auslosung. Erst „Zurück auf Offen" (löscht die Auslosung), dann entfernen und neu auslosen.',
+  ww_swap_adjacent: 'Diese beiden können nicht direkt getauscht werden — einer beschenkt bereits den anderen, der Tausch würde jemanden zum eigenen Wichtel machen. Tauscht jeweils mit einer dritten Person, oder zurück auf Offen und neu auslosen.',
+  ww_swap_excl_warn: 'Achtung: Dieser Tausch erzeugt eine Zuordnung, die die Ausschlussliste verbietet. Trotzdem fortfahren?',
+  ww_release_mismatch: 'Veröffentlichen nicht möglich: {a} Zuordnungen für {p} Teilnehmer. Jemand ist nach der Auslosung beigetreten — zurück auf Offen und neu auslosen, damit jeder einen Wichtel hat.',
+  ww_admin_sub: 'Wichtelrunden verwalten: eine unverlinkte Runde anlegen, das Wunschbuch pflegen, die Auslosung durchführen und die Zuordnungen veröffentlichen.',
+  ww_btn_new: '+ Neue Wichtelrunde',
+  ww_list_empty: 'Noch keine Wichtelrunden. Lege die erste an!',
+  ww_col_name: 'Runde',
+  ww_col_status: 'Status',
+  ww_col_seats: 'Plätze',
+  ww_col_dates: 'Termine',
+  ww_col_link: 'Einladungslink',
+  ww_col_actions: 'Aktionen',
+  ww_col_deadline_prefix: 'Anmeldung bis',
+  ww_btn_manage: 'Öffnen',
+  ww_btn_edit: 'Bearbeiten',
+  ww_copy_link: 'Einladungslink kopieren',
+  ww_copy_link_done: 'Kopiert!',
+  ww_copy_link_manual: 'Diesen Link kopieren:',
+  ww_status_draft: 'Entwurf',
+  ww_status_open: 'Offen',
+  ww_status_drawn: 'Ausgelost',
+  ww_status_released: 'Veröffentlicht',
+  ww_status_closed: 'Beendet',
+  ww_form_title_new: 'Neue Wichtelrunde',
+  ww_form_title_edit: 'Wichtelrunde bearbeiten',
+  ww_form_name: 'Name',
+  ww_form_slug: 'Slug (URL-Kürzel)',
+  ww_form_slug_hint: 'Kleinbuchstaben, Zahlen und Bindestriche. Teil des Einladungslinks — eine Änderung macht bereits verschickte Links ungültig.',
+  ww_form_cap: 'Maximale Teilnehmerzahl (harte Obergrenze)',
+  ww_form_cap_hint: 'Harte Obergrenze, von der Datenbank erzwungen — weitere Anmeldungen werden abgelehnt. Mindestens 2.',
+  ww_form_date: 'Datum der Bescherung',
+  ww_form_deadline: 'Anmeldeschluss',
+  ww_form_budget: 'Budget-Angabe',
+  ww_form_note_en: 'Hinweis (Englisch)',
+  ww_form_note_de: 'Hinweis (Deutsch)',
+  ww_form_cover: 'Titelbild-Dateiname',
+  ww_form_cover_hint: 'Dateiname im product-images-Bucket (z. B. wichtel-cover.png).',
+  ww_form_status: 'Status',
+  ww_form_status_locked: 'Die Namen sind bereits ausgelost — Statusänderungen erfolgen jetzt über die Buttons im Abschnitt Auslosung (Veröffentlichen / Zurück auf Offen).',
+  ww_form_save: 'Speichern',
+  ww_form_cancel: 'Abbrechen',
+  ww_err_name_required: 'Name ist erforderlich.',
+  ww_err_slug_required: 'Slug ist erforderlich.',
+  ww_err_slug_format: 'Der Slug darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten (z. B. wichteln-2026).',
+  ww_err_cap_required: 'Maximale Teilnehmerzahl ist erforderlich (ganze Zahl, mindestens 2).',
+  ww_err_slug_taken: 'Dieser Slug ist bereits vergeben — bitte einen anderen wählen.',
+  ww_err_cap_locked: 'Nach der Auslosung kann die Obergrenze nicht mehr erhöht werden.',
+  ww_err_cap_below: 'Die Obergrenze darf nicht unter der aktuellen Teilnehmerzahl liegen.',
+  ww_err_full: 'Diese Wichtelrunde ist voll.',
+  ww_save_failed: 'Speichern fehlgeschlagen',
+  ww_load_failed: 'Wichtel-Daten konnten nicht geladen werden',
+  ww_detail_back: '← Alle Wichtelrunden',
+  ww_seats_label: 'dabei',
+  ww_participants_title: 'Teilnehmer',
+  ww_participants_empty: 'Noch keine Teilnehmer — teile den Einladungslink.',
+  ww_col_p_name: 'Name',
+  ww_col_p_email: 'E-Mail',
+  ww_col_p_status: 'Status',
+  ww_col_p_wishes: 'Wünsche',
+  ww_p_status_invited: 'Eingeladen',
+  ww_p_status_joined: 'Dabei',
+  ww_p_status_declined: 'Abgesagt',
+  ww_btn_remove: 'Entfernen',
+  ww_remove_confirm: '{name} aus dieser Wichtelrunde entfernen?',
+  ww_exclusions_title: 'Ausschlüsse',
+  ww_exclusions_sub: 'Paare, die einander nicht ziehen dürfen (gilt in beide Richtungen).',
+  ww_exclusions_empty: 'Keine Ausschlüsse.',
+  ww_btn_add: '+ Hinzufügen',
+  ww_excl_same: 'Bitte zwei verschiedene Teilnehmer wählen.',
+  ww_excl_dup: 'Dieses Paar ist bereits ausgeschlossen.',
+  ww_btn_delete: 'Löschen',
+  ww_wishbook_title: 'Wunschbuch',
+  ww_wishbook_sub: 'Die spezielle Glass-Passion-Liste, aus der die Teilnehmer ihre Wünsche wählen. Teilnehmer sehen nur als aktiv markierte Zeilen.',
+  ww_wishbook_empty: 'Noch keine Einträge im Wunschbuch — in der untersten Zeile den ersten hinzufügen.',
+  ww_wb_col_name: 'Name',
+  ww_wb_col_color: 'Farbe',
+  ww_wb_col_height: 'Höhe',
+  ww_wb_col_price: 'Preis',
+  ww_wb_col_img: 'Bilddatei',
+  ww_wb_col_order: 'Reihenfolge',
+  ww_wb_col_active: 'Aktiv',
+  ww_btn_save: 'Speichern',
+  ww_wb_name_required: 'Name des Eintrags ist erforderlich.',
+  ww_wb_delete_confirm: '„{name}" aus dem Wunschbuch löschen? Darauf zeigende Wünsche werden ebenfalls entfernt.',
+  ww_draw_title: 'Auslosung & Zuordnungen',
+  ww_draw_sub: 'Erfordert Status Offen und mindestens 2 Teilnehmer. Die Auslosung beachtet alle Ausschlüsse — niemand zieht sich selbst.',
+  ww_btn_draw: 'Namen auslosen',
+  ww_draw_need_open: 'Zum Auslosen muss die Runde auf Offen stehen.',
+  ww_draw_need_two: 'Zum Auslosen sind mindestens 2 Teilnehmer nötig.',
+  ww_draw_confirm: 'Namen für {n} Teilnehmer auslosen? Bestehende Zuordnungen werden ersetzt.',
+  ww_draw_unsolvable: 'Nach 500 Versuchen keine gültige Zuordnung gefunden. Vermutlich machen die Ausschlüsse eine Lösung unmöglich — bitte einige entfernen und erneut versuchen.',
+  ww_col_giver: 'Schenkt',
+  ww_col_receiver: 'Beschenkt',
+  ww_col_swap: 'Tauschen',
+  ww_swap_placeholder: 'Empfänger tauschen mit…',
+  ww_swap_confirm: 'Empfänger tauschen: {a} und {b} tauschen, wen sie beschenken. Fortfahren?',
+  ww_btn_release: 'Zuordnungen veröffentlichen',
+  ww_release_confirm: 'Zuordnungen jetzt veröffentlichen? Alle Teilnehmer sehen sofort, wen sie gezogen haben, samt Wünschen. Das ist eine Einbahnstraße — was einmal gesehen wurde, lässt sich nicht zurücknehmen. Fortfahren?',
+  ww_btn_back_open: 'Zurück auf Offen (Auslosung verwerfen)',
+  ww_back_open_confirm: 'Die aktuelle Auslosung verwerfen und die Runde zurück auf Offen setzen? Alle Zuordnungen werden gelöscht.',
+  ww_released_note: 'Die Zuordnungen sind veröffentlicht — die Teilnehmer sehen, wen sie gezogen haben. Tauschen ist nicht mehr möglich.',
   admin_products_col_actions: 'Aktionen',
   admin_products_btn_edit: 'Bearbeiten',
   // Phase 6.49c: Löschen + Schnellstatusänderung
@@ -22497,6 +22722,7 @@ const ADMIN_TAB_CAPABILITY_MAP = {
   adminTabReports:   () => true,  // read-only
   adminTabProducts:  () => hasCapability('can_edit_products') || hasCapability('can_delete_products'),
   adminTabLottery:   () => hasCapability('can_run_lottery'),
+  adminTabWichtel:   () => hasCapability('can_manage_season'),
   adminTabAdmins:    () => isOwner(),  // Owner-only
 };
 
@@ -22647,6 +22873,806 @@ async function saveAdminCapabilities(emailLower) {
 }
 
 
+// ═══════════════════════════════════════════════════════════════════════
+// WICHTEL (Secret Santa) — ADMIN TAB
+// Exchanges live in ww_exchanges; participants join via the unlisted page
+// /wichtel.html?x=<slug> (RPC ww_join). The DB trigger enforces the hard
+// participant cap (WW_EXCHANGE_FULL) and the cap-change rules
+// (WW_CAP_LOCKED_AFTER_DRAW / WW_CAP_BELOW_HEADCOUNT). Admins manage the
+// wish book, exclusions, the draw and the release from here. All writes
+// are gated by can_manage_season CLIENT-SIDE ONLY (UX gating). The RLS
+// policies on ww_* tables check is_admin() — any admin account passes
+// server-side regardless of capability flags.
+// ═══════════════════════════════════════════════════════════════════════
+
+const _wichtelAdminState = {
+  view: 'list',          // 'list' | 'form' | 'detail'
+  exchanges: [],         // cached ww_exchanges rows (list view)
+  seatCounts: {},        // exchange_id -> joined participant count
+  editing: null,         // exchange row being edited, or null = create new
+  slugTouched: false,    // stop auto-suggesting the slug once admin edits it
+  detail: null,          // { exchange, participants, exclusions, wishbook, wishes, assignments }
+};
+
+function _wwVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+function _wwStatusBadge(status) {
+  const s = String(status || 'draft');
+  return `<span class="ww-badge ${escapeHtml(s)}">${escapeHtml(t('ww_status_' + s))}</span>`;
+}
+
+function _wwInviteLink(slug) {
+  return location.origin + '/wichtel.html?x=' + encodeURIComponent(slug || '');
+}
+
+// Map DB trigger / constraint errors to friendly i18n messages.
+function _wwPickError(e) {
+  const msg = String((e && e.message) || e || '');
+  if (msg.indexOf('WW_EXCHANGE_FULL') !== -1) return t('ww_err_full');
+  if (msg.indexOf('WW_CAP_LOCKED_AFTER_DRAW') !== -1) return t('ww_err_cap_locked');
+  if (msg.indexOf('WW_CAP_BELOW_HEADCOUNT') !== -1) return t('ww_err_cap_below');
+  if ((e && e.code === '23505') || msg.indexOf('duplicate key') !== -1) return t('ww_err_slug_taken');
+  return msg;
+}
+
+function _wwPName(d, pid) {
+  const p = d.participants.find(x => x.id === pid);
+  if (!p) return '?';
+  return p.display_name || p.email || '?';
+}
+
+async function renderAdminWichtel() {
+  const host = document.getElementById('adminWichtel');
+  if (!host) return;
+  const s = _wichtelAdminState;
+  // Keep sub-view across tab re-entry: detail/form re-render from state.
+  if (s.view === 'detail' && s.detail) { _wwRenderDetail(); return; }
+  if (s.view === 'form') { _wwRenderForm(); return; }
+  host.innerHTML = `<div style="color:var(--cream-dim);font-style:italic">${escapeHtml(t('loading'))}</div>`;
+  try {
+    const [exRes, pRes] = await Promise.all([
+      sb.from('ww_exchanges').select('*').order('created_at'),
+      sb.from('ww_participants').select('exchange_id,status'),
+    ]);
+    if (exRes.error) throw exRes.error;
+    if (pRes.error) throw pRes.error;
+    s.exchanges = exRes.data || [];
+    s.seatCounts = {};
+    (pRes.data || []).forEach(p => {
+      if (p.status !== 'joined') return;
+      s.seatCounts[p.exchange_id] = (s.seatCounts[p.exchange_id] || 0) + 1;
+    });
+  } catch (e) {
+    host.innerHTML = `<div class="alert alert-error">${escapeHtml(t('ww_load_failed') + ': ' + (e.message || e))}</div>`;
+    return;
+  }
+  _wwRenderList();
+}
+
+function _wwRenderList() {
+  const host = document.getElementById('adminWichtel');
+  if (!host) return;
+  const s = _wichtelAdminState;
+  const rows = s.exchanges.map(ex => {
+    const used = s.seatCounts[ex.id] || 0;
+    const safeSlug = String(ex.slug || '').replace(/'/g, "\\'");
+    return `<tr>
+      <td>${escapeHtml(ex.name || '')}<div style="font-size:11px;color:var(--cream-dim);font-family:'DM Mono',monospace">${escapeHtml(ex.slug || '')}</div></td>
+      <td>${_wwStatusBadge(ex.status)}</td>
+      <td style="font-family:'DM Mono',monospace;text-align:center">${used} / ${Number(ex.max_participants) || '—'}</td>
+      <td style="font-size:12px;font-family:'DM Mono',monospace">${escapeHtml(ex.exchange_date || '—')}${ex.rsvp_deadline ? `<div style="font-size:11px;color:var(--cream-dim)">${escapeHtml(t('ww_col_deadline_prefix') + ' ' + ex.rsvp_deadline)}</div>` : ''}</td>
+      <td><button class="btn btn-ghost btn-sm" data-slug="${escapeHtml(ex.slug)}" onclick="wwCopyInviteLink(this)">${escapeHtml(t('ww_copy_link'))}</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline btn-sm" onclick="wwOpenDetail('${escapeHtml(ex.id)}')">${escapeHtml(t('ww_btn_manage'))}</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:4px" onclick="wwEditExchange('${escapeHtml(ex.id)}')">${escapeHtml(t('ww_btn_edit'))}</button>
+      </td>
+    </tr>`;
+  }).join('');
+  host.innerHTML = `
+    <p style="color:var(--cream-dim);font-size:13px;font-weight:300;margin-bottom:16px">${escapeHtml(t('ww_admin_sub'))}</p>
+    <div style="margin-bottom:14px"><button class="btn btn-gold btn-sm" onclick="wwNewExchange()">${escapeHtml(t('ww_btn_new'))}</button></div>
+    ${s.exchanges.length
+      ? `<div style="overflow-x:auto"><table class="admin-table">
+          <thead><tr>
+            <th>${escapeHtml(t('ww_col_name'))}</th>
+            <th>${escapeHtml(t('ww_col_status'))}</th>
+            <th style="text-align:center">${escapeHtml(t('ww_col_seats'))}</th>
+            <th>${escapeHtml(t('ww_col_dates'))}</th>
+            <th>${escapeHtml(t('ww_col_link'))}</th>
+            <th>${escapeHtml(t('ww_col_actions'))}</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>`
+      : `<div style="padding:24px;text-align:center;color:var(--cream-dim);font-style:italic">${escapeHtml(t('ww_list_empty'))}</div>`}`;
+}
+
+async function wwCopyInviteLink(btn) {
+  const link = _wwInviteLink(btn && btn.dataset ? btn.dataset.slug : '');
+  try {
+    await navigator.clipboard.writeText(link);
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = t('ww_copy_link_done');
+      setTimeout(() => { btn.textContent = orig; }, 1600);
+    }
+  } catch (e) {
+    // Clipboard API unavailable (http / permissions) — let admin copy manually
+    prompt(t('ww_copy_link_manual'), link);
+  }
+}
+
+function wwBackToList() {
+  _wichtelAdminState.view = 'list';
+  _wichtelAdminState.editing = null;
+  _wichtelAdminState.detail = null;
+  renderAdminWichtel();
+}
+
+function wwNewExchange() {
+  _wichtelAdminState.editing = null;
+  _wichtelAdminState.slugTouched = false;
+  _wichtelAdminState.view = 'form';
+  _wwRenderForm();
+}
+
+function wwEditExchange(id) {
+  const s = _wichtelAdminState;
+  const ex = (s.detail && s.detail.exchange && s.detail.exchange.id === id)
+    ? s.detail.exchange
+    : s.exchanges.find(x => x.id === id);
+  if (!ex) return;
+  s.editing = ex;
+  s.slugTouched = true;   // never overwrite an existing slug from the name field
+  s.view = 'form';
+  _wwRenderForm();
+}
+
+// Slug auto-suggest: lowercase-hyphen, German umlauts transliterated.
+function _wwSlugify(name) {
+  return String(name || '').toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// The slug IS the key to the unlisted page, so the suggestion carries a
+// random suffix — a dictionary word alone would be guessable.
+function _wwSlugSuffix() {
+  const a = new Uint8Array(4);
+  crypto.getRandomValues(a);
+  return Array.from(a, b => (b % 36).toString(36)).join('');
+}
+
+function wwNameInput() {
+  if (_wichtelAdminState.slugTouched) return;
+  const slugEl = document.getElementById('wwFxSlug');
+  if (!slugEl) return;
+  if (!_wichtelAdminState.slugSuffix) _wichtelAdminState.slugSuffix = _wwSlugSuffix();
+  const base = _wwSlugify(_wwVal('wwFxName'));
+  slugEl.value = base ? base + '-' + _wichtelAdminState.slugSuffix : '';
+}
+
+function wwSlugInput() { _wichtelAdminState.slugTouched = true; }
+
+function _wwRenderForm() {
+  const host = document.getElementById('adminWichtel');
+  if (!host) return;
+  const ex = _wichtelAdminState.editing;
+  const isEdit = !!ex;
+  // Once names are drawn, drawn/released transitions happen only via the
+  // dedicated Draw-section buttons — the select would be a footgun here.
+  const locked = isEdit && (ex.status === 'drawn' || ex.status === 'released');
+  const statusField = locked
+    ? `<div>${_wwStatusBadge(ex.status)}<div style="font-size:11px;color:var(--cream-dim);font-style:italic;margin-top:6px">${escapeHtml(t('ww_form_status_locked'))}</div></div>`
+    : `<select id="wwFxStatus" class="ww-input">${['draft', 'open', 'closed'].map(v =>
+        `<option value="${v}" ${(ex ? ex.status : 'draft') === v ? 'selected' : ''}>${escapeHtml(t('ww_status_' + v))}</option>`).join('')}</select>`;
+  const coverUrl = ex && ex.cover_img ? productImageUrl(ex.cover_img) : null;
+  host.innerHTML = `
+    <div style="margin-bottom:14px"><a href="#" onclick="wwBackToList();return false" style="color:var(--gold-ink);font-size:13px">${escapeHtml(t('ww_detail_back'))}</a></div>
+    <div class="ww-section">
+      <h4 class="ww-section-title">${escapeHtml(t(isEdit ? 'ww_form_title_edit' : 'ww_form_title_new'))}</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+        <div>
+          <label class="ww-label" for="wwFxName">${escapeHtml(t('ww_form_name'))}</label>
+          <input id="wwFxName" class="ww-input" type="text" maxlength="120" value="${escapeHtml(ex ? ex.name || '' : '')}" oninput="wwNameInput()">
+          <div id="wwFxNameErr" style="font-size:11px;color:#c66;margin-top:4px"></div>
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxSlug">${escapeHtml(t('ww_form_slug'))}</label>
+          <input id="wwFxSlug" class="ww-input" type="text" maxlength="80" style="font-family:'DM Mono',monospace" value="${escapeHtml(ex ? ex.slug || '' : '')}" oninput="wwSlugInput()">
+          <div style="font-size:11px;color:var(--cream-dim);font-style:italic;margin-top:4px">${escapeHtml(t('ww_form_slug_hint'))}</div>
+          <div id="wwFxSlugErr" style="font-size:11px;color:#c66;margin-top:4px"></div>
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxCap">${escapeHtml(t('ww_form_cap'))}</label>
+          <input id="wwFxCap" class="ww-input" type="number" min="2" step="1" value="${escapeHtml(ex && ex.max_participants != null ? String(ex.max_participants) : '')}">
+          <div style="font-size:11px;color:var(--cream-dim);font-style:italic;margin-top:4px">${escapeHtml(t('ww_form_cap_hint'))}</div>
+          <div id="wwFxCapErr" style="font-size:11px;color:#c66;margin-top:4px"></div>
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxDate">${escapeHtml(t('ww_form_date'))}</label>
+          <input id="wwFxDate" class="ww-input" type="date" value="${escapeHtml(ex ? ex.exchange_date || '' : '')}">
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxDeadline">${escapeHtml(t('ww_form_deadline'))}</label>
+          <input id="wwFxDeadline" class="ww-input" type="date" value="${escapeHtml(ex ? ex.rsvp_deadline || '' : '')}">
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxBudget">${escapeHtml(t('ww_form_budget'))}</label>
+          <input id="wwFxBudget" class="ww-input" type="text" maxlength="80" value="${escapeHtml(ex ? ex.budget_label || '' : '')}">
+        </div>
+        <div>
+          <label class="ww-label" for="wwFxCover">${escapeHtml(t('ww_form_cover'))}</label>
+          <input id="wwFxCover" class="ww-input" type="text" maxlength="200" style="font-family:'DM Mono',monospace" value="${escapeHtml(ex ? ex.cover_img || '' : '')}">
+          <div style="font-size:11px;color:var(--cream-dim);font-style:italic;margin-top:4px">${escapeHtml(t('ww_form_cover_hint'))}</div>
+          ${coverUrl ? `<img src="${escapeHtml(coverUrl)}" alt="" style="margin-top:8px;max-width:120px;border-radius:4px;border:1px solid var(--line2)">` : ''}
+        </div>
+        <div>
+          <label class="ww-label">${escapeHtml(t('ww_form_status'))}</label>
+          ${statusField}
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label class="ww-label" for="wwFxNoteEn">${escapeHtml(t('ww_form_note_en'))}</label>
+        <textarea id="wwFxNoteEn" class="ww-input">${escapeHtml(ex ? ex.note_en || '' : '')}</textarea>
+      </div>
+      <div style="margin-top:14px">
+        <label class="ww-label" for="wwFxNoteDe">${escapeHtml(t('ww_form_note_de'))}</label>
+        <textarea id="wwFxNoteDe" class="ww-input">${escapeHtml(ex ? ex.note_de || '' : '')}</textarea>
+      </div>
+      <div style="margin-top:18px;text-align:right">
+        <button class="btn btn-ghost btn-sm" onclick="wwBackToList()">${escapeHtml(t('ww_form_cancel'))}</button>
+        <button class="btn btn-gold btn-sm" id="wwFxSaveBtn" style="margin-left:8px" onclick="wwSaveExchange()">${escapeHtml(t('ww_form_save'))}</button>
+      </div>
+    </div>`;
+}
+
+async function wwSaveExchange() {
+  if (!requireCapability('can_manage_season')) return;
+  const ex = _wichtelAdminState.editing;
+  ['wwFxNameErr', 'wwFxSlugErr', 'wwFxCapErr'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '';
+  });
+  const name = _wwVal('wwFxName').trim();
+  const slug = _wwVal('wwFxSlug').trim().toLowerCase();
+  const cap = parseInt(_wwVal('wwFxCap'), 10);
+  let bad = false;
+  if (!name) { const el = document.getElementById('wwFxNameErr'); if (el) el.textContent = t('ww_err_name_required'); bad = true; }
+  if (!slug) { const el = document.getElementById('wwFxSlugErr'); if (el) el.textContent = t('ww_err_slug_required'); bad = true; }
+  else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { const el = document.getElementById('wwFxSlugErr'); if (el) el.textContent = t('ww_err_slug_format'); bad = true; }
+  if (!Number.isFinite(cap) || cap < 2) { const el = document.getElementById('wwFxCapErr'); if (el) el.textContent = t('ww_err_cap_required'); bad = true; }
+  if (bad) return;
+
+  const locked = !!(ex && (ex.status === 'drawn' || ex.status === 'released'));
+  const payload = {
+    name: name,
+    slug: slug,
+    max_participants: cap,
+    exchange_date: _wwVal('wwFxDate') || null,
+    rsvp_deadline: _wwVal('wwFxDeadline') || null,
+    budget_label: _wwVal('wwFxBudget').trim() || null,
+    note_en: _wwVal('wwFxNoteEn').trim() || null,
+    note_de: _wwVal('wwFxNoteDe').trim() || null,
+    cover_img: _wwVal('wwFxCover').trim() || null,
+    updated_at: new Date().toISOString(),
+    updated_by: currentUser?.email || null,
+  };
+  if (!locked) payload.status = _wwVal('wwFxStatus') || 'draft';
+
+  const btn = document.getElementById('wwFxSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('saving'); }
+  try {
+    if (ex) {
+      const { error } = await sb.from('ww_exchanges').update(payload).eq('id', ex.id);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('ww_exchanges').insert(payload);
+      if (error) throw error;
+    }
+    wwBackToList();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = t('ww_form_save'); }
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+}
+
+// ── Per-exchange detail view ────────────────────────────────────────────
+
+async function wwOpenDetail(id) {
+  const host = document.getElementById('adminWichtel');
+  if (host) host.innerHTML = `<div style="color:var(--cream-dim);font-style:italic">${escapeHtml(t('loading'))}</div>`;
+  try {
+    const [exRes, pRes, xRes, wbRes, wRes, aRes] = await Promise.all([
+      sb.from('ww_exchanges').select('*').eq('id', id).single(),
+      sb.from('ww_participants').select('*').eq('exchange_id', id).order('joined_at'),
+      sb.from('ww_exclusions').select('*').eq('exchange_id', id),
+      sb.from('ww_wishbook').select('*').eq('exchange_id', id).order('display_order'),
+      sb.from('ww_wishes').select('id,participant_id').eq('exchange_id', id),
+      sb.from('ww_assignments').select('*').eq('exchange_id', id),
+    ]);
+    const err = exRes.error || pRes.error || xRes.error || wbRes.error || wRes.error || aRes.error;
+    if (err) throw err;
+    _wichtelAdminState.detail = {
+      exchange: exRes.data,
+      participants: pRes.data || [],
+      exclusions: xRes.data || [],
+      wishbook: wbRes.data || [],
+      wishes: wRes.data || [],
+      assignments: aRes.data || [],
+    };
+    _wichtelAdminState.view = 'detail';
+    _wwRenderDetail();
+  } catch (e) {
+    if (host) host.innerHTML = `<div class="alert alert-error">${escapeHtml(t('ww_load_failed') + ': ' + (e.message || e))}</div>`;
+  }
+}
+
+function _wwRenderDetail() {
+  const host = document.getElementById('adminWichtel');
+  const d = _wichtelAdminState.detail;
+  if (!host || !d) return;
+  const ex = d.exchange;
+  const joined = d.participants.filter(p => p.status === 'joined');
+  const wishCounts = {};
+  d.wishes.forEach(w => { wishCounts[w.participant_id] = (wishCounts[w.participant_id] || 0) + 1; });
+  const safeSlug = String(ex.slug || '').replace(/'/g, "\\'");
+
+  // Participants table
+  const pRows = d.participants.map(p => `<tr>
+    <td>${escapeHtml(p.display_name || '—')}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(p.email || '')}</td>
+    <td>${escapeHtml(t('ww_p_status_' + (p.status || 'invited')))}</td>
+    <td style="text-align:center;font-family:'DM Mono',monospace">${wishCounts[p.id] || 0}</td>
+    <td><button class="btn btn-ghost btn-sm" style="color:#8b2a2a" onclick="wwRemoveParticipant('${escapeHtml(p.id)}')">${escapeHtml(t('ww_btn_remove'))}</button></td>
+  </tr>`).join('');
+  const participantsHtml = `
+    <div class="ww-section">
+      <h4 class="ww-section-title">${escapeHtml(t('ww_participants_title'))}</h4>
+      ${d.participants.length
+        ? `<div style="overflow-x:auto"><table class="admin-table">
+            <thead><tr>
+              <th>${escapeHtml(t('ww_col_p_name'))}</th>
+              <th>${escapeHtml(t('ww_col_p_email'))}</th>
+              <th>${escapeHtml(t('ww_col_p_status'))}</th>
+              <th style="text-align:center">${escapeHtml(t('ww_col_p_wishes'))}</th>
+              <th>${escapeHtml(t('ww_col_actions'))}</th>
+            </tr></thead>
+            <tbody>${pRows}</tbody>
+          </table></div>`
+        : `<div style="color:var(--cream-dim);font-style:italic;font-size:13px">${escapeHtml(t('ww_participants_empty'))}</div>`}
+    </div>`;
+
+  // Exclusions editor
+  const pOptions = d.participants.map(p =>
+    `<option value="${escapeHtml(p.id)}">${escapeHtml(p.display_name || p.email || '')}</option>`).join('');
+  const exclRows = d.exclusions.map(x => `<tr>
+    <td>${escapeHtml(_wwPName(d, x.a))}</td>
+    <td style="color:var(--cream-dim)">⇄</td>
+    <td>${escapeHtml(_wwPName(d, x.b))}</td>
+    <td><button class="btn btn-ghost btn-sm" style="color:#8b2a2a" onclick="wwDeleteExclusion('${escapeHtml(x.id)}')">${escapeHtml(t('ww_btn_delete'))}</button></td>
+  </tr>`).join('');
+  const exclusionsHtml = `
+    <div class="ww-section">
+      <h4 class="ww-section-title">${escapeHtml(t('ww_exclusions_title'))}</h4>
+      <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0 0 12px">${escapeHtml(t('ww_exclusions_sub'))}</p>
+      ${d.participants.length >= 2 ? `
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <select id="wwExclA" class="ww-input ww-input-sm" style="width:auto;min-width:160px">${pOptions}</select>
+          <span style="color:var(--cream-dim)">⇄</span>
+          <select id="wwExclB" class="ww-input ww-input-sm" style="width:auto;min-width:160px">${pOptions}</select>
+          <button class="btn btn-outline btn-sm" onclick="wwAddExclusion()">${escapeHtml(t('ww_btn_add'))}</button>
+        </div>` : ''}
+      ${d.exclusions.length
+        ? `<table class="admin-table" style="max-width:560px"><tbody>${exclRows}</tbody></table>`
+        : `<div style="color:var(--cream-dim);font-style:italic;font-size:13px">${escapeHtml(t('ww_exclusions_empty'))}</div>`}
+    </div>`;
+
+  // Wish book editor (inline-editable rows + add row)
+  const wbRow = (item) => {
+    const idKey = item ? item.id : 'new';
+    const v = item || {};
+    return `<tr>
+      <td><input id="wwWb-${idKey}-name" class="ww-input ww-input-sm" type="text" value="${escapeHtml(v.name || '')}"></td>
+      <td><input id="wwWb-${idKey}-color" class="ww-input ww-input-sm" type="text" value="${escapeHtml(v.color || '')}"></td>
+      <td><input id="wwWb-${idKey}-height" class="ww-input ww-input-sm" type="text" style="width:80px" value="${escapeHtml(v.height != null ? String(v.height) : '')}"></td>
+      <td><input id="wwWb-${idKey}-price" class="ww-input ww-input-sm" type="text" style="width:90px" value="${escapeHtml(v.price_label || '')}"></td>
+      <td><input id="wwWb-${idKey}-img" class="ww-input ww-input-sm" type="text" style="font-family:'DM Mono',monospace;min-width:140px" value="${escapeHtml(v.img || '')}"></td>
+      <td><input id="wwWb-${idKey}-order" class="ww-input ww-input-sm" type="number" step="1" style="width:70px" value="${escapeHtml(v.display_order != null ? String(v.display_order) : '')}"></td>
+      <td style="text-align:center"><input id="wwWb-${idKey}-active" type="checkbox" ${item ? (v.is_active ? 'checked' : '') : 'checked'} style="accent-color:var(--gold-ink)"></td>
+      <td style="white-space:nowrap">
+        ${item
+          ? `<button class="btn btn-outline btn-sm" onclick="wwWishbookSaveRow('${escapeHtml(item.id)}')">${escapeHtml(t('ww_btn_save'))}</button>
+             <button class="btn btn-ghost btn-sm" style="color:#8b2a2a;margin-left:4px" onclick="wwWishbookDelete('${escapeHtml(item.id)}')">${escapeHtml(t('ww_btn_delete'))}</button>`
+          : `<button class="btn btn-gold btn-sm" onclick="wwWishbookAdd()">${escapeHtml(t('ww_btn_add'))}</button>`}
+      </td>
+    </tr>`;
+  };
+  const wishbookHtml = `
+    <div class="ww-section">
+      <h4 class="ww-section-title">${escapeHtml(t('ww_wishbook_title'))}</h4>
+      <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0 0 12px">${escapeHtml(t('ww_wishbook_sub'))}</p>
+      ${d.wishbook.length ? '' : `<div style="color:var(--cream-dim);font-style:italic;font-size:13px;margin-bottom:10px">${escapeHtml(t('ww_wishbook_empty'))}</div>`}
+      <div style="overflow-x:auto"><table class="admin-table">
+        <thead><tr>
+          <th>${escapeHtml(t('ww_wb_col_name'))}</th>
+          <th>${escapeHtml(t('ww_wb_col_color'))}</th>
+          <th>${escapeHtml(t('ww_wb_col_height'))}</th>
+          <th>${escapeHtml(t('ww_wb_col_price'))}</th>
+          <th>${escapeHtml(t('ww_wb_col_img'))}</th>
+          <th>${escapeHtml(t('ww_wb_col_order'))}</th>
+          <th style="text-align:center">${escapeHtml(t('ww_wb_col_active'))}</th>
+          <th>${escapeHtml(t('ww_col_actions'))}</th>
+        </tr></thead>
+        <tbody>${d.wishbook.map(wbRow).join('')}${wbRow(null)}</tbody>
+      </table></div>
+    </div>`;
+
+  // Draw / assignments section
+  const canDraw = ex.status === 'open' && joined.length >= 2;
+  let drawHtml;
+  if (!d.assignments.length) {
+    drawHtml = `
+      <button class="btn btn-gold btn-sm" onclick="wwDrawNames()" ${canDraw ? '' : 'disabled style="opacity:0.5;cursor:not-allowed"'}>${escapeHtml(t('ww_btn_draw'))}</button>
+      ${canDraw ? '' : `<div style="font-size:12px;color:var(--cream-dim);font-style:italic;margin-top:8px">${escapeHtml(t(joined.length < 2 ? 'ww_draw_need_two' : 'ww_draw_need_open'))}</div>`}`;
+  } else {
+    const swapOptions = (giverId) => d.assignments
+      .filter(a => a.giver_id !== giverId)
+      .map(a => `<option value="${escapeHtml(a.giver_id)}">${escapeHtml(_wwPName(d, a.giver_id))}</option>`).join('');
+    const aRows = d.assignments.map(a => `<tr>
+      <td>${escapeHtml(_wwPName(d, a.giver_id))}</td>
+      <td style="color:var(--gold-ink)">→</td>
+      <td>${escapeHtml(_wwPName(d, a.receiver_id))}</td>
+      ${ex.status === 'drawn' ? `<td>
+        <select class="ww-input ww-input-sm" style="width:auto" onchange="wwSwapAssignments('${escapeHtml(a.giver_id)}', this.value)">
+          <option value="">${escapeHtml(t('ww_swap_placeholder'))}</option>
+          ${swapOptions(a.giver_id)}
+        </select>
+      </td>` : ''}
+    </tr>`).join('');
+    drawHtml = `
+      <div style="overflow-x:auto"><table class="admin-table" style="max-width:640px">
+        <thead><tr>
+          <th>${escapeHtml(t('ww_col_giver'))}</th><th></th><th>${escapeHtml(t('ww_col_receiver'))}</th>
+          ${ex.status === 'drawn' ? `<th>${escapeHtml(t('ww_col_swap'))}</th>` : ''}
+        </tr></thead>
+        <tbody>${aRows}</tbody>
+      </table></div>
+      ${ex.status === 'released'
+        ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(196,154,108,0.08);border-left:3px solid var(--gold);font-size:12px;color:var(--cream-dim)">${escapeHtml(t('ww_released_note'))}</div>`
+        : `<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+             <button class="btn btn-gold btn-sm" onclick="wwReleaseAssignments()">${escapeHtml(t('ww_btn_release'))}</button>
+             <button class="btn btn-ghost btn-sm" onclick="wwBackToOpen()">${escapeHtml(t('ww_btn_back_open'))}</button>
+           </div>`}`;
+  }
+  const drawSectionHtml = `
+    <div class="ww-section">
+      <h4 class="ww-section-title">${escapeHtml(t('ww_draw_title'))}</h4>
+      <p style="font-size:12px;color:var(--cream-dim);font-weight:300;margin:0 0 12px">${escapeHtml(t('ww_draw_sub'))}</p>
+      ${drawHtml}
+    </div>`;
+
+  host.innerHTML = `
+    <div style="margin-bottom:14px"><a href="#" onclick="wwBackToList();return false" style="color:var(--gold-ink);font-size:13px">${escapeHtml(t('ww_detail_back'))}</a></div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+      <h3 style="margin:0;font-family:'Cinzel',serif;color:var(--gold-ink);letter-spacing:2px;text-transform:uppercase;font-size:14px">${escapeHtml(ex.name || '')}</h3>
+      ${_wwStatusBadge(ex.status)}
+      <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim)">${joined.length} / ${Number(ex.max_participants) || '—'} ${escapeHtml(t('ww_seats_label'))}</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="btn btn-ghost btn-sm" data-slug="${escapeHtml(d.exchange.slug)}" onclick="wwCopyInviteLink(this)">${escapeHtml(t('ww_copy_link'))}</button>
+      <button class="btn btn-ghost btn-sm" onclick="wwEditExchange('${escapeHtml(ex.id)}')">${escapeHtml(t('ww_btn_edit'))}</button>
+    </div>
+    ${participantsHtml}
+    ${exclusionsHtml}
+    ${wishbookHtml}
+    ${drawSectionHtml}`;
+}
+
+async function wwRemoveParticipant(pid) {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  // A participant inside a drawn/released result can't just vanish — that
+  // would orphan their giver and receiver. (The DB blocks it too:
+  // WW_LOCKED_BY_ASSIGNMENTS.) Admin must go Back to Open and redraw.
+  if ((d.assignments || []).some(a => a.giver_id === pid || a.receiver_id === pid)) {
+    alert(t('ww_remove_locked'));
+    return;
+  }
+  if (!confirm(t('ww_remove_confirm').replace('{name}', _wwPName(d, pid)))) return;
+  try {
+    const { error } = await sb.from('ww_participants').delete().eq('id', pid);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwAddExclusion() {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const a = _wwVal('wwExclA');
+  const b = _wwVal('wwExclB');
+  if (!a || !b) return;
+  if (a === b) { alert(t('ww_excl_same')); return; }
+  // Stored one direction, treated symmetric — block both orders as dupes
+  if (d.exclusions.some(x => (x.a === a && x.b === b) || (x.a === b && x.b === a))) {
+    alert(t('ww_excl_dup'));
+    return;
+  }
+  try {
+    const { error } = await sb.from('ww_exclusions').insert({ exchange_id: d.exchange.id, a: a, b: b });
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwDeleteExclusion(id) {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  try {
+    const { error } = await sb.from('ww_exclusions').delete().eq('id', id);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+// ── Wish book (admin-curated special product list) ──────────────────────
+
+function _wwWbCollect(idKey) {
+  const orderRaw = _wwVal('wwWb-' + idKey + '-order');
+  const orderNum = parseInt(orderRaw, 10);
+  const activeEl = document.getElementById('wwWb-' + idKey + '-active');
+  return {
+    name: _wwVal('wwWb-' + idKey + '-name').trim(),
+    color: _wwVal('wwWb-' + idKey + '-color').trim() || null,
+    height: _wwVal('wwWb-' + idKey + '-height').trim() || null,
+    price_label: _wwVal('wwWb-' + idKey + '-price').trim() || null,
+    img: _wwVal('wwWb-' + idKey + '-img').trim() || null,
+    display_order: Number.isFinite(orderNum) ? orderNum : null,
+    is_active: !!(activeEl && activeEl.checked),
+  };
+}
+
+async function wwWishbookAdd() {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const row = _wwWbCollect('new');
+  if (!row.name) { alert(t('ww_wb_name_required')); return; }
+  if (row.display_order == null) {
+    row.display_order = d.wishbook.reduce((m, i) => Math.max(m, i.display_order || 0), 0) + 1;
+  }
+  row.exchange_id = d.exchange.id;
+  try {
+    const { error } = await sb.from('ww_wishbook').insert(row);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwWishbookSaveRow(id) {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const row = _wwWbCollect(id);
+  if (!row.name) { alert(t('ww_wb_name_required')); return; }
+  try {
+    const { error } = await sb.from('ww_wishbook').update(row).eq('id', id);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwWishbookDelete(id) {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const item = d.wishbook.find(i => i.id === id);
+  if (!confirm(t('ww_wb_delete_confirm').replace('{name}', item ? item.name || '' : ''))) return;
+  try {
+    const { error } = await sb.from('ww_wishbook').delete().eq('id', id);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+// ── Draw, swap, release ─────────────────────────────────────────────────
+
+async function wwDrawNames() {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const ex = d.exchange;
+  if (ex.status !== 'open') { alert(t('ww_draw_need_open')); return; }
+
+  // Re-fetch just before drawing — the cached detail may be minutes old and
+  // someone can join right up until the draw. Drawing from a stale roster
+  // would orphan the newest participant.
+  let freshP, freshX;
+  try {
+    const [rp, rx] = await Promise.all([
+      sb.from('ww_participants').select('*').eq('exchange_id', ex.id),
+      sb.from('ww_exclusions').select('*').eq('exchange_id', ex.id),
+    ]);
+    if (rp.error) throw rp.error;
+    if (rx.error) throw rx.error;
+    freshP = rp.data || []; freshX = rx.data || [];
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+    return;
+  }
+  d.participants = freshP; d.exclusions = freshX;
+
+  const joined = freshP.filter(p => p.status === 'joined');
+  if (joined.length < 2) { alert(t('ww_draw_need_two')); return; }
+  if (!confirm(t('ww_draw_confirm').replace('{n}', joined.length))) return;
+
+  // Symmetric exclusion lookup: "a|b" present in either direction
+  const excl = new Set();
+  freshX.forEach(x => { excl.add(x.a + '|' + x.b); excl.add(x.b + '|' + x.a); });
+
+  // Shuffle-retry derangement over joined participants
+  const givers = joined.map(p => p.id);
+  let solution = null;
+  for (let attempt = 0; attempt < 500 && !solution; attempt++) {
+    const receivers = givers.slice();
+    for (let i = receivers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = receivers[i]; receivers[i] = receivers[j]; receivers[j] = tmp;
+    }
+    let ok = true;
+    for (let i = 0; i < givers.length; i++) {
+      if (receivers[i] === givers[i] || excl.has(givers[i] + '|' + receivers[i])) { ok = false; break; }
+    }
+    if (ok) solution = receivers;
+  }
+  if (!solution) { alert(t('ww_draw_unsolvable')); return; }
+
+  try {
+    let r = await sb.from('ww_assignments').delete().eq('exchange_id', ex.id);
+    if (r.error) throw r.error;
+    r = await sb.from('ww_assignments').insert(
+      givers.map((g, i) => ({ exchange_id: ex.id, giver_id: g, receiver_id: solution[i] }))
+    );
+    if (r.error) throw r.error;
+    r = await sb.from('ww_exchanges')
+      .update({ status: 'drawn', updated_at: new Date().toISOString(), updated_by: currentUser?.email || null })
+      .eq('id', ex.id);
+    if (r.error) throw r.error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(ex.id);
+}
+
+// Swap two givers' receivers. Because of the UNIQUE(exchange_id,receiver_id)
+// constraint, updating in place would collide mid-swap — so delete both rows
+// and re-insert them swapped; restore originals if the insert fails.
+async function wwSwapAssignments(giverA, giverB) {
+  if (!giverB) return;
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  const rowA = d.assignments.find(a => a.giver_id === giverA);
+  const rowB = d.assignments.find(a => a.giver_id === giverB);
+  if (!rowA || !rowB) return;
+  // Cycle-adjacent givers (one already gives to the other) can't be pairwise
+  // swapped — it would self-assign one of them (and the DB CHECK rejects it).
+  if (rowA.receiver_id === giverB || rowB.receiver_id === giverA) {
+    alert(t('ww_swap_adjacent'));
+    _wwRenderDetail();
+    return;
+  }
+  // Warn (but allow, with explicit confirmation) if the swap would create a
+  // pairing the exclusion list forbids — the admin may know better.
+  const exclSet = new Set();
+  (d.exclusions || []).forEach(x => { exclSet.add(x.a + '|' + x.b); exclSet.add(x.b + '|' + x.a); });
+  if ((exclSet.has(giverA + '|' + rowB.receiver_id) || exclSet.has(giverB + '|' + rowA.receiver_id))
+      && !confirm(t('ww_swap_excl_warn'))) {
+    _wwRenderDetail();
+    return;
+  }
+  if (!confirm(t('ww_swap_confirm')
+      .replace('{a}', _wwPName(d, giverA))
+      .replace('{b}', _wwPName(d, giverB)))) {
+    _wwRenderDetail();   // reset the select back to its placeholder
+    return;
+  }
+  try {
+    let r = await sb.from('ww_assignments').delete().in('id', [rowA.id, rowB.id]);
+    if (r.error) throw r.error;
+    r = await sb.from('ww_assignments').insert([
+      { exchange_id: d.exchange.id, giver_id: giverA, receiver_id: rowB.receiver_id },
+      { exchange_id: d.exchange.id, giver_id: giverB, receiver_id: rowA.receiver_id },
+    ]);
+    if (r.error) throw r.error;
+  } catch (e) {
+    // Never leave a half-swapped state: put the originals back
+    try {
+      await sb.from('ww_assignments').delete()
+        .eq('exchange_id', d.exchange.id).in('giver_id', [giverA, giverB]);
+      await sb.from('ww_assignments').insert([
+        { exchange_id: d.exchange.id, giver_id: giverA, receiver_id: rowA.receiver_id },
+        { exchange_id: d.exchange.id, giver_id: giverB, receiver_id: rowB.receiver_id },
+      ]);
+    } catch (e2) { console.warn('[wichtel] swap restore failed:', e2); }
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwReleaseAssignments() {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  // Fresh completeness check: everyone joined must have exactly one giver
+  // row. (The DB status guard enforces this too — WW_RELEASE_INCOMPLETE —
+  // this check just gives the admin a clear message before the confirm.)
+  try {
+    const [rp, ra] = await Promise.all([
+      sb.from('ww_participants').select('id,status').eq('exchange_id', d.exchange.id),
+      sb.from('ww_assignments').select('id').eq('exchange_id', d.exchange.id),
+    ]);
+    if (rp.error) throw rp.error;
+    if (ra.error) throw ra.error;
+    const joinedN = (rp.data || []).filter(p => p.status === 'joined').length;
+    const assignN = (ra.data || []).length;
+    if (assignN === 0 || assignN !== joinedN) {
+      alert(t('ww_release_mismatch').replace('{a}', assignN).replace('{p}', joinedN));
+      await wwOpenDetail(d.exchange.id);
+      return;
+    }
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+    return;
+  }
+  if (!confirm(t('ww_release_confirm'))) return;
+  try {
+    const { error } = await sb.from('ww_exchanges')
+      .update({ status: 'released', updated_at: new Date().toISOString(), updated_by: currentUser?.email || null })
+      .eq('id', d.exchange.id);
+    if (error) throw error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
+async function wwBackToOpen() {
+  if (!requireCapability('can_manage_season')) return;
+  const d = _wichtelAdminState.detail;
+  if (!d) return;
+  if (!confirm(t('ww_back_open_confirm'))) return;
+  try {
+    let r = await sb.from('ww_assignments').delete().eq('exchange_id', d.exchange.id);
+    if (r.error) throw r.error;
+    r = await sb.from('ww_exchanges')
+      .update({ status: 'open', updated_at: new Date().toISOString(), updated_by: currentUser?.email || null })
+      .eq('id', d.exchange.id);
+    if (r.error) throw r.error;
+  } catch (e) {
+    alert(t('ww_save_failed') + ': ' + _wwPickError(e));
+  }
+  await wwOpenDetail(d.exchange.id);
+}
+
 function adminTab(tab) {
   // Phase 6.56g: track active tab for background auto-refresh; re-baseline the
   // freshly-shown tab and clear any stale pill, then ensure the poller is running.
@@ -22668,6 +23694,7 @@ function adminTab(tab) {
     products: 'admin_tab_products',
     lottery:  'admin_lottery',
     admins:   'admin_tab_admins',  // Phase 6.56a
+    wichtel:  'admin_tab_wichtel',
   };
   const titleEl = document.querySelector('#apanel-admin .app-card-title');
   if (titleEl) {
@@ -22687,6 +23714,7 @@ function adminTab(tab) {
   document.getElementById('adminProducts').style.display = tab === 'products' ? 'block' : 'none';
   document.getElementById('adminLottery').style.display = tab === 'lottery' ? 'block' : 'none';
   document.getElementById('adminAdmins').style.display = tab === 'admins' ? 'block' : 'none';
+  document.getElementById('adminWichtel').style.display = tab === 'wichtel' ? 'block' : 'none';
   document.getElementById('adminTabAccounts').className = 'btn btn-sm ' + (tab === 'accounts' ? 'btn-outline' : 'btn-ghost');
   document.getElementById('adminTabOrders').className = 'btn btn-sm ' + (tab === 'orders' ? 'btn-outline' : 'btn-ghost');
   document.getElementById('adminTabHistory').className = 'btn btn-sm ' + (tab === 'history' ? 'btn-outline' : 'btn-ghost');
@@ -22700,6 +23728,8 @@ function adminTab(tab) {
   document.getElementById('adminTabLottery').className = 'btn btn-sm ' + (tab === 'lottery' ? 'btn-outline' : 'btn-ghost');
   const tabAdmins = document.getElementById('adminTabAdmins');
   if (tabAdmins) tabAdmins.className = 'btn btn-sm ' + (tab === 'admins' ? 'btn-outline' : 'btn-ghost');
+  const tabWichtel = document.getElementById('adminTabWichtel');
+  if (tabWichtel) tabWichtel.className = 'btn btn-sm ' + (tab === 'wichtel' ? 'btn-outline' : 'btn-ghost');
   if (tab === 'history' && typeof renderAdminHistory === 'function') renderAdminHistory();
   if (tab === 'quantity' && typeof renderAdminQuantity === 'function') renderAdminQuantity();
   if (tab === 'schedule' && typeof renderAdminSchedule === 'function') renderAdminSchedule();
@@ -22710,6 +23740,7 @@ function adminTab(tab) {
   if (tab === 'products' && typeof renderAdminProducts === 'function') renderAdminProducts();
   if (tab === 'lottery' && typeof renderAdminLottery === 'function') renderAdminLottery();
   if (tab === 'admins' && typeof renderAdminAdmins === 'function') renderAdminAdmins();
+  if (tab === 'wichtel' && typeof renderAdminWichtel === 'function') renderAdminWichtel();
   // Phase 6.50a: refresh sticky banner whenever an admin tab is shown
   if (typeof refreshAdminStickyBanner === 'function') refreshAdminStickyBanner();
 }

@@ -25,3 +25,12 @@
 
 /catalog.html
   Cache-Control: public, max-age=0, must-revalidate
+
+# Phase 7.0: Weihnachtswichtel — unlisted page: never index, always revalidate
+/wichtel
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=0, must-revalidate
+
+/wichtel.html
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=0, must-revalidate

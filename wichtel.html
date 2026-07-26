@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- Unlisted page: reachable only via a personal invitation link (?x=<slug>).
+     Block browser auto-translate — the page is natively bilingual (EN/DE). -->
+<meta name="google" content="notranslate">
+<title>Weihnachtswichtel</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<style>
+  /* Self-hosted fonts (same set as index.html / catalog.html — GDPR). */
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-regular.woff2') format('woff2'); }
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:500; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-500.woff2') format('woff2'); }
+  @font-face { font-family:'Cinzel'; font-style:normal; font-weight:600; font-display:swap;
+    src:url('/fonts/cinzel-v26-latin-600.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:300; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-300.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-regular.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:500; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-500.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:normal; font-weight:600; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-600.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:italic; font-weight:300; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-300italic.woff2') format('woff2'); }
+  @font-face { font-family:'Cormorant Garamond'; font-style:italic; font-weight:400; font-display:swap;
+    src:url('/fonts/cormorant-garamond-v21-latin-italic.woff2') format('woff2'); }
+  @font-face { font-family:'DM Mono'; font-style:normal; font-weight:300; font-display:swap;
+    src:url('/fonts/dm-mono-v16-latin-300.woff2') format('woff2'); }
+  @font-face { font-family:'DM Mono'; font-style:normal; font-weight:400; font-display:swap;
+    src:url('/fonts/dm-mono-v16-latin-regular.woff2') format('woff2'); }
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   Weihnachtswichtel — participant page of the hidden Secret Santa.
+   Festive dark theme in the wichtel logo's palette: deep pine green,
+   warm red, the house gold. Layout: Elfster-style left rail + main
+   column (~1080px), stacked on mobile. Standalone page, no build step.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg:        #0b1811;   /* deep pine */
+  --bg2:       #10231a;
+  --card:      rgba(18, 39, 29, 0.72);
+  --gold:      #b08d40;
+  --gold-ink:  #c9a84c;
+  --gold-lt:   #d9bc6a;
+  --gold-dim:  #8a6f30;
+  --red:       #a03d34;   /* warm wichtel red */
+  --red-lt:    #b9564a;
+  --green-lt:  #2e6b46;
+  --cream:     #ede4cd;
+  --cream-dim: #a9b39f;
+  --err:       #e08b80;
+  --line:      rgba(217, 188, 106, 0.28);
+  --line2:     rgba(237, 228, 205, 0.12);
+  --shadow:    0 8px 48px rgba(0, 0, 0, 0.5);
+  --r:         2px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+
+html { color-scheme: dark; }
+body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--cream);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* Candle-lit pine texture */
+body::before {
+  content: '';
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 50% at 18% 0%, rgba(217,188,106,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 70% at 92% 100%, rgba(160,61,52,0.10) 0%, transparent 62%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='3' height='3' fill='%230b1811'/%3E%3Ccircle cx='1' cy='1' r='0.3' fill='rgba(237,228,205,0.04)'/%3E%3C/svg%3E");
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; }
+img { max-width: 100%; }
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  height: 58px; padding: 0 20px;
+  border-bottom: 1px solid var(--line2);
+  background: rgba(11, 24, 17, 0.92);
+  position: sticky; top: 0; z-index: 50;
+}
+.brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.brand img { height: 34px; width: auto; filter: drop-shadow(0 1px 8px rgba(217,188,106,0.35)); }
+.wordmark {
+  font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--cream); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.wordmark span { color: var(--gold-ink); }
+.lang-toggle { display: flex; gap: 2px; flex: 0 0 auto; }
+.lang-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 6px 10px; color: var(--cream-dim);
+  border: 1px solid transparent; border-radius: var(--r);
+}
+.lang-btn.active { color: var(--gold-ink); border-color: var(--line); }
+@media (max-width: 430px) {
+  .topbar { padding: 0 12px; }
+  .wordmark { font-size: 11px; letter-spacing: 1.5px; }
+}
+
+/* ── SHARED BITS ── */
+.divider { display: flex; align-items: center; gap: 14px; justify-content: center; }
+.divider::before, .divider::after {
+  content: ''; width: 52px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.divider::after { background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.diamond { color: var(--gold-lt); font-size: 8px; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.pulse { animation: pulse 2.2s ease-in-out infinite; }
+
+.btn {
+  display: inline-block;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; text-align: center;
+  padding: 13px 26px; border-radius: var(--r);
+  transition: background 0.2s, color 0.2s;
+}
+.btn:disabled { opacity: 0.5; cursor: wait; }
+.btn-red { background: var(--red); color: #f7edd9; border: 1px solid rgba(0,0,0,0.25); }
+.btn-red:hover:not(:disabled) { background: var(--red-lt); }
+.btn-gold { color: var(--gold-ink); border: 1px solid var(--gold-ink); background: transparent; }
+.btn-gold:hover:not(:disabled) { background: rgba(217,188,106,0.08); }
+.link-btn {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold-ink); text-decoration: underline;
+}
+.link-btn:hover { color: var(--gold-lt); }
+
+/* ── SPLASH (no slug / unknown slug) ── */
+.splash {
+  min-height: calc(100vh - 58px);
+  min-height: calc(100dvh - 58px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; padding: 48px 24px; text-align: center;
+}
+.splash-logo { width: min(54vw, 210px); filter: drop-shadow(0 4px 24px rgba(217,188,106,0.3)); }
+.splash-title {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(19px, 4vw, 28px); letter-spacing: 4px; text-transform: uppercase;
+  color: var(--cream);
+}
+.splash-tagline {
+  font-style: italic; font-size: clamp(17px, 3vw, 22px); color: var(--gold-lt);
+}
+.splash-body {
+  font-weight: 300; font-size: clamp(15px, 2vw, 18px); line-height: 1.7;
+  max-width: 46ch; color: var(--cream);
+}
+.splash-hint {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--cream-dim); margin-top: 8px;
+}
+
+/* ── LOADING / ERROR ── */
+.loadview {
+  min-height: calc(100vh - 58px);
+  min-height: calc(100dvh - 58px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 26px; padding: 40px 24px; text-align: center;
+}
+.load-logo { width: min(40vw, 140px); filter: drop-shadow(0 4px 20px rgba(217,188,106,0.3)); }
+.pre-status {
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--cream-dim);
+  animation: pulse 2.2s ease-in-out infinite;
+  max-width: 42ch; line-height: 2;
+}
+.pre-status.static { animation: none; }
+
+/* ── APP LAYOUT ── */
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding: 22px 16px 72px;
+  display: grid; grid-template-columns: 1fr; gap: 22px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .wrap { grid-template-columns: 300px 1fr; gap: 28px; padding: 34px 24px 88px; }
+}
+
+/* Left rail */
+.cover {
+  border: 1px solid var(--line2); border-radius: 4px; overflow: hidden;
+  background: var(--bg2); box-shadow: var(--shadow);
+}
+.cover img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+.cover.is-logo img { object-fit: contain; padding: 30px; }
+.note-card {
+  margin-top: 16px; padding: 18px 18px 20px;
+  border: 1px solid var(--line2); border-radius: 4px;
+  background: var(--card);
+}
+.note-card h2 {
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--gold-ink);
+  margin-bottom: 10px;
+}
+.note-card p {
+  font-style: italic; font-size: 16px; font-weight: 400; line-height: 1.65;
+  color: var(--cream); white-space: pre-line;
+}
+
+/* Main column */
+.ex-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--gold-ink); margin-bottom: 8px;
+}
+.ex-name {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(21px, 4vw, 31px); letter-spacing: 1px; line-height: 1.25;
+  color: var(--cream);
+}
+
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px; margin: 18px 0 22px;
+}
+.stat {
+  border: 1px solid var(--line2); border-radius: 4px;
+  background: var(--card); padding: 14px 16px;
+}
+.stat-label {
+  font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold-ink);
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-value {
+  font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 0.5px;
+  color: var(--cream); margin-top: 9px; overflow-wrap: anywhere;
+}
+.stat-value .secret { color: var(--gold-lt); font-size: 18px; }
+
+/* Main panel (the state machine) */
+.panel {
+  border: 1px solid var(--line2); border-radius: 6px;
+  background: linear-gradient(160deg, rgba(26,48,36,0.7) 0%, rgba(13,27,19,0.7) 100%);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 4vw, 36px);
+}
+.panel-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--gold-ink); margin-bottom: 10px;
+}
+.panel-head {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(19px, 3vw, 26px); letter-spacing: 1px; line-height: 1.3;
+  color: var(--cream); margin-bottom: 12px;
+}
+.panel-body {
+  font-weight: 300; font-size: 17px; line-height: 1.7;
+  color: var(--cream); max-width: 62ch;
+}
+.panel-note {
+  font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--cream-dim); line-height: 1.9;
+  margin-top: 20px; max-width: 68ch;
+}
+
+/* Forms */
+.f-label {
+  display: block;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--cream-dim); margin-bottom: 6px;
+}
+.f-input {
+  width: 100%; padding: 11px 12px; margin-bottom: 14px;
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 16px;
+  color: var(--cream); background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--line2); border-radius: var(--r);
+}
+.f-input:focus { outline: none; border-color: var(--gold-ink); }
+.f-input::placeholder { color: var(--cream-dim); opacity: 0.6; font-style: italic; }
+.form-err { font-style: italic; font-size: 15px; color: var(--err); margin-bottom: 12px; }
+.form-err:empty { display: none; margin: 0; }
+.form-msg { font-style: italic; font-size: 15px; color: var(--gold-lt); line-height: 1.55; margin-bottom: 12px; }
+
+.auth-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px; margin-top: 20px;
+}
+.auth-box {
+  border: 1px solid var(--line2); border-radius: 4px;
+  background: rgba(0, 0, 0, 0.18); padding: 20px 18px;
+}
+.auth-head {
+  font-family: 'Cinzel', serif; font-weight: 500; font-size: 13px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lt);
+  margin-bottom: 14px;
+}
+
+.join-meta {
+  display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 6px 0 18px;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold-lt);
+}
+.join-form { max-width: 420px; margin-top: 6px; }
+
+.drawn-note {
+  margin-top: 16px; padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--gold);
+  font-style: italic; font-size: 16px; line-height: 1.6; color: var(--gold-lt);
+  max-width: 56ch;
+}
+
+/* Reveal */
+.reveal { text-align: center; }
+.reveal .panel-eyebrow { margin-bottom: 14px; }
+.reveal-lead { font-style: italic; font-size: clamp(18px, 3vw, 24px); color: var(--cream-dim); }
+.reveal-name {
+  font-family: 'Cinzel', serif; font-weight: 600;
+  font-size: clamp(27px, 7vw, 44px); letter-spacing: 2px; line-height: 1.2;
+  color: var(--gold-lt); text-shadow: 0 2px 28px rgba(217, 188, 106, 0.35);
+  margin: 12px 0 14px; overflow-wrap: anywhere;
+}
+.reveal-tip {
+  font-weight: 300; font-size: 16px; line-height: 1.65; color: var(--cream);
+  max-width: 52ch; margin: 16px auto 0;
+}
+.rcv-head {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold-ink);
+  margin: 28px 0 10px; text-align: left;
+}
+.rcv-list { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.rcv-item {
+  display: flex; align-items: center; gap: 13px;
+  border: 1px solid var(--line2); border-radius: 4px;
+  background: var(--card); padding: 10px 12px;
+}
+.rcv-thumb {
+  flex: 0 0 56px; width: 56px; height: 56px; position: relative;
+  background: #ffffff; border-radius: 2px; overflow: hidden;
+}
+.rcv-thumb img {
+  position: absolute; top: 4px; right: 4px; bottom: 4px; left: 4px; inset: 4px;
+  width: calc(100% - 8px); height: calc(100% - 8px); object-fit: contain;
+}
+.rcv-thumb .ph {
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 18px;
+}
+.rcv-body { min-width: 0; }
+.rcv-name { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 0.5px; color: var(--cream); }
+.rcv-specs {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--cream-dim); margin-top: 4px;
+}
+.rcv-price { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--gold-lt); margin-top: 4px; }
+.rcv-note { font-style: italic; font-size: 14px; color: var(--cream); margin-top: 4px; }
+
+/* Wish book */
+.wishbook { margin-top: 26px; }
+.wb-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.wb-title {
+  font-family: 'Cinzel', serif; font-weight: 500;
+  font-size: clamp(17px, 2.6vw, 22px); letter-spacing: 2px; color: var(--cream);
+}
+.wb-sub { font-style: italic; font-size: 15px; color: var(--cream-dim); margin-top: 6px; max-width: 58ch; }
+.wb-count {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold-lt);
+  border: 1px solid var(--gold-dim); border-radius: 999px; padding: 6px 13px;
+  white-space: nowrap;
+}
+.wb-count:empty { display: none; }
+.wb-note { font-style: italic; font-size: 16px; color: var(--cream-dim); margin-top: 16px; }
+.wb-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px; margin-top: 16px;
+}
+.wb-card {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line2); border-radius: 4px; overflow: hidden;
+  background: var(--card);
+}
+.wb-card.wished { border-color: rgba(217, 188, 106, 0.45); }
+/* Product photos are shot on white — keep the plate white (site convention) */
+.wb-photo { position: relative; background: #ffffff; aspect-ratio: 1 / 1; }
+.wb-photo img {
+  position: absolute; top: 10px; right: 10px; bottom: 10px; left: 10px; inset: 10px;
+  width: calc(100% - 20px); height: calc(100% - 20px); object-fit: contain;
+}
+.wb-photo .wb-ph {
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 26px; opacity: 0.5;
+}
+.wb-info { flex: 1 1 auto; padding: 12px 12px 0; }
+.wb-name { font-family: 'Cinzel', serif; font-size: 12.5px; letter-spacing: 0.5px; line-height: 1.35; color: var(--cream); }
+.wb-specs {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--cream-dim); margin-top: 6px;
+}
+.wb-price { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--gold-lt); margin-top: 5px; }
+.wb-btn { margin: 12px; padding: 11px 8px; }
+.wb-btn:not(.on) { color: var(--gold-ink); border: 1px solid var(--gold-ink); background: transparent; }
+.wb-btn:not(.on):hover:not(:disabled) { background: rgba(217, 188, 106, 0.08); }
+.wb-btn.on { background: var(--red); color: #f7edd9; border: 1px solid transparent; }
+.wb-btn.on:hover:not(:disabled) { background: var(--red-lt); }
+
+.session-row {
+  margin-top: 16px; display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--cream-dim);
+  overflow-wrap: anywhere;
+}
+
+/* Confetti overlay */
+#confettiCanvas {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 999; display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse, .pre-status { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="/img/wichtel-logo.png" alt="">
+    <div class="wordmark">Weihnachts<span>wichtel</span></div>
+  </div>
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button class="lang-btn" id="langEn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="langDe" onclick="setLang('de')">DE</button>
+  </div>
+</header>
+
+<!-- Splash: no invitation link / unknown exchange -->
+<div class="splash" id="viewSplash" hidden>
+  <img class="splash-logo" src="/img/wichtel-logo.png" alt="Weihnachtswichtel">
+  <h1 class="splash-title">Weihnachtswichtel</h1>
+  <div class="splash-tagline" data-t="tagline"></div>
+  <div class="divider"><span class="diamond">◆</span></div>
+  <p class="splash-body" data-t="splash_body"></p>
+  <div class="splash-hint" data-t="splash_hint"></div>
+</div>
+
+<!-- Loading / load-error -->
+<div class="loadview" id="viewLoading">
+  <img class="load-logo" src="/img/wichtel-logo.png" alt="">
+  <div class="pre-status" id="loadStatus" data-t="loading"></div>
+  <button class="btn btn-gold" id="loadRetry" hidden onclick="loadExchange()" data-t="retry"></button>
+</div>
+
+<!-- The exchange page -->
+<main class="wrap" id="viewApp" hidden>
+  <aside class="rail">
+    <figure class="cover" id="coverBox">
+      <img id="coverImg" src="/img/wichtel-logo.png" alt="">
+    </figure>
+    <section class="note-card" id="noteCard" hidden>
+      <h2 data-t="note_from"></h2>
+      <p id="noteText"></p>
+    </section>
+  </aside>
+
+  <section class="maincol">
+    <div class="ex-eyebrow">Weihnachtswichtel · Gläserne Leidenschaft</div>
+    <h1 class="ex-name" id="exName"></h1>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label"><span aria-hidden="true">🎩</span><span data-t="stat_draw"></span></div>
+        <div class="stat-value" id="statDraw"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><span data-t="stat_date"></span></div>
+        <div class="stat-value" id="statDate"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><span data-t="stat_budget"></span></div>
+        <div class="stat-value" id="statBudget"></div>
+      </div>
+    </div>
+
+    <section class="panel" id="panel"></section>
+
+    <section class="wishbook" id="wbSec" hidden>
+      <div class="wb-top">
+        <div>
+          <h2 class="wb-title" data-t="wishbook_head"></h2>
+          <p class="wb-sub" data-t="wishbook_sub"></p>
+          <p class="wb-sub" id="wbOpenNote" data-t="wishbook_still_open" hidden></p>
+        </div>
+        <div class="wb-count" id="wbCount"></div>
+      </div>
+      <div class="form-err" id="wbErr"></div>
+      <div id="wbBody"></div>
+    </section>
+
+    <div class="session-row" id="sessionRow" hidden>
+      <span><span data-t="signed_in_as"></span> <span id="sessionEmail"></span></span>
+      <button type="button" class="link-btn" onclick="doSignOut()" data-t="signout"></button>
+    </div>
+  </section>
+</main>
+
+<canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+<noscript>
+  <div style="position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:#0b1811;color:#ede4cd;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:Georgia,serif;font-size:18px;z-index:9999">
+    This page requires JavaScript. / Diese Seite benötigt JavaScript.
+  </div>
+</noscript>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+
+// ════════════════════════════════════════════
+// CONFIG (anon key is public by design — RLS + SECURITY DEFINER RPCs
+// protect the data; assignments only become readable on release)
+// ════════════════════════════════════════════
+var SB_URL  = 'https://wjddakdiknuyqchzcdbc.supabase.co';
+var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGRha2Rpa251eXFjaHpjZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjIxMjksImV4cCI6MjA5MTY5ODEyOX0.MKt_gugn0uEuk2EiYHF0e2HU2gNFAmIHDUKgKm_x-Wk';
+var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
+
+// One anonymous visit ping per page load (site convention; pathname only —
+// the invitation slug is never sent). Silently a no-op in local dev.
+(function () {
+  try {
+    var data = JSON.stringify({
+      page: location.pathname,
+      ref: document.referrer || '',
+      lang: navigator.language || ''
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/visit', new Blob([data], { type: 'application/json' }));
+    } else {
+      fetch('/api/visit', { method: 'POST', body: data, keepalive: true }).catch(function () {});
+    }
+  } catch (e) {}
+})();
+
+// ════════════════════════════════════════════
+// I18N — the Wichteln addresses its guests as friends (Du)
+// ════════════════════════════════════════════
+var T = {
+  en: {
+    tagline: 'A celebration of friendship',
+    splash_body: 'This is a private Secret Santa for friends of Gläserne Leidenschaft. It opens only with a personal invitation link — if you received one from us, please follow exactly that link.',
+    splash_hint: '✦ Invitation link required ✦',
+    loading: 'Lighting the candles…',
+    err_load: 'The Wichteln could not be loaded — please try again in a moment.',
+    retry: 'Try Again',
+
+    note_from: 'A note from Dietbert & Ivonne',
+    stat_draw: 'Your Draw',
+    stat_date: 'Exchange Date',
+    stat_budget: 'Budget',
+
+    auth_head: 'Welcome to the Wichteln',
+    auth_intro: 'You have been invited to a secret gift exchange among friends of Gläserne Leidenschaft. Sign in to take part — everything else stays a surprise.',
+    signin_head: 'Sign In',
+    signup_head: 'New Here?',
+    email: 'Email',
+    password: 'Password',
+    signin_btn: 'Sign In',
+    signup_btn: 'Create Account',
+    auth_note: 'An account is only needed so we know who is wichteling with whom — it is used for nothing else.',
+    confirm_email: 'Almost there! Please confirm your email address — we have just sent you a link. Then come back here and sign in.',
+    err_signin: 'That email and password did not match. Please try again.',
+    err_signup: 'The account could not be created. Please check the email address and choose a password with at least 6 characters.',
+    err_generic: 'Something went wrong — please try again.',
+
+    join_head: 'Join In!',
+    join_intro: 'Reserve your seat by the fire. The names are drawn in secret — and every Wichtel makes one friend very happy.',
+    join_name_label: 'Your name, as the others should see it',
+    join_btn: 'Count Me In',
+    seats_left: 'Seats left: {n}',
+    join_by: 'Please join by {d}.',
+    err_no_name: 'Please tell us your name first.',
+
+    full_head: 'All Seats Are Taken',
+    full_body: 'This Wichteln is already full — every seat by the fire is spoken for. Thank you for stopping by!',
+    closed_join_head: 'Joining Is Closed',
+    closed_join_body: 'This round has already begun, and no more Wichtel can slip in. Maybe next time!',
+
+    greet: 'Hello, {name}!',
+    wish_head: 'Ready, Set, Wish!',
+    wish_intro: 'Browse the wish book below and mark what you would love to find under the tree. Your secret Wichtel is taking notes…',
+    drawn_note: 'The names are being drawn at this very moment — check back soon to see who you got.',
+
+    wishbook_head: 'The Wish Book',
+    wishbook_sub: 'Hand-picked pieces from the Gläserne Leidenschaft studio.',
+    wishbook_still_open: 'Your own wish list stays open — you can add or change wishes any time.',
+    wb_loading: 'Opening the wish book…',
+    wb_empty: 'The wish book is still being filled — check back soon.',
+    wish_count_0: 'No wishes yet',
+    wish_count_1: '1 wish on your list',
+    wish_count_n: '{n} wishes on your list',
+    wish_btn: 'Wish for This',
+    wish_btn_on: 'On Your List',
+    err_wish: 'That wish could not be saved — please try again.',
+
+    reveal_eyebrow: 'The names have been drawn',
+    reveal_lead: 'You drew…',
+    reveal_tip: 'Psst — keep it secret! Below you can see what {name} is wishing for.',
+    rcv_wishes_head: '{name} is wishing for…',
+    rcv_no_wishes: '{name} has not made any wishes yet — time for a beautiful surprise from the collection.',
+    rcv_loading: 'Peeking at the wishes…',
+
+    closed_head: 'Thank You!',
+    closed_body: 'This year\u2019s Wichteln has come to a close. We hope it brought a little extra sparkle to your Christmas — see you next time by the fire!',
+
+    signed_in_as: 'Signed in as',
+    signout: 'Sign Out'
+  },
+  de: {
+    tagline: 'Ein Fest der Freundschaft',
+    splash_body: 'Dies ist ein privates Wichteln für Freunde der Gläsernen Leidenschaft. Es öffnet sich nur über einen persönlichen Einladungslink — wenn du einen von uns bekommen hast, folge bitte genau diesem Link.',
+    splash_hint: '✦ Nur mit Einladungslink ✦',
+    loading: 'Die Kerzen werden angezündet …',
+    err_load: 'Das Wichteln konnte nicht geladen werden — bitte versuch es gleich noch einmal.',
+    retry: 'Erneut versuchen',
+
+    note_from: 'Eine Nachricht von Dietbert & Ivonne',
+    stat_draw: 'Dein Wichtelkind',
+    stat_date: 'Wichteltag',
+    stat_budget: 'Budget',
+
+    auth_head: 'Willkommen beim Wichteln',
+    auth_intro: 'Du bist zu einem geheimen Wichteln unter Freunden der Gläsernen Leidenschaft eingeladen. Melde dich an, um mitzumachen — alles Weitere bleibt eine Überraschung.',
+    signin_head: 'Anmelden',
+    signup_head: 'Neu hier?',
+    email: 'E-Mail',
+    password: 'Passwort',
+    signin_btn: 'Anmelden',
+    signup_btn: 'Konto erstellen',
+    auth_note: 'Ein Konto brauchst du nur, damit wir wissen, wer mit wem wichtelt — für mehr wird es nicht verwendet.',
+    confirm_email: 'Fast geschafft! Bitte bestätige deine E-Mail-Adresse — wir haben dir soeben einen Link geschickt. Danach kommst du hierher zurück und meldest dich an.',
+    err_signin: 'E-Mail und Passwort passen nicht zusammen. Bitte versuch es noch einmal.',
+    err_signup: 'Das Konto konnte nicht erstellt werden. Bitte prüfe die E-Mail-Adresse und wähle ein Passwort mit mindestens 6 Zeichen.',
+    err_generic: 'Etwas ist schiefgelaufen — bitte versuch es noch einmal.',
+
+    join_head: 'Wichtel mit!',
+    join_intro: 'Sichere dir deinen Platz am Kamin. Die Lose werden im Geheimen gezogen — und jeder Wichtel macht einen Freund richtig glücklich.',
+    join_name_label: 'Dein Name, wie die anderen ihn sehen sollen',
+    join_btn: 'Ich wichtle mit',
+    seats_left: 'Freie Plätze: {n}',
+    join_by: 'Bitte sag bis zum {d} zu.',
+    err_no_name: 'Bitte verrate uns zuerst deinen Namen.',
+
+    full_head: 'Alle Plätze sind vergeben',
+    full_body: 'Dieses Wichteln ist leider schon voll — alle Plätze am Kamin sind besetzt. Schön, dass du vorbeigeschaut hast!',
+    closed_join_head: 'Die Anmeldung ist geschlossen',
+    closed_join_body: 'Diese Runde hat bereits begonnen, und es können keine Wichtel mehr dazukommen. Vielleicht beim nächsten Mal!',
+
+    greet: 'Hallo, {name}!',
+    wish_head: 'Auf die Plätze, fertig, wünschen!',
+    wish_intro: 'Blättere unten im Wunschbuch und markiere, worüber du dich unterm Baum freuen würdest. Dein geheimer Wichtel liest mit …',
+    drawn_note: 'Die Lose werden gerade gezogen — schau bald wieder vorbei und erfahre, wen du beschenken darfst.',
+
+    wishbook_head: 'Das Wunschbuch',
+    wishbook_sub: 'Handverlesene Stücke aus dem Atelier der Gläsernen Leidenschaft.',
+    wishbook_still_open: 'Deine eigene Wunschliste bleibt geöffnet — du kannst deine Wünsche jederzeit ändern.',
+    wb_loading: 'Das Wunschbuch wird aufgeschlagen …',
+    wb_empty: 'Das Wunschbuch wird noch befüllt — schau bald wieder vorbei.',
+    wish_count_0: 'Noch keine Wünsche',
+    wish_count_1: '1 Wunsch auf deiner Liste',
+    wish_count_n: '{n} Wünsche auf deiner Liste',
+    wish_btn: 'Wünsch ich mir',
+    wish_btn_on: 'Auf deiner Liste',
+    err_wish: 'Der Wunsch ließ sich nicht speichern — bitte versuch es noch einmal.',
+
+    reveal_eyebrow: 'Die Lose sind gezogen',
+    reveal_lead: 'Du hast gezogen …',
+    reveal_tip: 'Psst — nicht verraten! Unten siehst du, was sich {name} wünscht.',
+    rcv_wishes_head: 'Das wünscht sich {name}',
+    rcv_no_wishes: '{name} hat noch keine Wünsche eingetragen — Zeit für eine schöne Überraschung aus der Kollektion.',
+    rcv_loading: 'Ein Blick ins Wunschbuch …',
+
+    closed_head: 'Danke!',
+    closed_body: 'Das diesjährige Wichteln ist zu Ende. Wir hoffen, es hat euch ein wenig zusätzlichen Weihnachtszauber geschenkt — bis zum nächsten Mal am Kamin!',
+
+    signed_in_as: 'Angemeldet als',
+    signout: 'Abmelden'
+  }
+};
+
+var lang = 'en';
+try {
+  var stored = localStorage.getItem('gl_lang');
+  if (stored === 'de' || stored === 'en') lang = stored;
+  else if ((navigator.language || '').toLowerCase().indexOf('de') === 0) lang = 'de';
+} catch (e) {}
+
+function t(k) { return (T[lang] && T[lang][k]) || T.en[k] || k; }
+function tpl(k, vars) {
+  var s = t(k);
+  Object.keys(vars || {}).forEach(function (v) { s = s.replace('{' + v + '}', vars[v]); });
+  return s;
+}
+
+// Bilingual admin fields may be stored as "English / German" (site pattern);
+// plain single-language values pass through unchanged.
+function splitByLang(raw, currentLang) {
+  if (!raw) return '';
+  var s = String(raw);
+  var idx = s.indexOf(' / ');
+  if (idx === -1) return s;
+  var english = s.substring(0, idx).trim();
+  var german = s.substring(idx + 3).trim();
+  return currentLang === 'de' ? german : english;
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function imageUrl(f) {
+  if (!f) return null;
+  if (f.charAt(0) === '/') return f;
+  return STORAGE_BASE + encodeURIComponent(f);
+}
+
+// "2026-12-06" → "December 6, 2026" / "6. Dezember 2026" (no TZ surprises)
+function fmtDate(s) {
+  if (!s) return '';
+  var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(s);
+  var d = new Date(+m[1], +m[2] - 1, +m[3]);
+  try {
+    return d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US',
+      { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch (e) {
+    return m[3] + '.' + m[2] + '.' + m[1];
+  }
+}
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+var SLUG = (location.search.match(/[?&]x=([A-Za-z0-9_-]+)/) || [])[1] || null;
+var sb = null;
+var SESSION = null;      // supabase auth session (or null)
+var EX = null;           // ww_get_exchange payload
+var WISHBOOK = null;     // active ww_wishbook rows (null = not loaded yet)
+var MY_WISHES = null;    // my ww_wishes rows [{id, wishbook_item_id}]
+var RCV = null;          // receiver's wishes (null = not loaded yet)
+var WB_ERR = false;
+var wishBusy = {};       // per-item in-flight guard
+var authNotice = false;  // "confirm your email" after signup without session
+var confettiFired = false;
+
+function isJoined() { return !!(EX && EX.me && EX.me.status === 'joined'); }
+
+// ════════════════════════════════════════════
+// VIEWS + LOCALIZATION
+// ════════════════════════════════════════════
+function showView(v) {
+  document.getElementById('viewSplash').hidden = v !== 'splash';
+  document.getElementById('viewLoading').hidden = v !== 'loading';
+  document.getElementById('viewApp').hidden = v !== 'app';
+}
+
+function localize() {
+  document.documentElement.lang = lang;
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langDe').classList.toggle('active', lang === 'de');
+  document.querySelectorAll('[data-t]').forEach(function (el) {
+    var v = t(el.dataset.t);
+    if (v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-tpl]').forEach(function (el) {
+    el.textContent = tpl(el.dataset.tpl, {
+      n: el.dataset.tplN, d: el.dataset.tplD, name: el.dataset.tplName
+    });
+  });
+}
+
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem('gl_lang', l); } catch (e) {}
+  if (EX && !document.getElementById('viewApp').hidden) renderAll();
+  else localize();
+}
+
+// ════════════════════════════════════════════
+// PANEL BUILDERS (the state machine)
+// ════════════════════════════════════════════
+function msgPanel(headKey, bodyKey) {
+  return '<h2 class="panel-head" data-t="' + headKey + '"></h2>' +
+         '<p class="panel-body" data-t="' + bodyKey + '"></p>';
+}
+
+function authPanel() {
+  return '' +
+    '<h2 class="panel-head" data-t="auth_head"></h2>' +
+    '<p class="panel-body" data-t="auth_intro"></p>' +
+    '<div class="auth-grid">' +
+      '<form class="auth-box" onsubmit="return doSignIn(event)">' +
+        '<h3 class="auth-head" data-t="signin_head"></h3>' +
+        '<label class="f-label" for="siEmail" data-t="email"></label>' +
+        '<input class="f-input" id="siEmail" type="email" autocomplete="email" required>' +
+        '<label class="f-label" for="siPass" data-t="password"></label>' +
+        '<input class="f-input" id="siPass" type="password" autocomplete="current-password" required>' +
+        '<div class="form-err" id="siErr"></div>' +
+        '<button class="btn btn-red" id="siBtn" type="submit" data-t="signin_btn"></button>' +
+      '</form>' +
+      '<form class="auth-box" onsubmit="return doSignUp(event)">' +
+        '<h3 class="auth-head" data-t="signup_head"></h3>' +
+        '<label class="f-label" for="suEmail" data-t="email"></label>' +
+        '<input class="f-input" id="suEmail" type="email" autocomplete="email" required>' +
+        '<label class="f-label" for="suPass" data-t="password"></label>' +
+        '<input class="f-input" id="suPass" type="password" autocomplete="new-password" minlength="6" required>' +
+        (authNotice ? '<div class="form-msg" data-t="confirm_email"></div>' : '') +
+        '<div class="form-err" id="suErr"></div>' +
+        '<button class="btn btn-gold" id="suBtn" type="submit" data-t="signup_btn"></button>' +
+      '</form>' +
+    '</div>' +
+    '<p class="panel-note" data-t="auth_note"></p>';
+}
+
+function joinPanel() {
+  var meta = '';
+  if (EX.seats_left != null) {
+    meta += '<span data-tpl="seats_left" data-tpl-n="' + esc(String(EX.seats_left)) + '"></span>';
+  }
+  if (EX.rsvp_deadline) {
+    meta += '<span data-tpl="join_by" data-tpl-d="' + esc(fmtDate(EX.rsvp_deadline)) + '"></span>';
+  }
+  var prefill = (EX.me && EX.me.display_name) ? EX.me.display_name : '';
+  return '' +
+    '<h2 class="panel-head" data-t="join_head"></h2>' +
+    '<p class="panel-body" data-t="join_intro"></p>' +
+    (meta ? '<div class="join-meta">' + meta + '</div>' : '') +
+    '<form class="join-form" onsubmit="return doJoin(event)">' +
+      '<label class="f-label" for="jnName" data-t="join_name_label"></label>' +
+      '<input class="f-input" id="jnName" type="text" maxlength="60" autocomplete="name" value="' + esc(prefill) + '" required>' +
+      '<div class="form-err" id="jnErr"></div>' +
+      '<button class="btn btn-red" id="jnBtn" type="submit" data-t="join_btn"></button>' +
+    '</form>';
+}
+
+function wishPanel() {
+  return '' +
+    '<div class="panel-eyebrow" data-tpl="greet" data-tpl-name="' + esc(EX.me.display_name || '') + '"></div>' +
+    '<h2 class="panel-head" data-t="wish_head"></h2>' +
+    '<p class="panel-body" data-t="wish_intro"></p>' +
+    (EX.status === 'drawn' ? '<p class="drawn-note" data-t="drawn_note"></p>' : '');
+}
+
+function rcvListHtml() {
+  var rname = EX.my_receiver ? (EX.my_receiver.display_name || '') : '';
+  if (RCV === null) return '<p class="wb-note pulse">' + esc(t('rcv_loading')) + '</p>';
+  var rows = RCV.filter(function (w) { return w.item; });
+  if (!rows.length) {
+    return '<p class="wb-note" data-tpl="rcv_no_wishes" data-tpl-name="' + esc(rname) + '"></p>';
+  }
+  return rows.map(function (w) {
+    var it = w.item || {};
+    var name = it.name ? splitByLang(it.name, lang) : '✦';
+    var specs = [
+      it.color ? splitByLang(it.color, lang) : null,
+      it.height ? splitByLang(it.height, lang) : null
+    ].filter(Boolean).join(' · ');
+    return '<div class="rcv-item">' +
+      '<div class="rcv-thumb">' +
+        (it.img ? '<img src="' + esc(imageUrl(it.img)) + '" alt="" loading="lazy">'
+                : '<span class="ph">✦</span>') +
+      '</div>' +
+      '<div class="rcv-body">' +
+        '<div class="rcv-name">' + esc(name) + '</div>' +
+        (specs ? '<div class="rcv-specs">' + esc(specs) + '</div>' : '') +
+        (it.price_label ? '<div class="rcv-price">' + esc(it.price_label) + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function revealPanel() {
+  var rname = EX.my_receiver ? (EX.my_receiver.display_name || '') : '';
+  return '' +
+    '<div class="reveal">' +
+      '<div class="panel-eyebrow" data-t="reveal_eyebrow"></div>' +
+      '<div class="reveal-lead" data-t="reveal_lead"></div>' +
+      '<div class="reveal-name">' + esc(rname) + '!</div>' +
+      '<div class="divider"><span class="diamond">◆</span></div>' +
+      '<p class="reveal-tip" data-tpl="reveal_tip" data-tpl-name="' + esc(rname) + '"></p>' +
+      '<div class="rcv-head" data-tpl="rcv_wishes_head" data-tpl-name="' + esc(rname) + '"></div>' +
+      '<div class="rcv-list" id="rcvList">' + rcvListHtml() + '</div>' +
+    '</div>';
+}
+
+function panelHtml() {
+  if (!SESSION) return authPanel();                       // 1 — sign in / sign up
+  if (!isJoined()) {
+    if (EX.status === 'open' && !EX.is_full) return joinPanel();          // 2 — join
+    if (EX.status === 'open' && EX.is_full) return msgPanel('full_head', 'full_body');  // 3a — full
+    return msgPanel('closed_join_head', 'closed_join_body');              // 3b — joining closed
+  }
+  if (EX.status === 'closed') return msgPanel('closed_head', 'closed_body');  // 6 — thank you
+  if (EX.status === 'released' && EX.my_receiver) return revealPanel();       // 5 — the reveal
+  return wishPanel();                                                          // 4 — open / drawn
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function renderAll() {
+  if (!EX) return;
+  var joined = isJoined();
+  var released = EX.status === 'released';
+
+  // Shell
+  document.getElementById('exName').textContent = EX.name || 'Weihnachtswichtel';
+  var coverBox = document.getElementById('coverBox');
+  var cover = document.getElementById('coverImg');
+  if (EX.cover_img) {
+    cover.src = imageUrl(EX.cover_img);
+    coverBox.classList.remove('is-logo');
+  } else {
+    cover.src = '/img/wichtel-logo.png';
+    coverBox.classList.add('is-logo');
+  }
+  cover.alt = EX.name || '';
+
+  var note = lang === 'de' ? (EX.note_de || EX.note_en) : (EX.note_en || EX.note_de);
+  document.getElementById('noteCard').hidden = !note;
+  document.getElementById('noteText').textContent = note || '';
+
+  // Stat cards
+  var drawEl = document.getElementById('statDraw');
+  if (released && joined && EX.my_receiver) {
+    drawEl.textContent = EX.my_receiver.display_name || '';
+  } else {
+    drawEl.innerHTML = '<span class="secret">?</span>';
+  }
+  document.getElementById('statDate').textContent = EX.exchange_date ? fmtDate(EX.exchange_date) : '—';
+  document.getElementById('statBudget').textContent = EX.budget_label || '—';
+
+  // Main panel
+  document.getElementById('panel').innerHTML = panelHtml();
+
+  // Wish book (states 4 + 5; in 5 it stays reachable for editing own wishes)
+  var wbShow = joined && ['open', 'drawn', 'released'].indexOf(EX.status) !== -1;
+  document.getElementById('wbSec').hidden = !wbShow;
+  document.getElementById('wbOpenNote').hidden = !(wbShow && released);
+  if (wbShow) renderWishbook();
+
+  // Session footer
+  var sr = document.getElementById('sessionRow');
+  if (SESSION && SESSION.user) {
+    sr.hidden = false;
+    document.getElementById('sessionEmail').textContent = SESSION.user.email || '';
+  } else {
+    sr.hidden = true;
+  }
+
+  localize();
+
+  // 5 — celebrate the first reveal of this page load
+  if (released && joined && EX.my_receiver) fireConfetti();
+}
+
+function wbCardHtml(item) {
+  var on = !!(MY_WISHES && MY_WISHES.some(function (w) { return w.wishbook_item_id === item.id; }));
+  var name = splitByLang(item.name, lang);
+  var specs = [
+    item.color ? splitByLang(item.color, lang) : null,
+    item.height ? splitByLang(item.height, lang) : null
+  ].filter(Boolean).join(' · ');
+  var busy = !!wishBusy[item.id];
+  return '<div class="wb-card' + (on ? ' wished' : '') + '">' +
+    '<div class="wb-photo">' +
+      (item.img ? '<img src="' + esc(imageUrl(item.img)) + '" alt="' + esc(name) + '" loading="lazy">'
+                : '<span class="wb-ph">✦</span>') +
+    '</div>' +
+    '<div class="wb-info">' +
+      '<div class="wb-name">' + esc(name) + '</div>' +
+      (specs ? '<div class="wb-specs">' + esc(specs) + '</div>' : '') +
+      (item.price_label ? '<div class="wb-price">' + esc(item.price_label) + '</div>' : '') +
+    '</div>' +
+    '<button type="button" class="btn wb-btn' + (on ? ' on' : '') + '"' + (busy ? ' disabled' : '') +
+      ' onclick="toggleWish(\'' + esc(String(item.id)) + '\')">' +
+      (on ? '♥ ' : '♡ ') + '<span data-t="' + (on ? 'wish_btn_on' : 'wish_btn') + '"></span>' +
+    '</button>' +
+  '</div>';
+}
+
+function renderWishbook() {
+  if (document.getElementById('wbSec').hidden) return;
+  var body = document.getElementById('wbBody');
+  var count = document.getElementById('wbCount');
+  if (MY_WISHES === null) {
+    count.textContent = '';
+  } else {
+    var n = MY_WISHES.length;
+    count.textContent = n === 0 ? t('wish_count_0')
+                      : n === 1 ? t('wish_count_1')
+                      : tpl('wish_count_n', { n: n });
+  }
+  if (WB_ERR) { body.innerHTML = '<p class="wb-note">' + esc(t('err_generic')) + '</p>'; return; }
+  if (WISHBOOK === null) { body.innerHTML = '<p class="wb-note pulse">' + esc(t('wb_loading')) + '</p>'; return; }
+  if (!WISHBOOK.length) { body.innerHTML = '<p class="wb-note">' + esc(t('wb_empty')) + '</p>'; return; }
+  body.innerHTML = '<div class="wb-grid">' + WISHBOOK.map(wbCardHtml).join('') + '</div>';
+  localize();
+}
+
+function showWbErr() {
+  var el = document.getElementById('wbErr');
+  if (el) el.textContent = t('err_wish');
+}
+function hideWbErr() {
+  var el = document.getElementById('wbErr');
+  if (el) el.textContent = '';
+}
+
+// ════════════════════════════════════════════
+// DATA LOAD
+// ════════════════════════════════════════════
+function showLoadError() {
+  showView('loading');
+  var status = document.getElementById('loadStatus');
+  status.dataset.t = 'err_load';
+  status.classList.add('static');
+  document.getElementById('loadRetry').hidden = false;
+  localize();
+}
+
+function loadExchange() {
+  if (!sb) { showLoadError(); return; }
+  showView('loading');
+  var status = document.getElementById('loadStatus');
+  status.dataset.t = 'loading';
+  status.classList.remove('static');
+  document.getElementById('loadRetry').hidden = true;
+  localize();
+
+  sb.auth.getSession().then(function (s) {
+    SESSION = (s && s.data && s.data.session) || null;
+    return sb.rpc('ww_get_exchange', { p_slug: SLUG });
+  }).then(function (res) {
+    if (res.error) {
+      console.error('[wichtel] ww_get_exchange', res.error);
+      showLoadError();
+      return;
+    }
+    if (!res.data || res.data.found !== true) {
+      showView('splash');
+      localize();
+      return;
+    }
+    EX = res.data;
+    WISHBOOK = null; MY_WISHES = null; RCV = null; WB_ERR = false; wishBusy = {};
+    showView('app');
+    renderAll();
+    loadPanelData();
+  }).catch(function (e) {
+    console.error('[wichtel] load', e);
+    showLoadError();
+  });
+}
+
+function loadPanelData() {
+  if (!isJoined()) return;
+  if (['open', 'drawn', 'released'].indexOf(EX.status) === -1) return;
+
+  // The wish book + my own wishes (states 4 and 5)
+  Promise.all([
+    sb.from('ww_wishbook')
+      .select('id,name,color,height,price_label,img,display_order')
+      .eq('exchange_id', EX.id).eq('is_active', true)
+      .order('display_order', { ascending: true }),
+    sb.from('ww_wishes')
+      .select('id,wishbook_item_id')
+      .eq('participant_id', EX.me.participant_id)
+  ]).then(function (rs) {
+    if (rs[0].error || rs[1].error) {
+      console.error('[wichtel] wishbook', rs[0].error || rs[1].error);
+      WB_ERR = true;
+    } else {
+      WISHBOOK = rs[0].data || [];
+      MY_WISHES = rs[1].data || [];
+    }
+    renderWishbook();
+  }).catch(function (e) {
+    console.error('[wichtel] wishbook', e);
+    WB_ERR = true;
+    renderWishbook();
+  });
+
+  // The receiver's wishes (state 5 only — RLS opens this on release)
+  if (EX.status === 'released' && EX.my_receiver) {
+    sb.from('ww_wishes')
+      .select('item:ww_wishbook(name,color,height,price_label,img)')
+      .eq('participant_id', EX.my_receiver.participant_id)
+      .then(function (res) {
+        if (res.error) {
+          console.error('[wichtel] receiver wishes', res.error);
+          RCV = [];
+        } else {
+          RCV = res.data || [];
+        }
+        var list = document.getElementById('rcvList');
+        if (list) { list.innerHTML = rcvListHtml(); localize(); }
+      }, function (e) {
+        console.error('[wichtel] receiver wishes', e);
+        RCV = [];
+        var list = document.getElementById('rcvList');
+        if (list) { list.innerHTML = rcvListHtml(); localize(); }
+      });
+  }
+}
+
+// ════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════
+function doSignIn(ev) {
+  ev.preventDefault();
+  var email = document.getElementById('siEmail').value.trim();
+  var pass = document.getElementById('siPass').value;
+  var err = document.getElementById('siErr');
+  err.textContent = '';
+  if (!email || !pass) return false;
+  var btn = document.getElementById('siBtn');
+  btn.disabled = true;
+  sb.auth.signInWithPassword({ email: email, password: pass }).then(function (res) {
+    if (res.error) {
+      console.error('[wichtel] signin', res.error);
+      btn.disabled = false;
+      err.textContent = t('err_signin');
+      return;
+    }
+    authNotice = false;
+    loadExchange();
+  }, function (e) {
+    console.error('[wichtel] signin', e);
+    btn.disabled = false;
+    err.textContent = t('err_generic');
+  });
+  return false;
+}
+
+function doSignUp(ev) {
+  ev.preventDefault();
+  var email = document.getElementById('suEmail').value.trim();
+  var pass = document.getElementById('suPass').value;
+  var err = document.getElementById('suErr');
+  err.textContent = '';
+  if (!email || !pass) return false;
+  var btn = document.getElementById('suBtn');
+  btn.disabled = true;
+  sb.auth.signUp({ email: email, password: pass }).then(function (res) {
+    if (res.error) {
+      console.error('[wichtel] signup', res.error);
+      btn.disabled = false;
+      err.textContent = t('err_signup');
+      return;
+    }
+    if (res.data && res.data.session) {
+      // Email confirmation off (or already confirmed) — straight in.
+      authNotice = false;
+      loadExchange();
+    } else {
+      // Session is null: the confirmation email is on its way.
+      authNotice = true;
+      renderAll();
+    }
+  }, function (e) {
+    console.error('[wichtel] signup', e);
+    btn.disabled = false;
+    err.textContent = t('err_generic');
+  });
+  return false;
+}
+
+function doSignOut() {
+  sb.auth.signOut().then(function () {
+    SESSION = null;
+    authNotice = false;
+    loadExchange();
+  }, function (e) {
+    console.error('[wichtel] signout', e);
+    loadExchange();
+  });
+}
+
+function doJoin(ev) {
+  ev.preventDefault();
+  var name = document.getElementById('jnName').value.trim();
+  var err = document.getElementById('jnErr');
+  err.textContent = '';
+  if (!name) { err.textContent = t('err_no_name'); return false; }
+  var btn = document.getElementById('jnBtn');
+  btn.disabled = true;
+  sb.rpc('ww_join', { p_slug: SLUG, p_display_name: name }).then(function (res) {
+    if (res.error) {
+      console.error('[wichtel] ww_join', res.error);
+      btn.disabled = false;
+      err.textContent = t('err_generic');
+      return;
+    }
+    var d = res.data || {};
+    if (d.ok) { loadExchange(); return; }
+    console.error('[wichtel] ww_join refused:', d.error);
+    switch (d.error) {
+      case 'NO_NAME':
+        btn.disabled = false;
+        err.textContent = t('err_no_name');
+        break;
+      case 'FULL':
+      case 'NOT_OPEN':
+      case 'ALREADY_JOINED':
+      case 'NOT_LOGGED_IN':
+        // Refresh from the server — the fresh state shows the right panel.
+        loadExchange();
+        break;
+      default:
+        btn.disabled = false;
+        err.textContent = t('err_generic');
+    }
+  }, function (e) {
+    console.error('[wichtel] ww_join', e);
+    btn.disabled = false;
+    err.textContent = t('err_generic');
+  });
+  return false;
+}
+
+function toggleWish(itemId) {
+  if (!isJoined() || !MY_WISHES || wishBusy[itemId]) return;
+  var existing = null;
+  for (var i = 0; i < MY_WISHES.length; i++) {
+    if (MY_WISHES[i].wishbook_item_id === itemId) existing = MY_WISHES[i];
+  }
+  wishBusy[itemId] = true;
+  hideWbErr();
+  renderWishbook();
+
+  var q = existing
+    ? sb.from('ww_wishes').delete().eq('id', existing.id)
+    : sb.from('ww_wishes')
+        .insert({ exchange_id: EX.id, participant_id: EX.me.participant_id, wishbook_item_id: itemId })
+        .select('id,wishbook_item_id')
+        .single();
+
+  q.then(function (res) {
+    delete wishBusy[itemId];
+    if (res.error) {
+      console.error('[wichtel] wish toggle', res.error);
+      showWbErr();
+    } else if (existing) {
+      MY_WISHES = MY_WISHES.filter(function (w) { return w.id !== existing.id; });
+    } else if (res.data) {
+      MY_WISHES.push(res.data);
+    }
+    renderWishbook();
+  }, function (e) {
+    delete wishBusy[itemId];
+    console.error('[wichtel] wish toggle', e);
+    showWbErr();
+    renderWishbook();
+  });
+}
+
+// ════════════════════════════════════════════
+// CONFETTI (pure canvas — gold, red, and green paper for the reveal)
+// ════════════════════════════════════════════
+function fireConfetti() {
+  if (confettiFired) return;
+  confettiFired = true;
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  } catch (e) {}
+  var cv = document.getElementById('confettiCanvas');
+  if (!cv || !cv.getContext) return;
+  var ctx = cv.getContext('2d');
+  var W = cv.width = window.innerWidth;
+  var H = cv.height = window.innerHeight;
+  cv.style.display = 'block';
+
+  var colors = ['#d9bc6a', '#c9a84c', '#b08d40', '#a03d34', '#b9564a', '#2e6b46', '#f0e6cf'];
+  var pieces = [];
+  for (var i = 0; i < 150; i++) {
+    pieces.push({
+      x: Math.random() * W,
+      y: -20 - Math.random() * 220,
+      w: 5 + Math.random() * 5,
+      h: 8 + Math.random() * 8,
+      vy: 3.4 + Math.random() * 3,
+      drift: 0.6 + Math.random() * 1.4,
+      phase: Math.random() * Math.PI * 2,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.28,
+      color: colors[i % colors.length]
+    });
+  }
+  var start = null;
+  function frame(ts) {
+    if (start === null) start = ts;
+    var el = ts - start;
+    ctx.clearRect(0, 0, W, H);
+    var alive = false;
+    pieces.forEach(function (p) {
+      p.y += p.vy;
+      p.x += Math.sin(el / 300 + p.phase) * p.drift;
+      p.rot += p.vr;
+      if (p.y < H + 30) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      // The tumble: paper flips as it falls
+      ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.sin(el / 250 + p.phase)));
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive && el < 4200) {
+      requestAnimationFrame(frame);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      cv.style.display = 'none';
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+localize();
+if (!SLUG) {
+  showView('splash');
+  localize();
+} else {
+  try {
+    // Own storage key: never collides with the shop's or catalog's session.
+    sb = window.supabase.createClient(SB_URL, SB_ANON, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: 'sb-wichtel-auth' }
+    });
+    loadExchange();
+  } catch (e) {
+    console.error('[wichtel] init', e);
+    showLoadError();
+  }
+}
+</script>
+</body>
+</html>
