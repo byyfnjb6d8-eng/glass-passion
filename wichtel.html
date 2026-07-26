@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <!-- Unlisted page: reachable only via a personal invitation link (?x=<slug>).
-     Block browser auto-translate — the page is natively bilingual (EN/DE). -->
+     Block browser auto-translate - the page is natively bilingual (EN/DE). -->
 <meta name="google" content="notranslate">
 <title>Weihnachtswichtel</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <style>
-  /* Self-hosted fonts (same set as index.html / catalog.html — GDPR). */
+  /* Self-hosted fonts (same set as index.html / catalog.html - GDPR). */
   @font-face { font-family:'Cinzel'; font-style:normal; font-weight:400; font-display:swap;
     src:url('/fonts/cinzel-v26-latin-regular.woff2') format('woff2'); }
   @font-face { font-family:'Cinzel'; font-style:normal; font-weight:500; font-display:swap;
@@ -38,7 +38,7 @@
 </style>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
-   Weihnachtswichtel — participant page of the hidden Secret Santa.
+   Weihnachtswichtel - participant page of the hidden Secret Santa.
    Festive dark theme in the wichtel logo's palette: deep pine green,
    warm red, the house gold. Layout: Elfster-style left rail + main
    column (~1080px), stacked on mobile. Standalone page, no build step.
@@ -153,11 +153,12 @@ img { max-width: 100%; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 18px; padding: 48px 24px; text-align: center;
 }
-.splash-logo { width: min(54vw, 210px); filter: drop-shadow(0 4px 24px rgba(217,188,106,0.3)); }
+.splash-logo { width: min(82vw, 420px); filter: drop-shadow(0 6px 34px rgba(217,188,106,0.34)); }
+/* The logo badge already carries the wordmark, so the heading would just
+   repeat it. Kept in the DOM for screen readers, hidden visually. */
 .splash-title {
-  font-family: 'Cinzel', serif; font-weight: 500;
-  font-size: clamp(19px, 4vw, 28px); letter-spacing: 4px; text-transform: uppercase;
-  color: var(--cream);
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
 .splash-tagline {
   font-style: italic; font-size: clamp(17px, 3vw, 22px); color: var(--gold-lt);
@@ -395,7 +396,7 @@ img { max-width: 100%; }
   background: var(--card);
 }
 .wb-card.wished { border-color: rgba(217, 188, 106, 0.45); }
-/* Product photos are shot on white — keep the plate white (site convention) */
+/* Product photos are shot on white - keep the plate white (site convention) */
 .wb-photo { position: relative; background: #ffffff; aspect-ratio: 1 / 1; }
 .wb-photo img {
   position: absolute; top: 10px; right: 10px; bottom: 10px; left: 10px; inset: 10px;
@@ -534,14 +535,14 @@ img { max-width: 100%; }
 'use strict';
 
 // ════════════════════════════════════════════
-// CONFIG (anon key is public by design — RLS + SECURITY DEFINER RPCs
+// CONFIG (anon key is public by design - RLS + SECURITY DEFINER RPCs
 // protect the data; assignments only become readable on release)
 // ════════════════════════════════════════════
 var SB_URL  = 'https://wjddakdiknuyqchzcdbc.supabase.co';
 var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZGRha2Rpa251eXFjaHpjZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjIxMjksImV4cCI6MjA5MTY5ODEyOX0.MKt_gugn0uEuk2EiYHF0e2HU2gNFAmIHDUKgKm_x-Wk';
 var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
 
-// One anonymous visit ping per page load (site convention; pathname only —
+// One anonymous visit ping per page load (site convention; pathname only -
 // the invitation slug is never sent). Silently a no-op in local dev.
 (function () {
   try {
@@ -559,15 +560,15 @@ var STORAGE_BASE = SB_URL + '/storage/v1/object/public/product-images/';
 })();
 
 // ════════════════════════════════════════════
-// I18N — the Wichteln addresses its guests as friends (Du)
+// I18N - the Wichteln addresses its guests as friends (Du)
 // ════════════════════════════════════════════
 var T = {
   en: {
-    tagline: 'A celebration of friendship',
-    splash_body: 'This is a private Secret Santa for friends of Gläserne Leidenschaft. It opens only with a personal invitation link — if you received one from us, please follow exactly that link.',
+    tagline: 'Drawn by chance, made by hand',
+    splash_body: 'In Lauscha we blow every ornament by hand. Each December, chance decides who gifts whom. Weihnachtswichtel is our private exchange for friends of the studio, and it opens only with your personal invitation link.',
     splash_hint: '✦ Invitation link required ✦',
     loading: 'Lighting the candles…',
-    err_load: 'The Wichteln could not be loaded — please try again in a moment.',
+    err_load: 'The Wichteln could not be loaded - please try again in a moment.',
     retry: 'Try Again',
 
     note_from: 'A note from Dietbert & Ivonne',
@@ -576,21 +577,21 @@ var T = {
     stat_budget: 'Budget',
 
     auth_head: 'Welcome to the Wichteln',
-    auth_intro: 'You have been invited to a secret gift exchange among friends of Gläserne Leidenschaft. Sign in to take part — everything else stays a surprise.',
+    auth_intro: 'You have been invited to a secret gift exchange among friends of Gläserne Leidenschaft. Sign in to take part - everything else stays a surprise.',
     signin_head: 'Sign In',
     signup_head: 'New Here?',
     email: 'Email',
     password: 'Password',
     signin_btn: 'Sign In',
     signup_btn: 'Create Account',
-    auth_note: 'An account is only needed so we know who is wichteling with whom — it is used for nothing else.',
-    confirm_email: 'Almost there! Please confirm your email address — we have just sent you a link. Then come back here and sign in.',
+    auth_note: 'An account is only needed so we know who is wichteling with whom - it is used for nothing else.',
+    confirm_email: 'Almost there! Please confirm your email address - we have just sent you a link. Then come back here and sign in.',
     err_signin: 'That email and password did not match. Please try again.',
     err_signup: 'The account could not be created. Please check the email address and choose a password with at least 6 characters.',
-    err_generic: 'Something went wrong — please try again.',
+    err_generic: 'Something went wrong - please try again.',
 
     join_head: 'Join In!',
-    join_intro: 'Reserve your seat by the fire. The names are drawn in secret — and every Wichtel makes one friend very happy.',
+    join_intro: 'Reserve your seat by the fire. The names are drawn in secret - and every Wichtel makes one friend very happy.',
     join_name_label: 'Your name, as the others should see it',
     join_btn: 'Count Me In',
     seats_left: 'Seats left: {n}',
@@ -598,46 +599,46 @@ var T = {
     err_no_name: 'Please tell us your name first.',
 
     full_head: 'All Seats Are Taken',
-    full_body: 'This Wichteln is already full — every seat by the fire is spoken for. Thank you for stopping by!',
+    full_body: 'This Wichteln is already full - every seat by the fire is spoken for. Thank you for stopping by!',
     closed_join_head: 'Joining Is Closed',
     closed_join_body: 'This round has already begun, and no more Wichtel can slip in. Maybe next time!',
 
     greet: 'Hello, {name}!',
     wish_head: 'Ready, Set, Wish!',
     wish_intro: 'Browse the wish book below and mark what you would love to find under the tree. Your secret Wichtel is taking notes…',
-    drawn_note: 'The names are being drawn at this very moment — check back soon to see who you got.',
+    drawn_note: 'The names are being drawn at this very moment - check back soon to see who you got.',
 
     wishbook_head: 'The Wish Book',
     wishbook_sub: 'Hand-picked pieces from the Gläserne Leidenschaft studio.',
-    wishbook_still_open: 'Your own wish list stays open — you can add or change wishes any time.',
+    wishbook_still_open: 'Your own wish list stays open - you can add or change wishes any time.',
     wb_loading: 'Opening the wish book…',
-    wb_empty: 'The wish book is still being filled — check back soon.',
+    wb_empty: 'The wish book is still being filled - check back soon.',
     wish_count_0: 'No wishes yet',
     wish_count_1: '1 wish on your list',
     wish_count_n: '{n} wishes on your list',
     wish_btn: 'Wish for This',
     wish_btn_on: 'On Your List',
-    err_wish: 'That wish could not be saved — please try again.',
+    err_wish: 'That wish could not be saved - please try again.',
 
     reveal_eyebrow: 'The names have been drawn',
     reveal_lead: 'You drew…',
-    reveal_tip: 'Psst — keep it secret! Below you can see what {name} is wishing for.',
+    reveal_tip: 'Psst - keep it secret! Below you can see what {name} is wishing for.',
     rcv_wishes_head: '{name} is wishing for…',
-    rcv_no_wishes: '{name} has not made any wishes yet — time for a beautiful surprise from the collection.',
+    rcv_no_wishes: '{name} has not made any wishes yet - time for a beautiful surprise from the collection.',
     rcv_loading: 'Peeking at the wishes…',
 
     closed_head: 'Thank You!',
-    closed_body: 'This year\u2019s Wichteln has come to a close. We hope it brought a little extra sparkle to your Christmas — see you next time by the fire!',
+    closed_body: 'This year\u2019s Wichteln has come to a close. We hope it brought a little extra sparkle to your Christmas - see you next time by the fire!',
 
     signed_in_as: 'Signed in as',
     signout: 'Sign Out'
   },
   de: {
-    tagline: 'Ein Fest der Freundschaft',
-    splash_body: 'Dies ist ein privates Wichteln für Freunde der Gläsernen Leidenschaft. Es öffnet sich nur über einen persönlichen Einladungslink — wenn du einen von uns bekommen hast, folge bitte genau diesem Link.',
+    tagline: 'Vom Los bestimmt, von Hand gefertigt',
+    splash_body: 'In Lauscha blasen wir jedes Stück von Hand. Im Dezember entscheidet das Los, wer wen beschenkt. Weihnachtswichtel ist unsere private Wichtelrunde für Freunde des Ateliers und öffnet sich nur mit deinem persönlichen Einladungslink.',
     splash_hint: '✦ Nur mit Einladungslink ✦',
     loading: 'Die Kerzen werden angezündet …',
-    err_load: 'Das Wichteln konnte nicht geladen werden — bitte versuch es gleich noch einmal.',
+    err_load: 'Das Wichteln konnte nicht geladen werden - bitte versuch es gleich noch einmal.',
     retry: 'Erneut versuchen',
 
     note_from: 'Eine Nachricht von Dietbert & Ivonne',
@@ -646,21 +647,21 @@ var T = {
     stat_budget: 'Budget',
 
     auth_head: 'Willkommen beim Wichteln',
-    auth_intro: 'Du bist zu einem geheimen Wichteln unter Freunden der Gläsernen Leidenschaft eingeladen. Melde dich an, um mitzumachen — alles Weitere bleibt eine Überraschung.',
+    auth_intro: 'Du bist zu einem geheimen Wichteln unter Freunden der Gläsernen Leidenschaft eingeladen. Melde dich an, um mitzumachen - alles Weitere bleibt eine Überraschung.',
     signin_head: 'Anmelden',
     signup_head: 'Neu hier?',
     email: 'E-Mail',
     password: 'Passwort',
     signin_btn: 'Anmelden',
     signup_btn: 'Konto erstellen',
-    auth_note: 'Ein Konto brauchst du nur, damit wir wissen, wer mit wem wichtelt — für mehr wird es nicht verwendet.',
-    confirm_email: 'Fast geschafft! Bitte bestätige deine E-Mail-Adresse — wir haben dir soeben einen Link geschickt. Danach kommst du hierher zurück und meldest dich an.',
+    auth_note: 'Ein Konto brauchst du nur, damit wir wissen, wer mit wem wichtelt - für mehr wird es nicht verwendet.',
+    confirm_email: 'Fast geschafft! Bitte bestätige deine E-Mail-Adresse - wir haben dir soeben einen Link geschickt. Danach kommst du hierher zurück und meldest dich an.',
     err_signin: 'E-Mail und Passwort passen nicht zusammen. Bitte versuch es noch einmal.',
     err_signup: 'Das Konto konnte nicht erstellt werden. Bitte prüfe die E-Mail-Adresse und wähle ein Passwort mit mindestens 6 Zeichen.',
-    err_generic: 'Etwas ist schiefgelaufen — bitte versuch es noch einmal.',
+    err_generic: 'Etwas ist schiefgelaufen - bitte versuch es noch einmal.',
 
     join_head: 'Wichtel mit!',
-    join_intro: 'Sichere dir deinen Platz am Kamin. Die Lose werden im Geheimen gezogen — und jeder Wichtel macht einen Freund richtig glücklich.',
+    join_intro: 'Sichere dir deinen Platz am Kamin. Die Lose werden im Geheimen gezogen - und jeder Wichtel macht einen Freund richtig glücklich.',
     join_name_label: 'Dein Name, wie die anderen ihn sehen sollen',
     join_btn: 'Ich wichtle mit',
     seats_left: 'Freie Plätze: {n}',
@@ -668,36 +669,36 @@ var T = {
     err_no_name: 'Bitte verrate uns zuerst deinen Namen.',
 
     full_head: 'Alle Plätze sind vergeben',
-    full_body: 'Dieses Wichteln ist leider schon voll — alle Plätze am Kamin sind besetzt. Schön, dass du vorbeigeschaut hast!',
+    full_body: 'Dieses Wichteln ist leider schon voll - alle Plätze am Kamin sind besetzt. Schön, dass du vorbeigeschaut hast!',
     closed_join_head: 'Die Anmeldung ist geschlossen',
     closed_join_body: 'Diese Runde hat bereits begonnen, und es können keine Wichtel mehr dazukommen. Vielleicht beim nächsten Mal!',
 
     greet: 'Hallo, {name}!',
     wish_head: 'Auf die Plätze, fertig, wünschen!',
     wish_intro: 'Blättere unten im Wunschbuch und markiere, worüber du dich unterm Baum freuen würdest. Dein geheimer Wichtel liest mit …',
-    drawn_note: 'Die Lose werden gerade gezogen — schau bald wieder vorbei und erfahre, wen du beschenken darfst.',
+    drawn_note: 'Die Lose werden gerade gezogen - schau bald wieder vorbei und erfahre, wen du beschenken darfst.',
 
     wishbook_head: 'Das Wunschbuch',
     wishbook_sub: 'Handverlesene Stücke aus dem Atelier der Gläsernen Leidenschaft.',
-    wishbook_still_open: 'Deine eigene Wunschliste bleibt geöffnet — du kannst deine Wünsche jederzeit ändern.',
+    wishbook_still_open: 'Deine eigene Wunschliste bleibt geöffnet - du kannst deine Wünsche jederzeit ändern.',
     wb_loading: 'Das Wunschbuch wird aufgeschlagen …',
-    wb_empty: 'Das Wunschbuch wird noch befüllt — schau bald wieder vorbei.',
+    wb_empty: 'Das Wunschbuch wird noch befüllt - schau bald wieder vorbei.',
     wish_count_0: 'Noch keine Wünsche',
     wish_count_1: '1 Wunsch auf deiner Liste',
     wish_count_n: '{n} Wünsche auf deiner Liste',
     wish_btn: 'Wünsch ich mir',
     wish_btn_on: 'Auf deiner Liste',
-    err_wish: 'Der Wunsch ließ sich nicht speichern — bitte versuch es noch einmal.',
+    err_wish: 'Der Wunsch ließ sich nicht speichern - bitte versuch es noch einmal.',
 
     reveal_eyebrow: 'Die Lose sind gezogen',
     reveal_lead: 'Du hast gezogen …',
-    reveal_tip: 'Psst — nicht verraten! Unten siehst du, was sich {name} wünscht.',
+    reveal_tip: 'Psst - nicht verraten! Unten siehst du, was sich {name} wünscht.',
     rcv_wishes_head: 'Das wünscht sich {name}',
-    rcv_no_wishes: '{name} hat noch keine Wünsche eingetragen — Zeit für eine schöne Überraschung aus der Kollektion.',
+    rcv_no_wishes: '{name} hat noch keine Wünsche eingetragen - Zeit für eine schöne Überraschung aus der Kollektion.',
     rcv_loading: 'Ein Blick ins Wunschbuch …',
 
     closed_head: 'Danke!',
-    closed_body: 'Das diesjährige Wichteln ist zu Ende. Wir hoffen, es hat euch ein wenig zusätzlichen Weihnachtszauber geschenkt — bis zum nächsten Mal am Kamin!',
+    closed_body: 'Das diesjährige Wichteln ist zu Ende. Wir hoffen, es hat euch ein wenig zusätzlichen Weihnachtszauber geschenkt - bis zum nächsten Mal am Kamin!',
 
     signed_in_as: 'Angemeldet als',
     signout: 'Abmelden'
@@ -912,15 +913,15 @@ function revealPanel() {
 }
 
 function panelHtml() {
-  if (!SESSION) return authPanel();                       // 1 — sign in / sign up
+  if (!SESSION) return authPanel();                       // 1 - sign in / sign up
   if (!isJoined()) {
-    if (EX.status === 'open' && !EX.is_full) return joinPanel();          // 2 — join
-    if (EX.status === 'open' && EX.is_full) return msgPanel('full_head', 'full_body');  // 3a — full
-    return msgPanel('closed_join_head', 'closed_join_body');              // 3b — joining closed
+    if (EX.status === 'open' && !EX.is_full) return joinPanel();          // 2 - join
+    if (EX.status === 'open' && EX.is_full) return msgPanel('full_head', 'full_body');  // 3a - full
+    return msgPanel('closed_join_head', 'closed_join_body');              // 3b - joining closed
   }
-  if (EX.status === 'closed') return msgPanel('closed_head', 'closed_body');  // 6 — thank you
-  if (EX.status === 'released' && EX.my_receiver) return revealPanel();       // 5 — the reveal
-  return wishPanel();                                                          // 4 — open / drawn
+  if (EX.status === 'closed') return msgPanel('closed_head', 'closed_body');  // 6 - thank you
+  if (EX.status === 'released' && EX.my_receiver) return revealPanel();       // 5 - the reveal
+  return wishPanel();                                                          // 4 - open / drawn
 }
 
 // ════════════════════════════════════════════
@@ -955,8 +956,8 @@ function renderAll() {
   } else {
     drawEl.innerHTML = '<span class="secret">?</span>';
   }
-  document.getElementById('statDate').textContent = EX.exchange_date ? fmtDate(EX.exchange_date) : '—';
-  document.getElementById('statBudget').textContent = EX.budget_label || '—';
+  document.getElementById('statDate').textContent = EX.exchange_date ? fmtDate(EX.exchange_date) : '-';
+  document.getElementById('statBudget').textContent = EX.budget_label || '-';
 
   // Main panel
   document.getElementById('panel').innerHTML = panelHtml();
@@ -978,7 +979,7 @@ function renderAll() {
 
   localize();
 
-  // 5 — celebrate the first reveal of this page load
+  // 5 - celebrate the first reveal of this page load
   if (released && joined && EX.my_receiver) fireConfetti();
 }
 
@@ -1109,7 +1110,7 @@ function loadPanelData() {
     renderWishbook();
   });
 
-  // The receiver's wishes (state 5 only — RLS opens this on release)
+  // The receiver's wishes (state 5 only - RLS opens this on release)
   if (EX.status === 'released' && EX.my_receiver) {
     sb.from('ww_wishes')
       .select('item:ww_wishbook(name,color,height,price_label,img)')
@@ -1178,7 +1179,7 @@ function doSignUp(ev) {
       return;
     }
     if (res.data && res.data.session) {
-      // Email confirmation off (or already confirmed) — straight in.
+      // Email confirmation off (or already confirmed) - straight in.
       authNotice = false;
       loadExchange();
     } else {
@@ -1232,7 +1233,7 @@ function doJoin(ev) {
       case 'NOT_OPEN':
       case 'ALREADY_JOINED':
       case 'NOT_LOGGED_IN':
-        // Refresh from the server — the fresh state shows the right panel.
+        // Refresh from the server - the fresh state shows the right panel.
         loadExchange();
         break;
       default:
@@ -1284,7 +1285,7 @@ function toggleWish(itemId) {
 }
 
 // ════════════════════════════════════════════
-// CONFETTI (pure canvas — gold, red, and green paper for the reveal)
+// CONFETTI (pure canvas - gold, red, and green paper for the reveal)
 // ════════════════════════════════════════════
 function fireConfetti() {
   if (confettiFired) return;
