@@ -1195,15 +1195,43 @@ body::before {
 }
 .customs-box-head {
   display: flex; justify-content: space-between; align-items: baseline;
-  gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
   font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
   color: var(--gold-ink);
 }
-.customs-box-grid {
-  display: grid; grid-template-columns: auto 1fr; gap: 6px 10px;
-  align-items: center; font-size: 12px; color: var(--cream);
+.customs-box-head .cx-boxmeta {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  letter-spacing: 0; text-transform: none; color: var(--cream);
 }
-.customs-box-grid label { color: var(--cream-dim); }
+.customs-box-grid {
+  display: grid; grid-template-columns: auto 1fr; gap: 8px 12px;
+  align-items: start;
+  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--cream);
+}
+.customs-box-grid label { color: var(--cream); }
+/* Secondary annotations sit on their own line so they stop running into
+   the field they describe. */
+.cx-subnote {
+  display: block; margin-top: 3px;
+  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--cream);
+}
+.cx-subnote a { color: var(--gold-ink); margin-left: 8px; }
+.customs-pack-hint {
+  margin-top: 8px;
+  font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.6;
+  color: var(--cream);
+}
+.customs-pack-totals {
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line2);
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--cream);
+}
+.customs-pack-totals .cx-lbl { color: var(--cream); }
+.customs-pack-form {
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--cream);
+}
+@media (max-width: 640px) { .customs-pack-totals { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
   .customs-box-card { flex: 1 1 100%; }
   .customs-mini-input { width: 66px; }
@@ -1243,6 +1271,7 @@ body::before {
   padding: 6px 8px;
   border-bottom: 1px dotted var(--line2);
   vertical-align: middle;
+  color: var(--cream);
 }
 .admin-line-items-table tr:last-child td { border-bottom: none; }
 
@@ -12268,9 +12297,9 @@ Ivonne and Mr. D`;
       return `<tr>
         <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-ink)">${escapeHtml(r.style)}</td>
         <td style="color:var(--cream)">${escapeHtml(r.name)}${setBadge}${giftBadge}${giftNoteLine}${itemNoteLine}</td>
-        <td style="color:var(--cream-dim);font-style:italic">${escapeHtml(colorDisplay)}</td>
+        <td style="color:var(--cream);font-style:italic">${escapeHtml(colorDisplay)}</td>
         <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;color:var(--cream)">${qty}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream-dim);white-space:nowrap">${priceCell}${giftRemoveBtn}${itemRemoveBtn}${itemNoteBtn}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--cream);white-space:nowrap">${priceCell}${giftRemoveBtn}${itemRemoveBtn}${itemNoteBtn}</td>
       </tr>`;
     }).join('');
     // Phase 6.29: "Add Gift Item" button below the table — only when order
@@ -13702,6 +13731,13 @@ async function removeGiftItem(orderItemRowId, orderDbId) {
 // textarea persists to orders.customs_notes via saveCustomsNotes.
 // ═══════════════════════════════════════════════════════════════════════
 
+// Phase 7.1: grams stay the working unit, but once a total reaches a kilo the
+// kilo figure is shown alongside it, which is what the carrier asks for.
+function fmtGrams(g) {
+  const n = Math.round(Number(g) || 0);
+  return n >= 1000 ? `${n} g (${(n / 1000).toFixed(2)} kg)` : `${n} g`;
+}
+
 // ── Phase 7.1: packing plan helpers ──
 // orders.customs_packing holds { boxes:[{n,tare_grams,contents_override_grams}],
 // alloc:{ order_item_id: { boxNumber: qty } } }. NULL means one box holding
@@ -13941,12 +13977,12 @@ async function renderCustomsPanel(orderDbId) {
       return `  ${l.qty}x ${l.style} ${l.name}${giftMark} - ${l.lineWeight}g - €${l.lineValue.toFixed(2)}`;
     }).join('\n');
     return head + rows +
-      `\n  ${t('customs_contents_weight')}: ${b.contentsGrams}g` +
-      `\n  ${t('customs_box_weight')}: ${b.tareGrams}g` +
-      `\n  ${t('customs_box_total')}: ${b.totalGrams}g`;
+      `\n  ${t('customs_contents_weight')}: ${fmtGrams(b.contentsGrams)}` +
+      `\n  ${t('customs_box_weight')}: ${fmtGrams(b.tareGrams)}` +
+      `\n  ${t('customs_box_total')}: ${fmtGrams(b.totalGrams)}`;
   }).join('\n\n');
   const contentsText = contentsHeader + '\n\n' + contentsTextLines + '\n\n' +
-    `Total: ${customs.totalQty} items, ${customs.shippedWeightGrams}g, €${customs.totalValueEuros.toFixed(2)}`;
+    `Total: ${customs.totalQty} items, ${fmtGrams(customs.shippedWeightGrams)}, €${customs.totalValueEuros.toFixed(2)}`;
   // Per-order notes (loaded fresh from DB each open)
   const currentNotes = order.customs_notes || '';
   // Phase 7.1: editable line rows. Weight is per unit and accepts 0; when
@@ -13986,7 +14022,7 @@ async function renderCustomsPanel(orderDbId) {
     <div class="customs-box-card" data-cx="box-${b.n}">
       <div class="customs-box-head">
         <strong>${t('customs_box_label')} ${b.n}</strong>
-        <span style="color:var(--cream-dim);font-size:11px">${t('customs_total_value')}: €<span data-cx="bv-${b.n}">${b.valueEuros.toFixed(2)}</span> · <span data-cx="bf-${b.n}">${escapeHtml(b.recommendedForm)}</span></span>
+        <span class="cx-boxmeta">${t('customs_total_value')}: €<span data-cx="bv-${b.n}">${b.valueEuros.toFixed(2)}</span> · <span data-cx="bf-${b.n}">${escapeHtml(b.recommendedForm)}</span></span>
       </div>
       <div class="customs-box-grid">
         <label>${t('customs_contents_weight')}</label>
@@ -13994,14 +14030,16 @@ async function renderCustomsPanel(orderDbId) {
           <input type="number" class="cx-cont customs-mini-input" data-box="${b.n}" min="0" step="1"
                  data-manual="${b.contentsOverridden ? 1 : 0}" data-calc="${b.contentsCalcGrams}"
                  value="${b.contentsGrams}" oninput="customsContentsEdited(this, '${orderDbId}')"> g
-          <span data-cx="bc-${b.n}" style="font-size:11px;color:var(--cream-dim)"></span>
-          <a href="#" data-cx="bf-reset-${b.n}" style="font-size:11px;color:var(--gold-ink);display:none"
-             onclick="customsFollowItems(${b.n}, '${orderDbId}');return false">${t('customs_follow_items')}</a>
+          <span class="cx-subnote">
+            <span data-cx="ckg-${b.n}"></span><span data-cx="bc-${b.n}"></span>
+            <a href="#" data-cx="bf-reset-${b.n}" style="display:none"
+               onclick="customsFollowItems(${b.n}, '${orderDbId}');return false">${t('customs_follow_items')}</a>
+          </span>
         </div>
         <label>${t('customs_box_weight')}</label>
         <div><input type="number" class="cx-tare customs-mini-input" data-box="${b.n}" min="0" step="1" value="${b.tareGrams}" oninput="customsRecalc('${orderDbId}')"> g</div>
         <label><strong>${t('customs_box_total')}</strong></label>
-        <div><strong data-cx="bt-${b.n}">${b.totalGrams}</strong> g</div>
+        <div><strong data-cx="bt-${b.n}">${fmtGrams(b.totalGrams)}</strong></div>
       </div>
     </div>`).join('');
   // Render — Phase 6.29.6: all data-t converted to inline t() so we
@@ -14041,15 +14079,15 @@ async function renderCustomsPanel(orderDbId) {
         </tr></thead>
         <tbody>${linesHtml}</tbody>
       </table>
-      <div style="margin-top:6px;font-size:11px;color:var(--cream-dim);font-style:italic">${t('customs_weight_hint')}</div>
+      <div class="customs-pack-hint">${t('customs_weight_hint')}</div>
       <div class="customs-box-wrap">${boxSummaryHtml}</div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line2);display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
-        <div><span style="color:var(--cream-dim)">${t('customs_total_qty')}:</span> <strong>${customs.totalQty}</strong></div>
-        <div><span style="color:var(--cream-dim)">${t('customs_shipped_weight')}:</span> <strong data-cx="shipped">${customs.shippedWeightGrams}</strong>g</div>
-        <div><span style="color:var(--cream-dim)">${t('customs_total_value')}:</span> <strong style="color:var(--gold-ink)">€${customs.totalValueEuros.toFixed(2)}</strong></div>
+      <div class="customs-pack-totals">
+        <div><span class="cx-lbl">${t('customs_total_qty')}:</span> <strong>${customs.totalQty}</strong></div>
+        <div><span class="cx-lbl">${t('customs_shipped_weight')}:</span> <strong data-cx="shipped">${fmtGrams(customs.shippedWeightGrams)}</strong></div>
+        <div><span class="cx-lbl">${t('customs_total_value')}:</span> <strong style="color:var(--gold-ink)">€${customs.totalValueEuros.toFixed(2)}</strong></div>
       </div>
-      <div style="margin-top:8px;font-size:12px;font-style:italic;color:var(--cream-dim)">
-        ${t('customs_form_recommendation')}: <strong style="color:var(--cream);font-style:normal">${escapeHtml(customs.recommendedForm)}</strong>
+      <div class="customs-pack-form">
+        ${t('customs_form_recommendation')}: <strong>${escapeHtml(customs.recommendedForm)}</strong>
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" onclick="saveCustomsPacking('${orderDbId}')">${t('customs_packing_save')}</button>
@@ -14239,12 +14277,17 @@ function customsRecalc(orderDbId) {
     const total = contents + b.tare_grams;
     shipped += total;
     const totEl = panel.querySelector(`[data-cx="bt-${b.n}"]`);
-    if (totEl) totEl.textContent = String(total);
+    if (totEl) totEl.textContent = fmtGrams(total);
+    const kgEl = panel.querySelector(`[data-cx="ckg-${b.n}"]`);
+    if (kgEl) kgEl.textContent = '';
     const noteEl = panel.querySelector(`[data-cx="bc-${b.n}"]`);
     if (noteEl) {
-      noteEl.textContent = b.contents_override_grams != null
-        ? ' ' + t('customs_contents_manual').replace('{n}', calc)
-        : '';
+      const parts = [];
+      if (contents >= 1000) parts.push(`${(contents / 1000).toFixed(2)} kg`);
+      if (b.contents_override_grams != null) {
+        parts.push(t('customs_contents_manual').replace('{n}', calc));
+      }
+      noteEl.textContent = parts.join(' · ');
     }
     // Declared value and the form designation move with the split
     const valEl = panel.querySelector(`[data-cx="bv-${b.n}"]`);
@@ -14254,7 +14297,7 @@ function customsRecalc(orderDbId) {
     if (formEl) formEl.textContent = boxValue < 350 ? t('customs_form_cn22') : t('customs_form_cn23');
   });
   const shippedEl = panel.querySelector('[data-cx="shipped"]');
-  if (shippedEl) shippedEl.textContent = String(shipped);
+  if (shippedEl) shippedEl.textContent = fmtGrams(shipped);
   return !mismatch;
 }
 
@@ -15359,17 +15402,17 @@ async function generateCustomsPdf(orderDbId) {
   doc.setFontSize(10);
   doc.setTextColor(...PDF_BRAND.ink);
   doc.text(`${t('customs_total_qty')}: ${box.qty}`, leftMargin, y);
-  doc.text(`${t('customs_contents_weight')}: ${box.contentsGrams}g`, leftMargin + 60, y);
+  doc.text(`${t('customs_contents_weight')}: ${fmtGrams(box.contentsGrams)}`, leftMargin + 60, y);
   doc.setTextColor(...PDF_BRAND.gold);
   doc.text(`${t('customs_total_value')}: €${box.valueEuros.toFixed(2)}`, rightMargin, y, { align: 'right' });
   y += 5;
   doc.setTextColor(...PDF_BRAND.ink);
   doc.setFont('times', 'normal');
   doc.setFontSize(9);
-  doc.text(`${t('customs_box_weight')}: ${box.tareGrams}g`, leftMargin + 60, y);
+  doc.text(`${t('customs_box_weight')}: ${fmtGrams(box.tareGrams)}`, leftMargin + 60, y);
   doc.setFont('times', 'bold');
   doc.setFontSize(10);
-  doc.text(`${t('customs_box_total')}: ${box.totalGrams}g`, leftMargin, y);
+  doc.text(`${t('customs_box_total')}: ${fmtGrams(box.totalGrams)}`, leftMargin, y);
   y += 10;
 
   // Notes (if any)
