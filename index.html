@@ -13472,7 +13472,8 @@ function openGiftModal(orderDbId, orderIdLabel) {
   document.querySelector('input[name="giftType"][value="catalog"]').checked = true;
   document.getElementById('giftCustomName').value = '';
   document.getElementById('giftDeclaredValue').value = '';
-  document.getElementById('giftWeightGrams').value = siteSettings.customsDefaultWeightGrams || 60;
+  document.getElementById('giftWeightGrams').value = siteSettings.customsDefaultWeightGrams != null
+    ? siteSettings.customsDefaultWeightGrams : 60;
   document.getElementById('giftQuantity').value = '1';
   document.getElementById('giftNote').value = '';
   // Populate the catalog dropdown — sort alphabetically by name
@@ -13768,7 +13769,10 @@ function customsLineAllocation(itemId, lineQty, packing) {
 // weight (an admin may zero out items and declare one total instead), so a
 // falsy check would silently swap it for the 60 g site default.
 function computeCustomsData(orderItems, packingRaw) {
-  const defaultWeight = siteSettings.customsDefaultWeightGrams || 60;
+  // != null, not ||: a configured default of 0 g is a real setting and must
+  // not silently become 60.
+  const defaultWeight = siteSettings.customsDefaultWeightGrams != null
+    ? siteSettings.customsDefaultWeightGrams : 60;
   const packing = normalizeCustomsPacking(packingRaw);
   let totalQty = 0;
   let totalWeight = 0;
@@ -20402,7 +20406,7 @@ async function renderAdminCustoms() {
       </div>
       <div class="field" style="margin-top:12px">
         <label style="font-size:13px;color:var(--cream-dim);font-weight:300" data-t="customs_default_weight_label"></label>
-        <input type="number" min="1" step="1" id="customsDefaultWeight" value="${escAttr(s.customsDefaultWeightGrams)}" placeholder="60" style="width:160px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:13px">
+        <input type="number" min="0" step="1" id="customsDefaultWeight" value="${escAttr(s.customsDefaultWeightGrams)}" placeholder="60" style="width:160px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-family:'DM Mono',monospace;font-size:13px">
       </div>
     </div>
 
@@ -20428,8 +20432,10 @@ async function saveCustomsSettings() {
   const originCountry = document.getElementById('customsOriginCountry').value.trim() || null;
   const defaultWeightRaw = document.getElementById('customsDefaultWeight').value;
   const defaultWeight = defaultWeightRaw ? parseInt(defaultWeightRaw, 10) : null;
-  if (defaultWeight != null && (isNaN(defaultWeight) || defaultWeight < 1)) {
-    status.textContent = 'Default weight must be a positive integer';
+  // 0 is allowed: it means unweighed items declare nothing until they are
+  // given a weight, or until a total is entered on the order itself.
+  if (defaultWeight != null && (isNaN(defaultWeight) || defaultWeight < 0)) {
+    status.textContent = 'Default weight must be 0 or a positive whole number';
     status.style.color = '#8b2a2a';
     return;
   }
