@@ -1177,6 +1177,38 @@ body::before {
   font-style: italic;
   color: var(--cream-dim);
 }
+/* Phase 7.1: packing editor inside the customs panel */
+.customs-mini-input {
+  width: 78px; padding: 4px 6px; text-align: right;
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  background: rgba(42,31,21,0.05); color: var(--cream);
+  border: 1px solid rgba(42,31,21,0.18); border-radius: 3px;
+}
+.customs-mini-input:focus { outline: none; border-color: var(--gold-ink); }
+.customs-box-wrap {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+}
+.customs-box-card {
+  flex: 1 1 240px; padding: 10px 12px;
+  border: 1px solid var(--line2); border-radius: var(--r);
+  background: rgba(176,141,64,0.04);
+}
+.customs-box-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.customs-box-grid {
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 10px;
+  align-items: center; font-size: 12px; color: var(--cream);
+}
+.customs-box-grid label { color: var(--cream-dim); }
+@media (max-width: 640px) {
+  .customs-box-card { flex: 1 1 100%; }
+  .customs-mini-input { width: 66px; }
+}
+
 .customs-missing {
   color: #a8642a;
   font-style: italic;
@@ -7324,7 +7356,7 @@ const T = {
     gift_receipt_prefix: "Gift from Gläserne Leidenschaft:",
     // Customs view & document
     admin_customs_title: "Customs Settings",
-    admin_customs_sub: "These values appear on customs data views and printable customs documents. Leave blank fields you don't have yet — the customs view will surface what's missing.",
+    admin_customs_sub: "These values appear on customs data views and printable customs documents. Leave blank fields you don't have yet, the customs view will surface what's missing.",
     customs_hs_code_label: "HS code (Harmonized System tariff)",
     customs_hs_code_help: "E.g. 7018.10.00 for hand-blown glass ornaments. Used on all line items unless overridden per product.",
     customs_origin_label: "Country of origin",
@@ -7349,18 +7381,37 @@ const T = {
     customs_field_eori: "EORI / VAT",
     customs_total_qty: "Total quantity",
     customs_total_weight: "Total weight",
+    // Phase 7.1: packing editor
+    customs_box_label: "Box",
+    customs_weight_each: "Weight each",
+    customs_line_weight: "Line weight",
+    customs_weight_hint: "Weight is per single piece and may be 0. To skip the per item weights entirely, leave them and type the real figure into the contents weight below.",
+    customs_contents_weight: "Contents weight",
+    customs_box_weight: "Box weight (empty)",
+    customs_box_total: "Box total",
+    customs_shipped_weight: "Shipped weight (with boxes)",
+    customs_contents_manual: "manual, calculated {n}g",
+    customs_follow_items: "follow item weights",
+    customs_packing_partial: "Save failed, the panel now shows what is actually stored:",
+    customs_packing_save: "Save weights & boxes",
+    customs_packing_saved: "Weights and boxes saved.",
+    customs_add_box: "+ Add box",
+    customs_remove_box: "Remove last box",
+    customs_remove_box_confirm: "Box {n} still holds items. They will move back to the first box. Continue?",
+    customs_split_mismatch: "split {a} of {q}",
+    customs_split_blocked: "Fix the highlighted box split first: the quantities do not add up.",
     customs_total_value: "Total declared value",
     customs_form_recommendation: "Recommended form",
     customs_form_cn22: "CN22 (under €350)",
     customs_form_cn23: "CN23 (€350 or over, or detailed)",
     customs_notes_label: "Notes for customs (optional)",
-    customs_notes_placeholder: "e.g., Fragile — glass items. Handle with care.",
+    customs_notes_placeholder: "e.g., Fragile glass items. Handle with care.",
     customs_notes_save: "Save notes",
     customs_notes_saved: "Notes saved",
     customs_copy_block: "Copy",
     customs_missing_settings: "Some customs settings are blank. Fill them in via the Customs Settings tab.",
     customs_doc_title: "Customs Declaration",
-    customs_doc_subtitle: "Commercial invoice — accompanying document for CN22 / CN23",
+    customs_doc_subtitle: "Commercial invoice, accompanying document for CN22 / CN23",
     // ── Phase 6.30: Shipping tracking ──
     ship_modal_title: "Ship Order",
     ship_modal_sub: "Capture carrier and tracking number. Both are required when shipping. The customer will receive an email with a clickable tracking link.",
@@ -8569,7 +8620,7 @@ admin_lottery: "Lottery",
     gift_badge: "Geschenk",
     gift_receipt_prefix: "Geschenk von Gläserne Leidenschaft:",
     admin_customs_title: "Zolleinstellungen",
-    admin_customs_sub: "Diese Werte erscheinen in Zoll-Datenansichten und druckbaren Zolldokumenten. Lassen Sie Felder, die Sie noch nicht haben, leer — die Zollansicht zeigt, was fehlt.",
+    admin_customs_sub: "Diese Werte erscheinen in Zoll-Datenansichten und druckbaren Zolldokumenten. Lassen Sie Felder, die Sie noch nicht haben, leer; die Zollansicht zeigt, was fehlt.",
     customs_hs_code_label: "HS-Code (Harmonisiertes System)",
     customs_hs_code_help: "z.B. 7018.10.00 für mundgeblasene Glasornamente. Wird auf alle Positionen angewendet, sofern nicht pro Produkt überschrieben.",
     customs_origin_label: "Ursprungsland",
@@ -8594,18 +8645,37 @@ admin_lottery: "Lottery",
     customs_field_eori: "EORI / USt",
     customs_total_qty: "Gesamtmenge",
     customs_total_weight: "Gesamtgewicht",
+    // Phase 7.1: Packlisten-Editor
+    customs_box_label: "Karton",
+    customs_weight_each: "Gewicht je Stück",
+    customs_line_weight: "Zeilengewicht",
+    customs_weight_hint: "Das Gewicht gilt je Einzelstück und darf 0 sein. Wer die Einzelgewichte überspringen möchte, trägt einfach unten das tatsächliche Inhaltsgewicht ein.",
+    customs_contents_weight: "Inhaltsgewicht",
+    customs_box_weight: "Kartongewicht (leer)",
+    customs_box_total: "Gesamt pro Karton",
+    customs_shipped_weight: "Versandgewicht (mit Kartons)",
+    customs_contents_manual: "manuell, berechnet {n}g",
+    customs_follow_items: "Einzelgewichten folgen",
+    customs_packing_partial: "Speichern fehlgeschlagen, die Anzeige zeigt jetzt den tatsächlich gespeicherten Stand:",
+    customs_packing_save: "Gewichte & Kartons speichern",
+    customs_packing_saved: "Gewichte und Kartons gespeichert.",
+    customs_add_box: "+ Karton hinzufügen",
+    customs_remove_box: "Letzten Karton entfernen",
+    customs_remove_box_confirm: "In Karton {n} liegen noch Artikel. Sie wandern zurück in den ersten Karton. Fortfahren?",
+    customs_split_mismatch: "aufgeteilt {a} von {q}",
+    customs_split_blocked: "Bitte zuerst die markierte Aufteilung korrigieren: die Mengen ergeben nicht die Zeilenmenge.",
     customs_total_value: "Gesamtwert (deklariert)",
     customs_form_recommendation: "Empfohlenes Formular",
     customs_form_cn22: "CN22 (unter €350)",
     customs_form_cn23: "CN23 (ab €350 oder ausführlich)",
     customs_notes_label: "Hinweise für Zoll (optional)",
-    customs_notes_placeholder: "z.B. Zerbrechlich — Glasartikel. Vorsichtig behandeln.",
+    customs_notes_placeholder: "z.B. Zerbrechliche Glasartikel. Vorsichtig behandeln.",
     customs_notes_save: "Hinweise speichern",
     customs_notes_saved: "Hinweise gespeichert",
     customs_copy_block: "Kopieren",
     customs_missing_settings: "Einige Zolleinstellungen sind leer. Bitte über den Zolleinstellungen-Tab ausfüllen.",
     customs_doc_title: "Zollerklärung",
-    customs_doc_subtitle: "Handelsrechnung — Begleitdokument zu CN22 / CN23",
+    customs_doc_subtitle: "Handelsrechnung, Begleitdokument zu CN22 / CN23",
     // ── Phase 6.30: Versandverfolgung ──
     ship_modal_title: "Bestellung versenden",
     ship_modal_sub: "Versanddienst und Sendungsnummer erfassen. Beide sind beim Versand erforderlich. Der Kunde erhält eine E-Mail mit einem anklickbaren Tracking-Link.",
@@ -13631,18 +13701,92 @@ async function removeGiftItem(orderItemRowId, orderDbId) {
 // textarea persists to orders.customs_notes via saveCustomsNotes.
 // ═══════════════════════════════════════════════════════════════════════
 
+// ── Phase 7.1: packing plan helpers ──
+// orders.customs_packing holds { boxes:[{n,tare_grams,contents_override_grams}],
+// alloc:{ order_item_id: { boxNumber: qty } } }. NULL means one box holding
+// everything with no packaging weight, which is how orders behaved before 7.1.
+function normalizeCustomsPacking(packing) {
+  const p = packing && typeof packing === 'object' ? packing : {};
+  let boxes = Array.isArray(p.boxes) ? p.boxes : [];
+  boxes = boxes
+    .map((b, i) => ({
+      n: Number(b && b.n != null ? b.n : i + 1),
+      tare_grams: b && b.tare_grams != null ? Number(b.tare_grams) : 0,
+      contents_override_grams: b && b.contents_override_grams != null
+        ? Number(b.contents_override_grams) : null,
+    }))
+    .filter(b => Number.isFinite(b.n) && b.n >= 1);
+  if (!boxes.length) boxes = [{ n: 1, tare_grams: 0, contents_override_grams: null }];
+  boxes.sort((a, b) => a.n - b.n);
+  const alloc = (p.alloc && typeof p.alloc === 'object') ? p.alloc : {};
+  return { boxes, alloc };
+}
+
+// How many of this line sit in each box. Anything not allocated (or allocated
+// to a box that no longer exists) falls back to the first box, so a line can
+// never silently vanish from the paperwork.
+function customsLineAllocation(itemId, lineQty, packing) {
+  const { boxes, alloc } = packing;
+  const raw = alloc[itemId];
+  const out = {};
+  let assigned = 0;
+  if (raw && typeof raw === 'object') {
+    boxes.forEach(b => {
+      const v = raw[String(b.n)];
+      const n = v != null ? Math.max(0, Math.floor(Number(v))) : 0;
+      if (Number.isFinite(n) && n > 0) { out[b.n] = n; assigned += n; }
+    });
+  }
+  const remainder = lineQty - assigned;
+  if (remainder > 0) {
+    const first = boxes[0].n;
+    out[first] = (out[first] || 0) + remainder;
+  } else if (remainder < 0) {
+    // Over-allocated (stale data, or a split saved before validation tightened).
+    // Trim from the last box back so the paperwork can never declare more goods
+    // than the order actually contains.
+    let excess = -remainder;
+    const keys = Object.keys(out).map(Number).sort((a, b) => b - a);
+    for (const k of keys) {
+      if (excess <= 0) break;
+      const take = Math.min(out[k], excess);
+      out[k] -= take;
+      excess -= take;
+      if (out[k] === 0) delete out[k];
+    }
+  }
+  return out;
+}
+
 // Compute the customs lines for an order: each row gets effective
 // declared_value and weight (with fallback to site defaults), correctly
 // expanded for sets. Returns { lines, totalQty, totalWeightGrams,
-// totalValueEuros, recommendedForm }.
-function computeCustomsData(orderItems) {
+// totalValueEuros, recommendedForm } plus the Phase 7.1 per-box breakdown
+// in { packing, boxes, shippedWeightGrams, allocMismatch }.
+//
+// Weight and quantity comparisons use != null throughout: 0 is a legitimate
+// weight (an admin may zero out items and declare one total instead), so a
+// falsy check would silently swap it for the 60 g site default.
+function computeCustomsData(orderItems, packingRaw) {
   const defaultWeight = siteSettings.customsDefaultWeightGrams || 60;
+  const packing = normalizeCustomsPacking(packingRaw);
   let totalQty = 0;
   let totalWeight = 0;
   let totalValue = 0;
+  let allocMismatch = false;
+  // Per-box accumulators, keyed by box number
+  const boxAcc = {};
+  packing.boxes.forEach(b => {
+    boxAcc[b.n] = { n: b.n, qty: 0, contentsCalcGrams: 0, valueEuros: 0, lines: [] };
+  });
+
   const lines = (orderItems || []).map(it => {
     const r = resolveOrderItem(it);
-    const qty = (it.quantity || 1) * (r.is_set ? (r.set_member_count || 1) : 1);
+    // Packing works on the ordered line quantity; a set stays one packing
+    // unit, while its member count still multiplies weight and value.
+    const lineQty = it.quantity != null ? Number(it.quantity) : 1;
+    const unitsPer = r.is_set ? (r.set_member_count || 1) : 1;
+    const qty = lineQty * unitsPer;
     // Per-unit declared value: use stored value if available; else fall
     // back to product_euros (snapshot from order time).
     const perUnitValue = r.declared_value_euros != null
@@ -13652,27 +13796,84 @@ function computeCustomsData(orderItems) {
     const perUnitWeight = r.net_weight_grams != null
       ? Number(r.net_weight_grams)
       : defaultWeight;
-    const lineValue = perUnitValue * qty;
+    // Value scales with the ordered line quantity; weight scales with the
+    // number of physical pieces, which for a set is quantity x members.
+    const lineValue = perUnitValue * lineQty;
     const lineWeight = perUnitWeight * qty;
     totalQty += qty;
     totalWeight += lineWeight;
     totalValue += lineValue;
-    return {
+
+    const perBox = customsLineAllocation(r.id, lineQty, packing);
+    const allocSum = Object.keys(perBox).reduce((s, k) => s + perBox[k], 0);
+    if (allocSum !== lineQty) allocMismatch = true;
+
+    const line = {
+      id: r.id,
       style: r.style,
       name: r.name,
       qty,
+      lineQty,
+      unitsPer,
       perUnitValue,
       lineValue,
       perUnitWeight,
       lineWeight,
       isGift: !!r.is_gift,
+      perBox,
+      hasStoredWeight: r.net_weight_grams != null,
+    };
+    // Fold this line into each box it is split across
+    Object.keys(perBox).forEach(k => {
+      const acc = boxAcc[k];
+      if (!acc) return;
+      const share = perBox[k] * unitsPer;   // physical pieces in this box
+      acc.qty += share;
+      acc.contentsCalcGrams += perUnitWeight * share;
+      acc.valueEuros += perUnitValue * perBox[k];
+      acc.lines.push(Object.assign({}, line, {
+        qty: share,
+        boxQty: perBox[k],
+        lineWeight: perUnitWeight * share,
+        lineValue: perUnitValue * perBox[k],
+      }));
+    });
+    return line;
+  });
+
+  // Per box: the declared contents weight is the calculated sum unless the
+  // admin typed over it, plus the empty box weight.
+  const boxes = packing.boxes.map(b => {
+    const acc = boxAcc[b.n] || { qty: 0, contentsCalcGrams: 0, valueEuros: 0, lines: [] };
+    const overridden = b.contents_override_grams != null;
+    const contentsGrams = overridden ? b.contents_override_grams : acc.contentsCalcGrams;
+    const tareGrams = b.tare_grams != null ? b.tare_grams : 0;
+    return {
+      n: b.n,
+      qty: acc.qty,
+      lines: acc.lines,
+      contentsCalcGrams: acc.contentsCalcGrams,
+      contentsGrams,
+      contentsOverridden: overridden,
+      tareGrams,
+      totalGrams: contentsGrams + tareGrams,
+      valueEuros: acc.valueEuros,
+      // Each box crosses the €350 threshold on its own merits
+      recommendedForm: acc.valueEuros < 350 ? t('customs_form_cn22') : t('customs_form_cn23'),
     };
   });
+
   // CN22 if total value < €350 (per UPU/Deutsche Post threshold), else CN23
   const recommendedForm = totalValue < 350
     ? t('customs_form_cn22')
     : t('customs_form_cn23');
-  return { lines, totalQty, totalWeightGrams: totalWeight, totalValueEuros: totalValue, recommendedForm };
+  return {
+    lines, totalQty, totalWeightGrams: totalWeight, totalValueEuros: totalValue,
+    recommendedForm,
+    packing, boxes, allocMismatch,
+    // What the carrier actually weighs: declared contents plus packaging
+    shippedWeightGrams: boxes.reduce((s, b) => s + b.totalGrams, 0),
+  };
 }
 
 async function toggleCustomsPanel(orderDbId) {
@@ -13700,7 +13901,7 @@ async function renderCustomsPanel(orderDbId) {
     panel.innerHTML = `<div class="customs-missing">Failed to load order: ${escapeHtml(error?.message || 'unknown')}</div>`;
     return;
   }
-  const customs = computeCustomsData(order.order_items);
+  const customs = computeCustomsData(order.order_items, order.customs_packing);
   // Build sender block content as plain text for copy + display
   const s = siteSettings;
   const senderLines = [];
@@ -13726,24 +13927,79 @@ async function renderCustomsPanel(orderDbId) {
     s.customsHsCode ? `HS Code: ${s.customsHsCode}` : null,
     s.customsOriginCountry ? `Country of Origin: ${s.customsOriginCountry}` : null,
   ].filter(Boolean).join('\n');
-  const contentsTextLines = customs.lines.map(l => {
-    const giftMark = l.isGift ? ' (GIFT)' : '';
-    return `  ${l.qty}x ${l.style} ${l.name}${giftMark} — ${l.lineWeight}g — €${l.lineValue.toFixed(2)}`;
-  }).join('\n');
+  // Phase 7.1: the copy block walks the boxes so a pasted declaration
+  // matches the paperwork box for box.
+  const multiBox = customs.boxes.length > 1;
+  const contentsTextLines = customs.boxes.map(b => {
+    const head = multiBox ? `${t('customs_box_label')} ${b.n} / ${customs.boxes.length}\n` : '';
+    const rows = b.lines.map(l => {
+      const giftMark = l.isGift ? ' (GIFT)' : '';
+      return `  ${l.qty}x ${l.style} ${l.name}${giftMark} - ${l.lineWeight}g - €${l.lineValue.toFixed(2)}`;
+    }).join('\n');
+    return head + rows +
+      `\n  ${t('customs_contents_weight')}: ${b.contentsGrams}g` +
+      `\n  ${t('customs_box_weight')}: ${b.tareGrams}g` +
+      `\n  ${t('customs_box_total')}: ${b.totalGrams}g`;
+  }).join('\n\n');
   const contentsText = contentsHeader + '\n\n' + contentsTextLines + '\n\n' +
-    `Total: ${customs.totalQty} items, ${customs.totalWeightGrams}g, €${customs.totalValueEuros.toFixed(2)}`;
+    `Total: ${customs.totalQty} items, ${customs.shippedWeightGrams}g, €${customs.totalValueEuros.toFixed(2)}`;
   // Per-order notes (loaded fresh from DB each open)
   const currentNotes = order.customs_notes || '';
-  // Build the line items table HTML
-  const linesHtml = customs.lines.map(l => `
+  // Phase 7.1: editable line rows. Weight is per unit and accepts 0; when
+  // more than one box exists each row also gets a quantity input per box so
+  // a line can be split. All text is inline t() - see the applyT note below.
+  const boxCols = multiBox
+    ? customs.boxes.map(b => `<th style="width:62px;text-align:center">${t('customs_box_label')} ${b.n}</th>`).join('')
+    : '';
+  const linesHtml = customs.lines.map(l => {
+    const allocCells = multiBox
+      ? customs.boxes.map(b => `
+          <td style="text-align:center">
+            <input type="number" class="cx-a customs-mini-input" data-id="${escapeHtml(l.id)}" data-box="${b.n}"
+                   min="0" step="1" value="${l.perBox[b.n] || 0}" oninput="customsRecalc('${orderDbId}')">
+          </td>`).join('')
+      : '';
+    return `
     <tr${l.isGift ? ' class="gift-row"' : ''}>
       <td>${escapeHtml(l.style)}</td>
-      <td>${escapeHtml(l.name)}${l.isGift ? ' <span class="gift-badge-mini">🎁</span>' : ''}</td>
-      <td style="text-align:center">${l.qty}</td>
-      <td style="text-align:right">${l.lineWeight}g</td>
+      <td>${escapeHtml(l.name)}${l.isGift ? ' <span class="gift-badge-mini">🎁</span>' : ''}
+        <span data-cx="mis-${escapeHtml(l.id)}" class="customs-missing" style="display:none;font-size:11px"></span></td>
+      <td style="text-align:center">${l.lineQty}${l.unitsPer > 1 ? ` <span style="color:var(--cream-dim);font-size:11px">x${l.unitsPer}</span>` : ''}</td>
+      <td style="text-align:right">
+        <input type="number" class="cx-w customs-mini-input" data-id="${escapeHtml(l.id)}" data-units="${l.unitsPer}"
+               data-qty="${l.lineQty}" data-stored="${l.hasStoredWeight ? 1 : 0}" data-value="${l.perUnitValue}"
+               min="0" step="1" value="${l.perUnitWeight}" oninput="customsRecalc('${orderDbId}')">
+      </td>
+      ${allocCells}
+      <td style="text-align:right" data-cx="lw-${escapeHtml(l.id)}">${l.lineWeight}g</td>
       <td style="text-align:right">€${l.lineValue.toFixed(2)}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+
+  // Per box summary: calculated contents, the declared contents (typed over
+  // when the admin would rather skip the per item numbers), packaging, total.
+  const boxSummaryHtml = customs.boxes.map(b => `
+    <div class="customs-box-card" data-cx="box-${b.n}">
+      <div class="customs-box-head">
+        <strong>${t('customs_box_label')} ${b.n}</strong>
+        <span style="color:var(--cream-dim);font-size:11px">${t('customs_total_value')}: €<span data-cx="bv-${b.n}">${b.valueEuros.toFixed(2)}</span> · <span data-cx="bf-${b.n}">${escapeHtml(b.recommendedForm)}</span></span>
+      </div>
+      <div class="customs-box-grid">
+        <label>${t('customs_contents_weight')}</label>
+        <div>
+          <input type="number" class="cx-cont customs-mini-input" data-box="${b.n}" min="0" step="1"
+                 data-manual="${b.contentsOverridden ? 1 : 0}" data-calc="${b.contentsCalcGrams}"
+                 value="${b.contentsGrams}" oninput="customsContentsEdited(this, '${orderDbId}')"> g
+          <span data-cx="bc-${b.n}" style="font-size:11px;color:var(--cream-dim)"></span>
+          <a href="#" data-cx="bf-reset-${b.n}" style="font-size:11px;color:var(--gold-ink);display:none"
+             onclick="customsFollowItems(${b.n}, '${orderDbId}');return false">${t('customs_follow_items')}</a>
+        </div>
+        <label>${t('customs_box_weight')}</label>
+        <div><input type="number" class="cx-tare customs-mini-input" data-box="${b.n}" min="0" step="1" value="${b.tareGrams}" oninput="customsRecalc('${orderDbId}')"> g</div>
+        <label><strong>${t('customs_box_total')}</strong></label>
+        <div><strong data-cx="bt-${b.n}">${b.totalGrams}</strong> g</div>
+      </div>
+    </div>`).join('');
   // Render — Phase 6.29.6: all data-t converted to inline t() so we
   // don't need to call applyT() at the end. applyT triggers a re-render
   // of adminOrders (LIVE-6.3 block) which destroys this panel and
@@ -13774,18 +14030,28 @@ async function renderCustomsPanel(orderDbId) {
           <th>${t('col_sku') || 'SKU'}</th>
           <th>${t('col_item_name') || 'Item'}</th>
           <th style="text-align:center">${t('col_qty') || 'Qty'}</th>
-          <th style="text-align:right">Weight</th>
+          <th style="width:78px;text-align:right">${t('customs_weight_each')}</th>
+          ${boxCols}
+          <th style="text-align:right">${t('customs_line_weight')}</th>
           <th style="text-align:right">${t('col_price') || 'Value'}</th>
         </tr></thead>
         <tbody>${linesHtml}</tbody>
       </table>
+      <div style="margin-top:6px;font-size:11px;color:var(--cream-dim);font-style:italic">${t('customs_weight_hint')}</div>
+      <div class="customs-box-wrap">${boxSummaryHtml}</div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line2);display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
         <div><span style="color:var(--cream-dim)">${t('customs_total_qty')}:</span> <strong>${customs.totalQty}</strong></div>
-        <div><span style="color:var(--cream-dim)">${t('customs_total_weight')}:</span> <strong>${customs.totalWeightGrams}g</strong></div>
+        <div><span style="color:var(--cream-dim)">${t('customs_shipped_weight')}:</span> <strong data-cx="shipped">${customs.shippedWeightGrams}</strong>g</div>
         <div><span style="color:var(--cream-dim)">${t('customs_total_value')}:</span> <strong style="color:var(--gold-ink)">€${customs.totalValueEuros.toFixed(2)}</strong></div>
       </div>
       <div style="margin-top:8px;font-size:12px;font-style:italic;color:var(--cream-dim)">
         ${t('customs_form_recommendation')}: <strong style="color:var(--cream);font-style:normal">${escapeHtml(customs.recommendedForm)}</strong>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="saveCustomsPacking('${orderDbId}')">${t('customs_packing_save')}</button>
+        <button class="btn btn-ghost btn-sm" onclick="customsAddBox('${orderDbId}')">${t('customs_add_box')}</button>
+        ${customs.boxes.length > 1 ? `<button class="btn btn-ghost btn-sm" onclick="customsRemoveBox('${orderDbId}')">${t('customs_remove_box')}</button>` : ''}
+        <span id="customs-pack-status-${orderDbId}" style="font-size:12px;color:var(--cream-dim)"></span>
       </div>
     </div>
     <div class="customs-block">
@@ -13797,6 +14063,10 @@ async function renderCustomsPanel(orderDbId) {
       </div>
     </div>
   `;
+  // Paint the derived state (split warnings, manual markers, per box badges)
+  // straight away. Without this a stored problem stays invisible until the
+  // admin happens to touch an input.
+  customsRecalc(orderDbId);
 }
 
 function copyCustomsBlock(btn, text) {
@@ -13833,6 +14103,244 @@ async function saveCustomsNotes(orderDbId) {
     return;
   }
   if (status) { status.textContent = t('customs_notes_saved'); status.style.color = '#2a5535'; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.1: customs packing editor
+// Per item weights (0 allowed), a packaging weight per box, and splitting
+// line quantities across boxes. Recalculation happens in the DOM so typing
+// never loses focus; nothing persists until Save.
+// ═══════════════════════════════════════════════════════════════════════
+
+// Typing in the contents field is what makes a box manual. Emptying it hands
+// the box back to the item weights, which is also what the reset link does.
+function customsContentsEdited(el, orderDbId) {
+  el.dataset.manual = el.value.trim() === '' ? '0' : '1';
+  customsRecalc(orderDbId);
+}
+
+function customsFollowItems(boxN, orderDbId) {
+  const panel = document.getElementById('customs-panel-' + orderDbId);
+  const el = panel && panel.querySelector(`.cx-cont[data-box="${boxN}"]`);
+  if (!el) return;
+  el.dataset.manual = '0';
+  customsRecalc(orderDbId);
+}
+
+// Read the whole editor back out of the DOM.
+function collectCustomsForm(orderDbId) {
+  const panel = document.getElementById('customs-panel-' + orderDbId);
+  if (!panel) return null;
+  const num = (el, fallback) => {
+    const v = parseInt(el.value, 10);
+    return Number.isFinite(v) && v >= 0 ? v : fallback;
+  };
+  const weights = {};
+  const lines = [];
+  panel.querySelectorAll('.cx-w').forEach(el => {
+    const id = el.dataset.id;
+    const grams = num(el, 0);
+    weights[id] = grams;
+    lines.push({
+      id,
+      grams,
+      units: Number(el.dataset.units) || 1,
+      qty: Number(el.dataset.qty) || 0,
+      unitValue: Number(el.dataset.value) || 0,
+      hadStored: el.dataset.stored === '1',
+    });
+  });
+  const boxNums = [];
+  panel.querySelectorAll('.cx-tare').forEach(el => boxNums.push(Number(el.dataset.box)));
+  boxNums.sort((a, b) => a - b);
+  const alloc = {};
+  panel.querySelectorAll('.cx-a').forEach(el => {
+    const id = el.dataset.id;
+    const box = String(el.dataset.box);
+    const v = num(el, 0);
+    if (!alloc[id]) alloc[id] = {};
+    alloc[id][box] = v;
+  });
+  const boxes = boxNums.map(n => {
+    const tareEl = panel.querySelector(`.cx-tare[data-box="${n}"]`);
+    const contEl = panel.querySelector(`.cx-cont[data-box="${n}"]`);
+    const tare = tareEl ? num(tareEl, 0) : 0;
+    // An override is recorded, never inferred: the box stays manual until the
+    // admin clears the field or clicks the follow link.
+    let override = null;
+    if (contEl && contEl.dataset.manual === '1' && contEl.value.trim() !== '') {
+      override = num(contEl, 0);
+    }
+    return { n, tare_grams: tare, contents_override_grams: override };
+  });
+  return { weights, lines, boxes, alloc, boxNums };
+}
+
+// Live totals without re-rendering (a re-render would steal focus mid-typing).
+function customsRecalc(orderDbId) {
+  const panel = document.getElementById('customs-panel-' + orderDbId);
+  const form = collectCustomsForm(orderDbId);
+  if (!panel || !form) return false;
+  const multi = form.boxNums.length > 1;
+  const perBoxContents = {};
+  const perBoxValue = {};
+  form.boxNums.forEach(n => { perBoxContents[n] = 0; perBoxValue[n] = 0; });
+  let mismatch = false;
+
+  form.lines.forEach(l => {
+    const lwEl = panel.querySelector(`[data-cx="lw-${CSS.escape(l.id)}"]`);
+    if (lwEl) lwEl.textContent = (l.grams * l.qty * l.units) + 'g';
+    // Split check: the per box quantities have to add up to the line quantity
+    let allocSum = 0;
+    if (multi) {
+      panel.querySelectorAll(`.cx-a[data-id="${CSS.escape(l.id)}"]`).forEach(el => {
+        const v = parseInt(el.value, 10);
+        const n = Number.isFinite(v) && v >= 0 ? v : 0;
+        allocSum += n;
+        perBoxContents[Number(el.dataset.box)] += l.grams * n * l.units;
+        perBoxValue[Number(el.dataset.box)] += l.unitValue * n;
+      });
+    } else {
+      allocSum = l.qty;
+      perBoxContents[form.boxNums[0]] += l.grams * l.qty * l.units;
+      perBoxValue[form.boxNums[0]] += l.unitValue * l.qty;
+    }
+    const misEl = panel.querySelector(`[data-cx="mis-${CSS.escape(l.id)}"]`);
+    if (misEl) {
+      if (allocSum !== l.qty) {
+        mismatch = true;
+        misEl.style.display = '';
+        misEl.textContent = ' ' + t('customs_split_mismatch').replace('{a}', allocSum).replace('{q}', l.qty);
+      } else {
+        misEl.style.display = 'none';
+        misEl.textContent = '';
+      }
+    }
+  });
+
+  let shipped = 0;
+  form.boxes.forEach(b => {
+    const calc = perBoxContents[b.n] || 0;
+    const contEl = panel.querySelector(`.cx-cont[data-box="${b.n}"]`);
+    // A box that is still following the items tracks them as they change.
+    // dataset.calc is display only now - the manual flag is the source of truth.
+    if (contEl) {
+      const following = contEl.dataset.manual !== '1';
+      contEl.dataset.calc = String(calc);
+      if (following) contEl.value = String(calc);
+    }
+    const resetEl = panel.querySelector(`[data-cx="bf-reset-${b.n}"]`);
+    if (resetEl) resetEl.style.display = (contEl && contEl.dataset.manual === '1') ? '' : 'none';
+    const contents = b.contents_override_grams != null ? b.contents_override_grams : calc;
+    const total = contents + b.tare_grams;
+    shipped += total;
+    const totEl = panel.querySelector(`[data-cx="bt-${b.n}"]`);
+    if (totEl) totEl.textContent = String(total);
+    const noteEl = panel.querySelector(`[data-cx="bc-${b.n}"]`);
+    if (noteEl) {
+      noteEl.textContent = b.contents_override_grams != null
+        ? ' ' + t('customs_contents_manual').replace('{n}', calc)
+        : '';
+    }
+    // Declared value and the form designation move with the split
+    const valEl = panel.querySelector(`[data-cx="bv-${b.n}"]`);
+    const formEl = panel.querySelector(`[data-cx="bf-${b.n}"]`);
+    const boxValue = perBoxValue[b.n] || 0;
+    if (valEl) valEl.textContent = boxValue.toFixed(2);
+    if (formEl) formEl.textContent = boxValue < 350 ? t('customs_form_cn22') : t('customs_form_cn23');
+  });
+  const shippedEl = panel.querySelector('[data-cx="shipped"]');
+  if (shippedEl) shippedEl.textContent = String(shipped);
+  return !mismatch;
+}
+
+async function saveCustomsPacking(orderDbId, opts) {
+  if (!sb || !orderDbId) return false;
+  if (!requireCapability('can_edit_orders')) return false;
+  const status = document.getElementById('customs-pack-status-' + orderDbId);
+  const form = collectCustomsForm(orderDbId);
+  if (!form) return false;
+  const ok = customsRecalc(orderDbId);
+  if (!ok && !(opts && opts.force)) {
+    if (status) { status.textContent = t('customs_split_blocked'); status.style.color = '#8b2a2a'; }
+    return false;
+  }
+  if (status) { status.textContent = '…'; status.style.color = 'var(--cream-dim)'; }
+  try {
+    // Pin every weight, including ones left at the site default. Leaving them
+    // NULL would let a later change to that default silently re-declare an
+    // order that has already shipped.
+    const writes = form.lines
+      .map(l => sb.from('order_items').update({ net_weight_grams: l.grams }).eq('id', l.id));
+    const boxes = (opts && opts.boxes) || form.boxes;
+    const alloc = (opts && opts.alloc) || form.alloc;
+    const packing = { boxes, alloc };
+    const results = await Promise.all(writes.concat([
+      sb.from('orders').update({ customs_packing: packing }).eq('id', orderDbId),
+    ]));
+    const failed = results.find(r => r && r.error);
+    if (failed) throw failed.error;
+  } catch (e) {
+    console.error('[customs] packing save failed:', e);
+    // Some of the parallel writes may have landed. Re-read so the panel shows
+    // the real stored state instead of the admin's unsaved typing.
+    await renderCustomsPanel(orderDbId);
+    const st = document.getElementById('customs-pack-status-' + orderDbId);
+    if (st) { st.textContent = t('customs_packing_partial') + ' ' + (e.message || e); st.style.color = '#8b2a2a'; }
+    return false;
+  }
+  // Re-render only this panel. Calling renderAdminOrders() here would
+  // collapse the row and the panel (see the Phase 6.29.5/6.29.6 notes).
+  // Carry any unsaved notes across, otherwise saving weights throws away
+  // text the admin is midway through writing.
+  const notesEl = document.getElementById('customs-notes-' + orderDbId);
+  const pendingNotes = notesEl ? notesEl.value : null;
+  await renderCustomsPanel(orderDbId);
+  if (pendingNotes != null) {
+    const freshNotes = document.getElementById('customs-notes-' + orderDbId);
+    if (freshNotes && freshNotes.value !== pendingNotes) freshNotes.value = pendingNotes;
+  }
+  const fresh = document.getElementById('customs-pack-status-' + orderDbId);
+  if (fresh) {
+    fresh.textContent = t('customs_packing_saved');
+    fresh.style.color = '#2a5535';
+    setTimeout(() => { if (fresh.isConnected) fresh.textContent = ''; }, 2500);
+  }
+  return true;
+}
+
+// Structural changes save the pending edits too, so nothing typed is lost.
+async function customsAddBox(orderDbId) {
+  if (!requireCapability('can_edit_orders')) return;
+  const form = collectCustomsForm(orderDbId);
+  if (!form) return;
+  if (!customsRecalc(orderDbId)) {
+    const st = document.getElementById('customs-pack-status-' + orderDbId);
+    if (st) { st.textContent = t('customs_split_blocked'); st.style.color = '#8b2a2a'; }
+    return;
+  }
+  const next = (form.boxNums.length ? Math.max.apply(null, form.boxNums) : 0) + 1;
+  const boxes = form.boxes.concat([{ n: next, tare_grams: 0, contents_override_grams: null }]);
+  await saveCustomsPacking(orderDbId, { boxes, alloc: form.alloc });
+}
+
+async function customsRemoveBox(orderDbId) {
+  if (!requireCapability('can_edit_orders')) return;
+  const form = collectCustomsForm(orderDbId);
+  if (!form || form.boxNums.length < 2) return;
+  const last = Math.max.apply(null, form.boxNums);
+  const holds = Object.keys(form.alloc).some(id => (form.alloc[id][String(last)] || 0) > 0);
+  if (holds && !confirm(t('customs_remove_box_confirm').replace('{n}', last))) return;
+  const boxes = form.boxes.filter(b => b.n !== last);
+  const alloc = {};
+  Object.keys(form.alloc).forEach(id => {
+    const row = Object.assign({}, form.alloc[id]);
+    delete row[String(last)];
+    alloc[id] = row;
+  });
+  // Anything that lived in the removed box falls back to the first box.
+  // force is safe here: the removal itself resolves the split it validates.
+  await saveCustomsPacking(orderDbId, { boxes, alloc, force: true });
 }
 
 function openAdminCancelModal(orderDbId) {
@@ -14688,14 +15196,20 @@ async function downloadOrderPdf(orderDbId, kind) {
 async function generateCustomsPdf(orderDbId) {
   const order = await fetchOrderForPdf(orderDbId);
   if (!order) { alert('Could not load order data.'); return; }
-  const customs = computeCustomsData(order.order_items);
+  const customs = computeCustomsData(order.order_items, order.customs_packing);
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const leftMargin = 15;
   const rightMargin = 210 - 15;
   const contentWidth = rightMargin - leftMargin;
-  let y = drawPdfHeader(doc);
   const s = siteSettings;
+
+  // Phase 7.1: one complete document per box, as separate pages of a single
+  // file. Several doc.save() calls in a row get blocked by browsers, and one
+  // file prints as one sheet per box anyway.
+  customs.boxes.forEach((box, boxIdx) => {
+  if (boxIdx > 0) doc.addPage();
+  let y = drawPdfHeader(doc);
 
   // Title + meta
   doc.setTextColor(...PDF_BRAND.ink);
@@ -14713,17 +15227,21 @@ async function generateCustomsPdf(orderDbId) {
   const dateStr = order.created_at ? new Date(order.created_at).toISOString().slice(0,10) : '';
   doc.text(`Order ID:  ${order.order_id || '—'}`, rightMargin, y, { align: 'right' });
   doc.text(`Date:      ${dateStr}`,              rightMargin, y + 5, { align: 'right' });
-  doc.text(`Form:      ${customs.recommendedForm.split(' ')[0]}`, rightMargin, y + 10, { align: 'right' });
+  doc.text(`Form:      ${box.recommendedForm.split(' ')[0]}`, rightMargin, y + 10, { align: 'right' });
+  let metaY = y + 15;
+  if (customs.boxes.length > 1) {
+    doc.text(`Box:       ${box.n} of ${customs.boxes.length}`, rightMargin, metaY, { align: 'right' });
+    metaY += 5;
+  }
   // Phase 6.30: tracking line if set — useful reference if a parcel
   // gets queried by customs after dispatch.
   if (order.tracking_number) {
     const carrierName = carrierDisplayName(order.shipping_carrier, order.shipping_carrier_other);
-    doc.text(`Carrier:   ${carrierName}`, rightMargin, y + 15, { align: 'right' });
-    doc.text(`Tracking:  ${order.tracking_number}`, rightMargin, y + 20, { align: 'right' });
-    y += 28;
-  } else {
-    y += 18;
+    doc.text(`Carrier:   ${carrierName}`, rightMargin, metaY, { align: 'right' });
+    doc.text(`Tracking:  ${order.tracking_number}`, rightMargin, metaY + 5, { align: 'right' });
+    metaY += 10;
   }
+  y = metaY + 3;
 
   // Sender + Recipient blocks side by side
   doc.setFont('times', 'bold');
@@ -14812,7 +15330,7 @@ async function generateCustomsPdf(orderDbId) {
   doc.setFont('times', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(...PDF_BRAND.ink);
-  customs.lines.forEach(l => {
+  box.lines.forEach(l => {
     doc.text(String(l.style || ''), colSku, y);
     // Truncate long names so they fit
     const nameStr = l.isGift ? `${l.name} (GIFT)` : l.name;
@@ -14836,10 +15354,18 @@ async function generateCustomsPdf(orderDbId) {
   doc.setFont('times', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(...PDF_BRAND.ink);
-  doc.text(`${t('customs_total_qty')}: ${customs.totalQty}`, leftMargin, y);
-  doc.text(`${t('customs_total_weight')}: ${customs.totalWeightGrams}g`, leftMargin + 60, y);
+  doc.text(`${t('customs_total_qty')}: ${box.qty}`, leftMargin, y);
+  doc.text(`${t('customs_contents_weight')}: ${box.contentsGrams}g`, leftMargin + 60, y);
   doc.setTextColor(...PDF_BRAND.gold);
-  doc.text(`${t('customs_total_value')}: €${customs.totalValueEuros.toFixed(2)}`, rightMargin, y, { align: 'right' });
+  doc.text(`${t('customs_total_value')}: €${box.valueEuros.toFixed(2)}`, rightMargin, y, { align: 'right' });
+  y += 5;
+  doc.setTextColor(...PDF_BRAND.ink);
+  doc.setFont('times', 'normal');
+  doc.setFontSize(9);
+  doc.text(`${t('customs_box_weight')}: ${box.tareGrams}g`, leftMargin + 60, y);
+  doc.setFont('times', 'bold');
+  doc.setFontSize(10);
+  doc.text(`${t('customs_box_total')}: ${box.totalGrams}g`, leftMargin, y);
   y += 10;
 
   // Notes (if any)
@@ -14870,9 +15396,10 @@ async function generateCustomsPdf(orderDbId) {
   doc.setTextColor(...PDF_BRAND.muted);
   doc.text('Signature & date', leftMargin, y + 4);
   doc.text('I certify the above information is true and correct.', leftMargin + 90, y + 2);
+  });
 
-  const filename = `customs-${order.order_id || orderDbId}.pdf`;
-  doc.save(filename);
+  const base = `customs-${order.order_id || orderDbId}`;
+  doc.save(customs.boxes.length > 1 ? `${base}-boxes.pdf` : `${base}.pdf`);
 }
 
 async function downloadCustomsPdf(orderDbId) {
