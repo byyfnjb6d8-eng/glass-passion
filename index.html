@@ -1731,6 +1731,14 @@ html { -webkit-text-size-adjust: 100%; }
   border: 1px solid var(--gold-dim); color: var(--gold-ink);
   border-radius: 2px; margin-left: 4px; vertical-align: middle;
 }
+/* Phase 7.2: returning design in a colour it has not been made in before.
+   Same shape as .new-badge, muted tone so a genuinely new design still
+   reads as the louder of the two. */
+.new-badge.colorway {
+  border-color: var(--line2);
+  color: var(--cream-dim, var(--ink));
+  opacity: 0.85;
+}
 /* Phase 6.56b: pre-launch banner — appears on order page before launch,
    under the LE Showcase's lottery copy. Distinguishable from the
    ordering-closed amber banner by using gold/cream brand tones (this is a
@@ -6538,6 +6546,9 @@ async function loadProducts() {
       description: row.description || '',
       // Phase 6.56b: admin-toggled "NEW for the season" badge
       is_new_for_season: !!row.is_new_for_season,
+      // Phase 7.2: returning design offered in a colour it has not been made
+      // in before. Independent of is_new_for_season; see the badge logic.
+      is_new_colorway: !!row.is_new_colorway,
     }));
     console.log(`[products] loaded ${PRODUCTS.length} products from DB`);
   } catch (e) {
@@ -8011,6 +8022,9 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   // Phase 6.56b: NEW for this season toggle
   admin_products_form_is_new_label: 'New This Season',
   admin_products_form_is_new_hint: 'Show a NEW badge next to this product on the order page and admin list.',
+  admin_products_form_is_colorway_label: 'New Coloration This Year',
+  admin_products_form_is_colorway_hint: 'For a returning design offered in a colour it has not been made in before. Shows a NEW COLOR badge. Ignored when "New This Season" is also ticked.',
+  order_colorway_badge: 'New Color',
   // Phase 6.56b: pre-launch banner + alert
   pre_launch_banner_title: 'Pre-Launch — Browse Only',
   pre_launch_banner_body: "Ordering hasn't opened yet. You can browse the catalog, but Submit is disabled until launch. Prices and catalog page numbers are hidden while we finalize this year's collection.",
@@ -9236,6 +9250,9 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   // Phase 6.56b: NEU diese Saison Umschalter
   admin_products_form_is_new_label: 'Neu in dieser Saison',
   admin_products_form_is_new_hint: 'Zeigt ein NEU-Abzeichen neben diesem Produkt auf der Bestellseite und in der Admin-Liste an.',
+  admin_products_form_is_colorway_label: 'Neue Farbe in diesem Jahr',
+  admin_products_form_is_colorway_hint: 'Für ein wiederkehrendes Motiv in einer Farbe, in der es bisher nicht hergestellt wurde. Zeigt ein NEUE FARBE-Abzeichen. Wird ignoriert, wenn auch "Neu in dieser Saison" angehakt ist.',
+  order_colorway_badge: 'Neue Farbe',
   // Phase 6.56b: Vorab-Start-Banner + Hinweis
   pre_launch_banner_title: 'Vor dem Start — nur stöbern',
   pre_launch_banner_body: 'Die Bestellung ist noch nicht geöffnet. Sie können den Katalog durchsehen, aber das Absenden ist bis zum Start deaktiviert. Preise und Katalogseiten sind ausgeblendet, während wir die Kollektion dieses Jahres fertigstellen.',
@@ -10189,9 +10206,12 @@ function renderProducts(filter = '') {
     if (isPrior) badges.push('<span class="prior-badge" data-t="order_prior_badge">Prior Year</span>');
     const badgeHtml = badges.length ? `<span class="row-badges">${badges.join('')}</span>` : '';
     // Phase 6.56b: NEW badge rendered separately so it survives row-badges hide
+    // Phase 7.2: a new design outranks a new colourway, so only one shows.
     const newBadgeHtml = p.is_new_for_season
       ? '<span class="new-badge">NEW</span>'
-      : '';
+      : (p.is_new_colorway
+          ? `<span class="new-badge colorway" data-t="order_colorway_badge">${escapeHtml(t('order_colorway_badge'))}</span>`
+          : '');
     // Sold-out badge rendered separately (not inside .row-badges) so it
     // survives the 6.21 badge-hide CSS and remains visible when the
     // feature is on.
@@ -10259,7 +10279,7 @@ function renderProducts(filter = '') {
           <td class="photo-cell">${setPhotoHtml}</td>
           <td class="style-cell">${escapeHtml(p.style)}</td>
           <td class="name-cell" onclick="toggleSetExpansion('${p.id}')" style="cursor:pointer">
-            ${expandToggle}<span class="set-name-text">${escapeHtml(p.name)}</span>${setBadge}${p.is_new_for_season ? '<span class="new-badge">NEW</span>' : ''}${soldOutHtml}${groupLockedHtml}
+            ${expandToggle}<span class="set-name-text">${escapeHtml(p.name)}</span>${setBadge}${p.is_new_for_season ? '<span class="new-badge">NEW</span>' : (p.is_new_colorway ? `<span class="new-badge colorway" data-t="order_colorway_badge">${escapeHtml(t('order_colorway_badge'))}</span>` : '')}${soldOutHtml}${groupLockedHtml}
           </td>
           <td class="color-cell">${memberCount} ${t('set_colors')}</td>
           <td class="height-cell">${escapeHtml(splitByLang(p.height, lang))}</td>
@@ -20999,7 +21019,7 @@ function _renderAdminProductsView() {
           ${selTd}
           <td style="font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(p.id)}</td>
           <td>${thumb}</td>
-          <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : ''}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${p.season ? `<span style="color:var(--gold-ink);opacity:1">${escapeHtml(p.season)}</span>` : ''}${p.season && p.color ? ' · ' : ''}${escapeHtml(p.color || '')}</div></td>
+          <td>${escapeHtml(p.name || '')}${p.is_new_for_season ? ' <span class="new-badge">NEW</span>' : (p.is_new_colorway ? ` <span class="new-badge colorway">${escapeHtml(t('order_colorway_badge'))}</span>` : '')}<div style="font-size:11px;color:var(--cream-dim, var(--ink));opacity:0.6;font-family:'DM Mono',monospace">${p.season ? `<span style="color:var(--gold-ink);opacity:1">${escapeHtml(p.season)}</span>` : ''}${p.season && p.color ? ' · ' : ''}${escapeHtml(p.color || '')}</div></td>
           <td style="font-family:'DM Mono',monospace">€${Number(p.euros || 0).toFixed(2)}</td>
           <td>${statusSelect}</td>
           <td style="text-align:center;font-family:'DM Mono',monospace">${photoCountLabel}</td>
@@ -21174,6 +21194,8 @@ async function _adminProductsStartEdit(sku) {
     description: p.description || '',
     // Phase 6.56b: NEW badge toggle
     is_new_for_season: !!p.is_new_for_season,
+    // Phase 7.2: NEW COLOR badge toggle
+    is_new_colorway: !!p.is_new_colorway,
   };
   // Build image list from p.img + p.imgs
   const imgs = Array.isArray(p.imgs) ? p.imgs.filter(Boolean) : [];
@@ -21260,6 +21282,8 @@ function _adminProductsBlankForm() {
     description: '',
     // Phase 6.56b: NEW badge toggle
     is_new_for_season: false,
+    // Phase 7.2: NEW COLOR badge toggle
+    is_new_colorway: false,
   };
 }
 
@@ -21380,6 +21404,16 @@ function _adminProductsRenderForm() {
             <span data-t="admin_products_form_is_new_hint"></span>
           </div>
         </div>
+        <!-- Phase 7.2: returning design in a colour never made before.
+             Dimmed while "New This Season" is ticked, because a new design
+             cannot also be a new colourway of itself. -->
+        <div class="product-form-field full" id="pfColorwayWrap" style="${f.is_new_for_season?'opacity:0.45':''}">
+          <label data-t="admin_products_form_is_colorway_label"></label>
+          <div class="check-row">
+            <input type="checkbox" id="pfIsColorway" ${f.is_new_colorway?'checked':''} ${f.is_new_for_season?'disabled':''} onchange="_adminProductsFormUpdate('is_new_colorway', this.checked)">
+            <span data-t="admin_products_form_is_colorway_hint"></span>
+          </div>
+        </div>
         <div class="product-form-field full">
           <label data-t="admin_products_form_set_label"></label>
           <div class="check-row">
@@ -21451,6 +21485,17 @@ function _adminProductsFormUpdate(field, val) {
   if (field === 'is_set') {
     const w = document.getElementById('pfSetFieldsWrap');
     if (w) w.style.display = val ? '' : 'none';
+  }
+  // Phase 7.2: a new design cannot also be a new colourway of itself, so
+  // ticking "New This Season" clears and locks the colourway box.
+  if (field === 'is_new_for_season') {
+    const wrap = document.getElementById('pfColorwayWrap');
+    const cb   = document.getElementById('pfIsColorway');
+    if (wrap) wrap.style.opacity = val ? '0.45' : '';
+    if (cb) {
+      cb.disabled = !!val;
+      if (val) { cb.checked = false; s.form.is_new_colorway = false; }
+    }
   }
 }
 
@@ -21772,6 +21817,9 @@ async function _adminProductsSave() {
     description: String(f.description || '').trim() || null,
     // Phase 6.56b: NEW for this season toggle
     is_new_for_season: !!f.is_new_for_season,
+    // Phase 7.2: NEW COLOR toggle. Forced false for a new design so the
+    // stored data matches what the badge logic will actually render.
+    is_new_colorway: !f.is_new_for_season && !!f.is_new_colorway,
   };
 
   // Save
