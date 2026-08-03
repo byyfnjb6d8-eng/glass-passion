@@ -3763,9 +3763,98 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 #adminProducts .set-member-remove:hover {
   background: rgba(139,42,42,0.08);
 }
+/* Phase 7.6 — "Add existing" picker: pull products that are already in the
+   catalog into a set instead of re-typing them as new member rows. */
+#adminProducts .set-members-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+#adminProducts .set-member-existing-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  background: rgba(176,141,64,0.15);
+  color: var(--gold-ink);
+  border: 1px solid rgba(176,141,64,0.35);
+  border-radius: 2px;
+  vertical-align: middle;
+}
+#adminProducts .member-picker {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+}
+#adminProducts .member-picker-head {
+  display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px;
+}
+#adminProducts .member-picker-search {
+  width: 100%;
+  padding: 7px 9px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--ink);
+  box-sizing: border-box;
+}
+#adminProducts .member-picker-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+#adminProducts .member-picker-row {
+  display: grid;
+  grid-template-columns: 26px 44px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--line2);
+  cursor: pointer;
+}
+#adminProducts .member-picker-row:last-child { border-bottom: none; }
+#adminProducts .member-picker-row:hover { background: var(--surface2); }
+#adminProducts .member-picker-row.picked { background: rgba(176,141,64,0.10); }
+#adminProducts .member-picker-thumb {
+  width: 44px; height: 44px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+}
+#adminProducts .member-picker-name {
+  font-size: 13px; color: var(--ink);
+}
+#adminProducts .member-picker-meta {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--ink);
+  opacity: 0.6;
+}
+#adminProducts .member-picker-price {
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--ink);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+#adminProducts .member-picker-actions {
+  display: flex; gap: 8px; align-items: center; margin-top: 10px;
+}
 @media (max-width: 720px) {
   #adminProducts .product-form-grid { grid-template-columns: 1fr; }
   #adminProducts .set-member-fields { grid-template-columns: 1fr; }
+  #adminProducts .member-picker-row { grid-template-columns: 26px 44px 1fr; }
+  #adminProducts .member-picker-price { grid-column: 3; }
 }
 
 /* ═════════════════════════════════════════════════════
@@ -8038,8 +8127,20 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   // Phase 6.49e: set member sub-form keys
   admin_products_form_set_members_title: 'Set members',
   admin_products_form_set_members_hint: 'Add each ornament that belongs to this set. Status, season, collection, and LE flag are inherited from the parent.',
-  admin_products_form_set_members_empty: 'No members yet. Click "Add Member" below to create the first one.',
+  admin_products_form_set_members_empty: 'No members yet. Use "Add Member" for a brand-new ornament, or "Add Existing Product" to pull one that is already in the catalog.',
   admin_products_form_set_member_add: '+ Add Member',
+  // Phase 7.6: assign products that already exist in the catalog to a set
+  admin_products_form_set_member_add_existing: '+ Add Existing Product',
+  admin_products_form_set_member_pick_title: 'Add an existing product to this set',
+  admin_products_form_set_member_pick_hint: 'Only standalone products are listed. Sets, products already in a set, and the ones you have already added are hidden.',
+  admin_products_form_set_member_pick_search_ph: 'Search SKU, name, colour, style, season…',
+  admin_products_form_set_member_pick_none: 'No matching standalone products.',
+  admin_products_form_set_member_pick_count: '{n} product(s) listed',
+  admin_products_form_set_member_pick_add: 'Add {n} selected',
+  admin_products_form_set_member_pick_cancel: 'Close',
+  admin_products_form_set_member_pick_confirm: 'Add {n} existing product(s) to this set?\n\nWhen you save, each one becomes a member of the set: it stops appearing as its own item on the order form, its price is cleared (the set is sold at the parent price), and its status, season, collection and LE flag are taken from the set. Its SKU, name, colour, height, style number and main photo are kept.',
+  admin_products_form_set_member_pick_confirm_orders: 'WARNING — these already have orders this season: {list}. Existing orders keep what was ordered, but the product will no longer be orderable on its own.',
+  admin_products_form_set_member_existing_badge: 'From catalog',
   admin_products_form_set_member_id: 'SKU',
   admin_products_form_set_member_id_ph: '253000-m1',
   admin_products_form_set_member_name: 'Name',
@@ -9266,8 +9367,20 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   // Phase 6.49e: Set-Mitglieder Schlüssel
   admin_products_form_set_members_title: 'Set-Mitglieder',
   admin_products_form_set_members_hint: 'Jedes Ornament hinzufügen, das zu diesem Set gehört. Status, Saison, Kollektion und SE-Markierung werden vom Hauptprodukt übernommen.',
-  admin_products_form_set_members_empty: 'Noch keine Mitglieder. Klicken Sie unten auf „Mitglied hinzufügen", um das erste anzulegen.',
+  admin_products_form_set_members_empty: 'Noch keine Mitglieder. „Mitglied hinzufügen" für ein ganz neues Ornament, „Vorhandenes Produkt hinzufügen" für eines, das bereits im Katalog steht.',
   admin_products_form_set_member_add: '+ Mitglied hinzufügen',
+  // Phase 7.6: bereits vorhandene Produkte einem Set zuordnen
+  admin_products_form_set_member_add_existing: '+ Vorhandenes Produkt hinzufügen',
+  admin_products_form_set_member_pick_title: 'Vorhandenes Produkt zu diesem Set hinzufügen',
+  admin_products_form_set_member_pick_hint: 'Es werden nur Einzelprodukte aufgelistet. Sets, Produkte in einem Set und bereits hinzugefügte sind ausgeblendet.',
+  admin_products_form_set_member_pick_search_ph: 'Artikel-Nr., Name, Farbe, Stil, Saison suchen…',
+  admin_products_form_set_member_pick_none: 'Keine passenden Einzelprodukte.',
+  admin_products_form_set_member_pick_count: '{n} Produkt(e) aufgelistet',
+  admin_products_form_set_member_pick_add: '{n} ausgewählte hinzufügen',
+  admin_products_form_set_member_pick_cancel: 'Schließen',
+  admin_products_form_set_member_pick_confirm: '{n} vorhandene(s) Produkt(e) zu diesem Set hinzufügen?\n\nBeim Speichern wird jedes davon zum Set-Mitglied: es erscheint nicht mehr als eigener Posten im Bestellformular, sein Preis wird geleert (das Set wird zum Preis des Hauptprodukts verkauft), und Status, Saison, Kollektion und SE-Markierung werden vom Set übernommen. Artikel-Nr., Name, Farbe, Höhe, Stilnummer und Hauptfoto bleiben erhalten.',
+  admin_products_form_set_member_pick_confirm_orders: 'ACHTUNG — dafür liegen in dieser Saison bereits Bestellungen vor: {list}. Bestehende Bestellungen bleiben unverändert, das Produkt ist aber nicht mehr einzeln bestellbar.',
+  admin_products_form_set_member_existing_badge: 'Aus Katalog',
   admin_products_form_set_member_id: 'Artikel-Nr.',
   admin_products_form_set_member_id_ph: '253000-m1',
   admin_products_form_set_member_name: 'Name',
@@ -20892,6 +21005,10 @@ const _productsAdminState = {
   // originalId is set for members that already exist in the DB (used to detect
   // deletions at save time). New rows have originalId = null.
   setMembers: [],
+  // Phase 7.6: "Add existing product" picker. Lets the admin assign ornaments
+  // that are already rows in the products table to a set, instead of typing
+  // them in again as brand-new member rows. selected holds picked SKUs.
+  memberPicker: { open: false, search: '', selected: new Set() },
   // Phase 6.56c: Recently Deleted panel state
   deletedExpanded: false,
   deletedLoaded: false,
@@ -21157,6 +21274,7 @@ function _adminProductsStartAdd() {
   _productsAdminState.form = _adminProductsBlankForm();
   _productsAdminState.imageUploads = [];
   _productsAdminState.setMembers = [];  // Phase 6.49e
+  _adminProductsResetMemberPicker();    // Phase 7.6
   _renderAdminProductsView();
   // Scroll to form
   setTimeout(() => {
@@ -21219,6 +21337,11 @@ async function _adminProductsStartEdit(sku) {
       name: m.name || '',
       color: m.color || '',
       height: m.height || '',
+      // Phase 7.6: carry the style number through the form. Members created
+      // from scratch have none, but a product pulled in from the catalog does,
+      // and that number is what links a repeating ornament across seasons —
+      // so it must survive every subsequent save of the parent set.
+      style: m.style || '',
       display_order: m.display_order != null ? m.display_order : '',
       img: m.img || '',
       imgUrl: productImageUrl(m.img),
@@ -21227,6 +21350,7 @@ async function _adminProductsStartEdit(sku) {
   } else {
     _productsAdminState.setMembers = [];
   }
+  _adminProductsResetMemberPicker();   // Phase 7.6
   // Count non-cancelled orders for this SKU this season (informational warning).
   // The `status` field lives on the `orders` parent table, not on order_items,
   // so we join via an embedded select and filter on the parent's status.
@@ -21294,6 +21418,7 @@ function _adminProductsCancelForm() {
   _productsAdminState.imageUploads = [];
   _productsAdminState.liveOrderCount = 0;
   _productsAdminState.setMembers = [];   // Phase 6.49e
+  _adminProductsResetMemberPicker();     // Phase 7.6
   _renderAdminProductsView();
 }
 
@@ -21431,7 +21556,14 @@ function _adminProductsRenderForm() {
                 <span class="hint" data-t="admin_products_form_set_members_hint"></span>
               </div>
               <div id="pfSetMembersList">${_adminProductsRenderMembersList()}</div>
-              <button type="button" class="btn btn-ghost btn-sm" onclick="_adminProductsAddMember()" data-t="admin_products_form_set_member_add"></button>
+              <!-- Phase 7.6: "Add Member" types a brand-new ornament;
+                   "Add Existing Product" pulls a row that is already in the
+                   products table into this set. -->
+              <div class="set-members-actions">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="_adminProductsAddMember()" data-t="admin_products_form_set_member_add"></button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="_adminProductsToggleMemberPicker()" data-t="admin_products_form_set_member_add_existing"></button>
+              </div>
+              <div id="pfMemberPicker">${_adminProductsRenderMemberPicker()}</div>
             </div>
           </div>
         </div>
@@ -21593,6 +21725,13 @@ function _adminProductsRenderMembersList() {
     const thumbCls = `set-member-thumb ${m.imgUrl ? 'has-img' : ''} ${m.uploading ? 'uploading' : ''}`;
     const thumbStyle = m.imgUrl ? `style="background-image:url(&quot;${escapeHtml(m.imgUrl)}&quot;)"` : '';
     const thumbLabel = m.uploading ? t('admin_products_form_images_uploading') : t('admin_products_form_set_member_photo');
+    // Phase 7.6: rows pulled in from the catalog are flagged, and their SKU is
+    // locked — it is an existing product's identity, and editing it here would
+    // take the rename path (delete + re-insert) on a row that may carry orders.
+    const fromCatalog = !!m.fromExisting;
+    const existingBadge = fromCatalog
+      ? ` <span class="set-member-existing-badge">${escapeHtml(t('admin_products_form_set_member_existing_badge'))}</span>`
+      : '';
     return `
       <div class="set-member-row">
         <div class="set-member-thumb-col">
@@ -21603,8 +21742,8 @@ function _adminProductsRenderMembersList() {
         </div>
         <div class="set-member-fields">
           <div class="field-full">
-            <span class="field-label" data-t="admin_products_form_set_member_id"></span>
-            <input type="text" value="${escapeHtml(String(m.id || ''))}" oninput="_adminProductsMemberUpdate(${idx}, 'id', this.value)" placeholder="${escapeHtml(t('admin_products_form_set_member_id_ph'))}">
+            <span class="field-label" data-t="admin_products_form_set_member_id"></span>${existingBadge}
+            <input type="text" value="${escapeHtml(String(m.id || ''))}" ${fromCatalog ? 'readonly' : ''} oninput="_adminProductsMemberUpdate(${idx}, 'id', this.value)" placeholder="${escapeHtml(t('admin_products_form_set_member_id_ph'))}">
           </div>
           <div class="field-full">
             <span class="field-label" data-t="admin_products_form_set_member_name"></span>
@@ -21648,6 +21787,7 @@ function _adminProductsAddMember() {
     name: '',
     color: '',
     height: '',
+    style: '',
     display_order: nextOrder,
     img: '',
     imgUrl: '',
@@ -21660,6 +21800,195 @@ function _adminProductsRemoveMember(idx) {
   if (!confirm(t('admin_products_form_set_member_remove_confirm'))) return;
   _productsAdminState.setMembers.splice(idx, 1);
   _refreshSetMembersList();
+  _refreshMemberPicker();   // Phase 7.6: the removed SKU is selectable again
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.6 — Assign existing products to a set
+// ═══════════════════════════════════════════════════════════════════════
+// Ornaments that are already rows in the products table can be pulled into
+// a set instead of being typed in again. A picked product keeps its SKU,
+// name, colour, height, style number and main photo; at save time it takes
+// the member UPDATE path (originalId === id), so no row is duplicated —
+// the existing row is converted in place.
+// ═══════════════════════════════════════════════════════════════════════
+
+function _adminProductsResetMemberPicker() {
+  _productsAdminState.memberPicker = { open: false, search: '', selected: new Set() };
+}
+
+// Standalone products only: no sets, no rows already belonging to a set, not
+// the parent itself, and nothing already sitting in the member list.
+// (PRODUCTS excludes soft-deleted rows, so those never show up here.)
+function _adminProductsMemberPickerCandidates() {
+  const s = _productsAdminState;
+  const parentSku = String(s.form?.id || '').trim();
+  const taken = new Set(s.setMembers.map(m => String(m.id || '').trim()).filter(Boolean));
+  const needle = String(s.memberPicker.search || '').trim().toLowerCase();
+  return PRODUCTS
+    .filter(p => !p.is_set && !p.is_set_member)
+    .filter(p => p.id !== parentSku && !taken.has(p.id))
+    .filter(p => {
+      if (!needle) return true;
+      const hay = [p.id, p.name, p.color, p.style, p.season].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(needle);
+    })
+    .sort((a, b) =>
+      String(b.season || '').localeCompare(String(a.season || ''), undefined, { numeric: true })
+      || String(a.name || '').localeCompare(String(b.name || ''))
+    );
+}
+
+function _adminProductsRenderMemberPickerRows() {
+  const s = _productsAdminState;
+  const cands = _adminProductsMemberPickerCandidates();
+  if (!cands.length) {
+    return `<div class="hint" style="padding:14px;text-align:center">${escapeHtml(t('admin_products_form_set_member_pick_none'))}</div>`;
+  }
+  return cands.map(p => {
+    const safeId = String(p.id).replace(/'/g, "\\'");
+    const picked = s.memberPicker.selected.has(p.id);
+    const imgUrl = productImageUrl(p.img);
+    const thumb = imgUrl
+      ? `<div class="member-picker-thumb" style="background-image:url(&quot;${escapeHtml(imgUrl)}&quot;)"></div>`
+      : `<div class="member-picker-thumb"></div>`;
+    const meta = [p.id, p.season, p.color].filter(Boolean).join(' · ');
+    return `
+      <div class="member-picker-row ${picked ? 'picked' : ''}" onclick="_adminProductsMemberPickerToggle('${safeId}')">
+        <input type="checkbox" ${picked ? 'checked' : ''} onclick="event.stopPropagation();_adminProductsMemberPickerToggle('${safeId}')">
+        ${thumb}
+        <div>
+          <div class="member-picker-name">${escapeHtml(p.name || '')}</div>
+          <div class="member-picker-meta">${escapeHtml(meta)}</div>
+        </div>
+        <div class="member-picker-price">€${Number(p.euros || 0).toFixed(2)}</div>
+      </div>`;
+  }).join('');
+}
+
+function _adminProductsRenderMemberPicker() {
+  const s = _productsAdminState;
+  const mp = s.memberPicker;
+  if (!mp || !mp.open) return '';
+  const count = _adminProductsMemberPickerCandidates().length;
+  return `
+    <div class="member-picker">
+      <div class="member-picker-head">
+        <span class="set-members-title" data-t="admin_products_form_set_member_pick_title"></span>
+        <span class="hint" data-t="admin_products_form_set_member_pick_hint"></span>
+      </div>
+      <input type="text" class="member-picker-search" id="pfMemberPickerSearch"
+             value="${escapeHtml(mp.search)}"
+             oninput="_adminProductsMemberPickerSearch(this.value)"
+             placeholder="${escapeHtml(t('admin_products_form_set_member_pick_search_ph'))}">
+      <div class="member-picker-list" id="pfMemberPickerList">${_adminProductsRenderMemberPickerRows()}</div>
+      <div class="member-picker-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="pfMemberPickerAdd" onclick="_adminProductsMemberPickerConfirm()" ${mp.selected.size ? '' : 'disabled'}>${escapeHtml(t('admin_products_form_set_member_pick_add').replace('{n}', mp.selected.size))}</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="_adminProductsToggleMemberPicker()" data-t="admin_products_form_set_member_pick_cancel"></button>
+        <span class="member-picker-meta" id="pfMemberPickerCount">${escapeHtml(t('admin_products_form_set_member_pick_count').replace('{n}', count))}</span>
+      </div>
+    </div>`;
+}
+
+function _refreshMemberPicker() {
+  const el = document.getElementById('pfMemberPicker');
+  if (el) {
+    el.innerHTML = _adminProductsRenderMemberPicker();
+    applyT();
+  }
+}
+
+// Repaints only the list + the two live counters, so the search box keeps
+// focus and the caret while the admin types.
+function _refreshMemberPickerRows() {
+  const mp = _productsAdminState.memberPicker;
+  const list = document.getElementById('pfMemberPickerList');
+  if (list) list.innerHTML = _adminProductsRenderMemberPickerRows();
+  const addBtn = document.getElementById('pfMemberPickerAdd');
+  if (addBtn) {
+    addBtn.textContent = t('admin_products_form_set_member_pick_add').replace('{n}', mp.selected.size);
+    addBtn.disabled = !mp.selected.size;
+  }
+  const cnt = document.getElementById('pfMemberPickerCount');
+  if (cnt) cnt.textContent = t('admin_products_form_set_member_pick_count').replace('{n}', _adminProductsMemberPickerCandidates().length);
+}
+
+function _adminProductsToggleMemberPicker() {
+  const mp = _productsAdminState.memberPicker;
+  mp.open = !mp.open;
+  if (!mp.open) { mp.search = ''; mp.selected.clear(); }
+  _refreshMemberPicker();
+  if (mp.open) {
+    const el = document.getElementById('pfMemberPickerSearch');
+    if (el) el.focus();
+  }
+}
+
+function _adminProductsMemberPickerSearch(val) {
+  _productsAdminState.memberPicker.search = val || '';
+  _refreshMemberPickerRows();
+}
+
+function _adminProductsMemberPickerToggle(sku) {
+  const sel = _productsAdminState.memberPicker.selected;
+  if (sel.has(sku)) sel.delete(sku); else sel.add(sku);
+  _refreshMemberPickerRows();
+}
+
+async function _adminProductsMemberPickerConfirm() {
+  const s = _productsAdminState;
+  const ids = [...s.memberPicker.selected];
+  if (!ids.length) return;
+  const picked = ids.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean);
+  if (!picked.length) return;
+
+  // Warn if any pick already has orders this season — the order itself keeps
+  // its snapshot, but the product stops being orderable on its own.
+  const liveCounts = {};
+  try {
+    const currentSeason = '2026';
+    const { data, error } = await sb.from('order_items')
+      .select('product_id, orders!inner(status)')
+      .in('product_id', ids)
+      .eq('season', currentSeason)
+      .neq('orders.status', 'cancelled');
+    if (error) throw error;
+    (data || []).forEach(r => { liveCounts[r.product_id] = (liveCounts[r.product_id] || 0) + 1; });
+  } catch (e) {
+    console.warn('[products] could not count live orders for picked members:', e);
+  }
+  let msg = t('admin_products_form_set_member_pick_confirm').replace('{n}', picked.length);
+  const withOrders = picked.filter(p => liveCounts[p.id]);
+  if (withOrders.length) {
+    msg += '\n\n' + t('admin_products_form_set_member_pick_confirm_orders')
+      .replace('{list}', withOrders.map(p => `${p.id} (${liveCounts[p.id]})`).join(', '));
+  }
+  if (!confirm(msg)) return;
+
+  // display_order on a member orders it inside the set, so renumber from the
+  // end of the current list rather than carrying over the catalog page order.
+  let order = s.setMembers.length;
+  picked.forEach(p => {
+    order++;
+    s.setMembers.push({
+      id: p.id,
+      originalId: p.id,       // → UPDATE path at save: converts the row in place
+      name: p.name || '',
+      color: p.color || '',
+      height: p.height || '',
+      style: p.style || '',
+      display_order: order,
+      img: p.img || '',
+      imgUrl: productImageUrl(p.img),
+      uploading: false,
+      fromExisting: true,
+    });
+  });
+  s.memberPicker.selected.clear();
+  s.memberPicker.open = false;
+  s.memberPicker.search = '';
+  _refreshSetMembersList();
+  _refreshMemberPicker();
 }
 
 function _adminProductsMemberUpdate(idx, field, val) {
@@ -21876,6 +22205,11 @@ async function _adminProductsSave() {
           display_order: m.display_order === '' ? null : Number(m.display_order),
           img: m.img || null,
           ...inheritedFields,
+          // Phase 7.6: must come AFTER the spread — inheritedFields nulls style
+          // for hand-typed members (they never had one), but a product pulled
+          // in from the catalog keeps its style number, which is the link that
+          // ties a repeating ornament to its other seasons.
+          style: String(m.style || '').trim() || null,
         };
         if (m.originalId && m.originalId === mid) {
           // Existing member — UPDATE
