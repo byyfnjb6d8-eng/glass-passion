@@ -14995,6 +14995,36 @@ async function fetchOrderForPdf(orderDbId) {
   return data;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.7 — Shipping preference + payment type on the printed summary
+// ═══════════════════════════════════════════════════════════════════════
+// The order summary PDF is English throughout (headings, table head, the
+// sign-off), so these read from fixed English maps rather than t(): a German
+// customer's copy is still an English document, and it is the same file the
+// admin prints when packing an order.
+// Payment is deliberately limited to the two PayPal types. "Pickup in Store"
+// is a shipping preference, not a payment method.
+// ═══════════════════════════════════════════════════════════════════════
+const PDF_SHIPPING_LABELS = {
+  express: 'Express (Direct from Germany)',
+  premium: 'Premium (Direct from Germany)',
+  pickup:  'Pickup in Store',
+};
+const PDF_PAYMENT_LABELS = {
+  friends_family: 'PayPal Friends & Family',
+  goods_services: 'PayPal Goods & Services (+5%)',
+};
+// Unknown/legacy values fall through to the raw stored value so an old order
+// never prints a blank line, and a missing value says so in words.
+function pdfShippingLabel(o) {
+  const v = o && o.shipping_method;
+  return PDF_SHIPPING_LABELS[v] || (v ? String(v) : 'Not specified');
+}
+function pdfPaymentLabel(o) {
+  const v = o && o.payment_type;
+  return PDF_PAYMENT_LABELS[v] || (v ? String(v) : 'Not specified');
+}
+
 // ─── ORDER CONFIRMATION PDF ───
 async function generateOrderConfirmationPdf(orderDbId) {
   const o = await fetchOrderForPdf(orderDbId);
@@ -15046,6 +15076,21 @@ async function generateOrderConfirmationPdf(orderDbId) {
     if (shipLines[i]) doc.text(shipLines[i], leftMargin + 95, y + i * 5);
   }
   y += maxRows * 5 + 8;
+
+  // Phase 7.7: the shipping preference the customer actually chose, and the
+  // PayPal type they picked. Same two-column layout as the block above.
+  doc.setFont('times', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...PDF_BRAND.goldDim);
+  doc.text('SHIPPING METHOD', leftMargin, y);
+  doc.text('PAYMENT METHOD', leftMargin + 95, y);
+  y += 5;
+  doc.setFont('times', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(...PDF_BRAND.ink);
+  doc.text(pdfShippingLabel(o), leftMargin, y);
+  doc.text(pdfPaymentLabel(o), leftMargin + 95, y);
+  y += 8;
 
   // Items table — Phase 6.26: resolve via denormalized snapshot, add Qty column
   // Phase 6.29: gift rows display with the "Gift from..." prefix and FREE
