@@ -3346,6 +3346,14 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   background: var(--chrome);
 }
 
+/* Phase 7.9: the "To Make" column is the operational headline of the report,
+   so it is weighted to be scannable down the page next to Total Ordered. */
+#adminReports .admin-table td.report-remaining-col {
+  color: var(--gold-ink);
+  font-weight: 700;
+}
+#adminReports .admin-table th.report-remaining-col { cursor: help; }
+
 .flag-note { font-size: 10px; color: #8b2a2a; font-family: 'DM Mono', monospace; margin-top: 4px; }
 .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
 
@@ -8055,6 +8063,9 @@ admin_vault_preview_unavailable: 'Preview not available for this file type.',
   admin_reports_col_is_set: 'Set?',
   admin_reports_col_set_size: 'Set Size',
   admin_reports_col_total_ordered: 'Total Ordered',
+  // Phase 7.9: units still to make, derived from order status
+  admin_reports_col_remaining: 'To Make',
+  admin_reports_col_remaining_hint: 'Units still to make: pending plus approved. Shipped units count as made. Waitlisted and cancelled are not counted. Note this tracks orders not yet sent, not whether the ornament has been blown.',
   admin_reports_col_shipped: 'Shipped',
     // Phase 6.47a: per-status columns
     admin_reports_col_pending: 'Pending',
@@ -9297,6 +9308,9 @@ admin_vault_preview_unavailable: 'Vorschau für diesen Dateityp nicht verfügbar
   admin_reports_col_is_set: 'Set?',
   admin_reports_col_set_size: 'Set-Größe',
   admin_reports_col_total_ordered: 'Bestellt gesamt',
+  // Phase 7.9: noch zu fertigende Stueck, aus dem Bestellstatus abgeleitet
+  admin_reports_col_remaining: 'Zu fertigen',
+  admin_reports_col_remaining_hint: 'Noch zu fertigende Stueck: ausstehend plus aktiviert. Versendete gelten als gefertigt. Warteliste und stornierte zaehlen nicht. Hinweis: dies erfasst noch nicht versandte Bestellungen, nicht ob das Ornament bereits geblasen wurde.',
   admin_reports_col_shipped: 'Versendet',
     // Phase 6.47a: Spalten pro Status
     admin_reports_col_pending: 'Ausstehend',
@@ -20406,6 +20420,47 @@ async function _adminReportsRenderGlobalCapTile() {
   `;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.9: "Remaining to make" per ornament.
+// ═══════════════════════════════════════════════════════════════════════
+// Committed demand is pending + approved + shipped. Waitlisted is excluded
+// because those orders may never be fulfilled, and cancelled is excluded
+// outright. This matches how loadOrnamentSoldCounts already defines demand
+// for the ornament caps, so the two figures agree.
+//
+// Production is derived, not recorded: the only signal the app has that an
+// ornament is finished is that its order shipped. So produced = shipped, and
+// the two shipped terms cancel, leaving pending + approved.
+//
+// The subtraction is written out in full rather than collapsed, because the
+// definition of demand is the thing most likely to change (e.g. if waitlisted
+// should start counting) and the intent has to survive that edit.
+//
+// LIMITATION, by design: this counts units on orders that have not gone out,
+// not units that have not been blown. An ornament made on Monday and shipped
+// on Friday stays in this figure all week. Closing that gap needs someone to
+// record production; the owner chose derived-only, no manual entry.
+// ═══════════════════════════════════════════════════════════════════════
+// Gift ornaments count too: a gift still has to be blown. They need their own
+// terms because the report views exclude every gift line from the status
+// buckets (each bucket opens with CASE WHEN is_gift THEN 0), so gifts are
+// invisible to pending/approved. gift_pending_units and gift_approved_units
+// come from backups/phase7.9-gift-units-in-reports.sql and are already
+// expanded into member ornaments for a gifted set.
+//
+// Do NOT use r.gifts here: that column counts gift ORDER LINES, not ornaments,
+// has no status split, and reports a gifted set of 6 as 1.
+//
+// The || 0 fallbacks mean this stays correct before the migration is applied -
+// the columns are simply absent and gifts contribute nothing, exactly as
+// today. Once the views are replaced, the figure picks them up on its own.
+function reportRemainingToMake(r) {
+  const giftDemand = (r.gift_pending_units || 0) + (r.gift_approved_units || 0);
+  const demand   = (r.pending || 0) + (r.approved || 0) + (r.shipped || 0) + giftDemand;
+  const produced = (r.shipped || 0);
+  return Math.max(0, demand - produced);
+}
+
 function _adminReportsRenderInventoryTable() {
   const el = document.getElementById('adminReportsInventoryTable');
   if (!el) return;
@@ -20430,6 +20485,10 @@ function _adminReportsRenderInventoryTable() {
   // Phase 6.47b: sums use filteredRows so totals reflect the active status filter
   const totals = {
     total_ordered: filteredRows.reduce((s, r) => s + (r.total_ordered || 0), 0),
+    // Phase 7.9: sum the per-row figure rather than subtracting the totals, so
+    // a row whose shipped count exceeds its demand cannot push the total below
+    // what the visible rows add up to (reportRemainingToMake floors each row).
+    remaining: filteredRows.reduce((s, r) => s + reportRemainingToMake(r), 0),
     pending: filteredRows.reduce((s, r) => s + (r.pending || 0), 0),
     approved: filteredRows.reduce((s, r) => s + (r.approved || 0), 0),
     waitlisted: filteredRows.reduce((s, r) => s + (r.waitlisted || 0), 0),
@@ -20451,6 +20510,7 @@ function _adminReportsRenderInventoryTable() {
     <th data-t="admin_reports_col_is_set"></th>
     <th class="num-col" data-t="admin_reports_col_set_size"></th>
     <th class="num-col" data-t="admin_reports_col_total_ordered"></th>
+    <th class="num-col report-remaining-col" data-t="admin_reports_col_remaining" title="${escapeHtml(t('admin_reports_col_remaining_hint'))}"></th>
     <th class="num-col" data-t="admin_reports_col_pending"></th>
     <th class="num-col" data-t="admin_reports_col_approved"></th>
     <th class="num-col" data-t="admin_reports_col_waitlisted"></th>
@@ -20468,6 +20528,7 @@ function _adminReportsRenderInventoryTable() {
     <td>—</td>
     <td class="num-col">—</td>
     <td class="num-col">${totals.total_ordered}</td>
+    <td class="num-col report-remaining-col">${totals.remaining}</td>
     <td class="num-col">${totals.pending}</td>
     <td class="num-col">${totals.approved}</td>
     <td class="num-col">${totals.waitlisted}</td>
@@ -20486,6 +20547,7 @@ function _adminReportsRenderInventoryTable() {
       <td>${r.product_is_set ? yesText : noText}</td>
       <td class="num-col">${r.product_is_set ? (r.product_set_member_count || '—') : '—'}</td>
       <td class="num-col">${r.total_ordered || 0}</td>
+      <td class="num-col report-remaining-col">${reportRemainingToMake(r)}</td>
       <td class="num-col">${r.pending || 0}</td>
       <td class="num-col">${r.approved || 0}</td>
       <td class="num-col">${r.waitlisted || 0}</td>
@@ -20541,6 +20603,7 @@ function _adminReportsRenderUnlimitedInventory() {
     } else {
       const totals = {
         total_ordered: rows.reduce((s, r) => s + (r.total_ordered || 0), 0),
+        remaining: rows.reduce((s, r) => s + reportRemainingToMake(r), 0),   // Phase 7.9
         pending: rows.reduce((s, r) => s + (r.pending || 0), 0),
         approved: rows.reduce((s, r) => s + (r.approved || 0), 0),
         waitlisted: rows.reduce((s, r) => s + (r.waitlisted || 0), 0),
@@ -20560,6 +20623,7 @@ function _adminReportsRenderUnlimitedInventory() {
         <th data-t="admin_reports_col_is_set"></th>
         <th class="num-col" data-t="admin_reports_col_set_size"></th>
         <th class="num-col" data-t="admin_reports_col_total_ordered"></th>
+        <th class="num-col report-remaining-col" data-t="admin_reports_col_remaining" title="${escapeHtml(t('admin_reports_col_remaining_hint'))}"></th>
         <th class="num-col" data-t="admin_reports_col_pending"></th>
         <th class="num-col" data-t="admin_reports_col_approved"></th>
         <th class="num-col" data-t="admin_reports_col_waitlisted"></th>
@@ -20571,6 +20635,7 @@ function _adminReportsRenderUnlimitedInventory() {
       html += `<tr class="totals-row">
         <td>${escapeHtml(totalText)}</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="num-col">—</td>
         <td class="num-col">${totals.total_ordered}</td>
+        <td class="num-col report-remaining-col">${totals.remaining}</td>
         <td class="num-col">${totals.pending}</td>
         <td class="num-col">${totals.approved}</td>
         <td class="num-col">${totals.waitlisted}</td>
@@ -20588,6 +20653,7 @@ function _adminReportsRenderUnlimitedInventory() {
           <td>${r.product_is_set ? yesText : noText}</td>
           <td class="num-col">${r.product_is_set ? (r.product_set_member_count || '—') : '—'}</td>
           <td class="num-col">${r.total_ordered || 0}</td>
+          <td class="num-col report-remaining-col">${reportRemainingToMake(r)}</td>
           <td class="num-col">${r.pending || 0}</td>
           <td class="num-col">${r.approved || 0}</td>
           <td class="num-col">${r.waitlisted || 0}</td>
@@ -20618,7 +20684,7 @@ function adminReportsExportInventoryCsv() {
 
   // Phase 6.47a: per-status columns in CSV export
   const headers = ['SKU', 'Name', 'Style', 'Color', 'Is Set', 'Set Size',
-    'Total Ordered', 'Pending', 'Approved', 'Waitlisted', 'Shipped', 'Gifts'];
+    'Total Ordered', 'Remaining To Make', 'Pending', 'Approved', 'Waitlisted', 'Shipped', 'Gifts'];
   if (includeCancelled) headers.push('Cancelled');
   headers.push('Order Count');
 
@@ -20632,6 +20698,7 @@ function adminReportsExportInventoryCsv() {
       q(r.product_is_set ? 'Yes' : 'No'),
       q(r.product_is_set ? (r.product_set_member_count || '') : ''),
       q(r.total_ordered || 0),
+      q(reportRemainingToMake(r)),
       q(r.pending || 0),
       q(r.approved || 0),
       q(r.waitlisted || 0),
@@ -20674,6 +20741,7 @@ function adminReportsExportInventoryPdf() {
   // Phase 6.47a: per-status totals (replaces rolled-up in_flight)
   const totals = {
     total_ordered: rows.reduce((s, r) => s + (r.total_ordered || 0), 0),
+    remaining: rows.reduce((s, r) => s + reportRemainingToMake(r), 0),   // Phase 7.9
     pending: rows.reduce((s, r) => s + (r.pending || 0), 0),
     approved: rows.reduce((s, r) => s + (r.approved || 0), 0),
     waitlisted: rows.reduce((s, r) => s + (r.waitlisted || 0), 0),
@@ -20684,7 +20752,7 @@ function adminReportsExportInventoryPdf() {
   };
 
   const head = [['SKU', 'Name', 'Style', 'Color', 'Set?', 'Size',
-    'Ordered', 'Pending', 'Approved', 'Waitlisted', 'Shipped', 'Gifts']];
+    'Ordered', 'To Make', 'Pending', 'Approved', 'Waitlisted', 'Shipped', 'Gifts']];
   if (includeCancelled) head[0].push('Cancelled');
   head[0].push('# Orders');
 
@@ -20692,6 +20760,7 @@ function adminReportsExportInventoryPdf() {
   const totalsRow = [
     t('admin_reports_pdf_total'), '—', '—', '—', '—', '—',
     String(totals.total_ordered),
+    String(totals.remaining),
     String(totals.pending),
     String(totals.approved),
     String(totals.waitlisted),
@@ -20711,6 +20780,7 @@ function adminReportsExportInventoryPdf() {
       r.product_is_set ? 'Y' : 'N',
       r.product_is_set ? String(r.product_set_member_count || '') : '',
       String(r.total_ordered || 0),
+      String(reportRemainingToMake(r)),
       String(r.pending || 0),
       String(r.approved || 0),
       String(r.waitlisted || 0),
