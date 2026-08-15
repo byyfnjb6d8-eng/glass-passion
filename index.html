@@ -4040,6 +4040,73 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   padding: 0; border-bottom: 1px solid var(--line2);
   background: rgba(42,31,21,0.03);
 }
+
+/* ═══ Phase 7.8 — Admin orders: status sections + red cancelled rows ═══ */
+/* EVERY selector below is written as:
+     #adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr… > td
+   Both halves of that are load-bearing:
+     - :not(.admin-line-items-table) — the expanded detail panel renders a
+       SECOND table that also carries class .admin-table. Without the guard,
+       these rules restyle the line items inside every order.
+     - the > child combinators — the detail row itself carries data-status, and
+       the nested table sits inside it, so a descendant combinator reaches into
+       the nested cells even with the :not() guard above.
+   Loosen either one and the red marker repeats once per line item.
+
+   Zebra striping is rebased here. The global rules use tbody tr:nth-child(),
+   which breaks the moment section-header rows are interleaved: parity no longer
+   tracks "every other order". Neutralise it and stripe from the data-zeb index
+   the renderer emits, which restarts at 0 in every section. Both rules must
+   stay — remove the reset and half the table falls back to the old colours. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr:nth-child(even) > td,
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr:nth-child(odd) > td { background: var(--surface2); }
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-row-expandable[data-zeb="1"] > td { background: var(--surface); }
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-details-row > td { background: var(--surface2); }
+
+/* Restore row hover. The zebra reset above is ID-scoped, so it outranks the
+   class-level hover rules earlier in this sheet — without this, ordinary rows
+   would lose their hover tint while cancelled rows and group headers kept
+   theirs, because only those two got ID-scoped hover rules. Must stay AFTER
+   the zebra rules: it ties with them on specificity and wins on source order. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-row-expandable:hover > td { background: rgba(176,168,76,0.08); }
+
+/* Section header row. Gold band rather than the dark --chrome of the real
+   thead, so it reads as a divider inside the table, not a second header. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-group-row > td {
+  background: rgba(201,168,76,0.18);
+  color: var(--gold-ink);
+  font-family: 'Cinzel', serif;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(176,141,64,0.35);
+  cursor: pointer; user-select: none;
+}
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-group-row:hover > td { background: rgba(201,168,76,0.28); }
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-group-row.open .admin-expand-chevron { transform: rotate(90deg); }
+.admin-group-count {
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0; font-weight: 400; font-size: 11px;
+  color: var(--cream-dim);
+}
+
+/* Cancelled orders read red. Declared AFTER the zebra and hover rules: the
+   base tint ties with them on specificity and wins on source order, and the
+   cancelled hover carries one extra attribute selector so it beats the
+   generic hover above. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-row-expandable[data-status="cancelled"] > td { background: rgba(139,42,42,0.12); }
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-row-expandable[data-status="cancelled"]:hover > td { background: rgba(139,42,42,0.19); }
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr.admin-details-row[data-status="cancelled"] > td { background: rgba(139,42,42,0.05); }
+/* Red edge marker, the same device used for error boxes and the shipping
+   block. inset box-shadow rather than border-left: the table is
+   border-collapse, where a td border would fight the row rules. On the detail
+   row the only cell is the full-width panel, so the marker runs down it too. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr[data-status="cancelled"] > td:first-child { box-shadow: inset 3px 0 0 #8b2a2a; }
+/* !important is needed only here: the status <select> carries inline styles. */
+#adminOrders .admin-table:not(.admin-line-items-table) > tbody > tr[data-status="cancelled"] .admin-status-select {
+  background: rgba(139,42,42,0.10) !important;
+  border-color: rgba(139,42,42,0.35) !important;
+  color: #8b2a2a !important;
+}
 .admin-details-inner {
   padding: 20px 24px; display: grid;
   grid-template-columns: 1fr 1fr; gap: 24px;
@@ -8294,6 +8361,8 @@ admin_lottery: "Lottery",
     flag_email: "⚠ Similar email", flag_address: "⚠ Same address",
     status_pending: "Pending", status_approved: "Approved", status_denied: "Denied",
     status_shipped: "Shipped", status_cancelled: "Cancelled",
+    // Phase 7.8: orders table grouped into a section per status
+    admin_orders_group_toggle_hint: "Click to collapse or expand this section",
     order_id_label: "Order ID", order_status_label: "Status",
     nav_sign_in: "Sign In", nav_my_account: "My Account",
     col_paypal: "PayPal",
@@ -9570,6 +9639,8 @@ admin_lottery: "Verlosung",
     flag_email: "⚠ Ähnliche E-Mail", flag_address: "⚠ Gleiche Adresse",
     status_pending: "Ausstehend", status_approved: "Aktiviert", status_denied: "Abgelehnt",
     status_shipped: "Versendet", status_cancelled: "Storniert",
+    // Phase 7.8: Bestelltabelle nach Status in Abschnitte gruppiert
+    admin_orders_group_toggle_hint: "Klicken, um diesen Abschnitt ein- oder auszuklappen",
     order_id_label: "Bestellnummer", order_status_label: "Status",
     nav_sign_in: "Anmelden", nav_my_account: "Mein Konto",
     col_paypal: "PayPal",
@@ -9659,7 +9730,23 @@ let activeStyleFilter = 'all';
 // Phase 6.27: admin orders sort state. col is one of: order_id, created_at,
 // name, qty, shipping_method, total, paypal, status. dir is 'asc' or 'desc'.
 // Resets on each renderAdmin() invocation (acceptable per our decision).
-let adminOrderSort = { col: 'created_at', dir: 'desc' };
+// Phase 7.8b: default is order number ascending, so each status section reads
+// smallest order number first. Clicking any other column header still re-sorts
+// within the sections.
+let adminOrderSort = { col: 'order_id', dir: 'asc' };
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.8: the admin orders table is grouped into a section per status.
+// Section order follows the life of an order, so whatever needs a decision
+// sits at the top and settled orders sink.
+// Collapse state lives here at module level, NOT in the DOM, because
+// renderAdminOrders() rebuilds the whole table via innerHTML on every sort,
+// status change and language switch — DOM-held state would be wiped each time.
+// Cancelled starts collapsed; once the admin opens it, it stays open for the
+// rest of the session.
+// ═══════════════════════════════════════════════════════════════════════
+const ADMIN_ORDER_STATUS_ORDER = ['pending', 'approved', 'shipped', 'waitlisted', 'cancelled'];
+let adminOrderGroupCollapsed = { cancelled: true };
 let adminOrderSearchQuery = '';
 
 // ════════════════════════════════
@@ -12319,6 +12406,12 @@ async function renderAdminOrders() {
   const sortKey = adminOrderSort.col;
   const dir = adminOrderSort.dir === 'asc' ? 1 : -1;
   orders.sort((a, b) => {
+    // Phase 7.8b: order numbers compare numerically, not as raw strings, so
+    // "…-9" sorts before "…-10". A plain string compare only happens to work
+    // while every id is zero-padded to the same width; this holds either way.
+    if (sortKey === 'order_id') {
+      return String(a.order_id || '').localeCompare(String(b.order_id || ''), undefined, { numeric: true }) * dir;
+    }
     let av, bv;
     switch (sortKey) {
       case 'order_id':        av = a.order_id || ''; bv = b.order_id || ''; break;
@@ -12337,7 +12430,11 @@ async function renderAdminOrders() {
   });
 
   // Build paired rows: a main clickable row, followed by a hidden details row.
-  const rowsHtml = orders.map(o => {
+  // Phase 7.8: this is now a builder called per status section rather than a
+  // direct map over all orders. groupStatus is the section the row sits in,
+  // collapsed hides it when that section is closed, and zeb drives the zebra
+  // stripe (nth-child parity is useless once section headers are interleaved).
+  const renderOrderRow = (o, groupStatus, collapsed, zeb) => {
     // Phase 6.27: combined date+time display ("Apr 25, 2026 14:35")
     const placed = (() => {
       if (!o.created_at) return '—';
@@ -12468,7 +12565,7 @@ Ivonne and Mr. D`;
       return '€' + final.toFixed(2) + `<br><span style="font-size:10px;color:var(--cream-dim);font-weight:300">sub €${sub.toFixed(2)}</span>`;
     })();
 
-    return `<tr class="admin-row-expandable" data-expand-target="expand-${o.id}" data-search="${escapeHtml(((o.order_id||'')+' '+name+' '+email+' '+(o.paypal_email||'')).toLowerCase())}" onclick="toggleAdminOrderRow('${o.id}')">
+    return `<tr class="admin-row-expandable" data-expand-target="expand-${o.id}" data-group="${escapeHtml(groupStatus)}" data-status="${escapeHtml(currentStatus)}" data-zeb="${zeb}"${collapsed ? ' style="display:none"' : ''} data-search="${escapeHtml(((o.order_id||'')+' '+name+' '+email+' '+(o.paypal_email||'')).toLowerCase())}" onclick="toggleAdminOrderRow('${o.id}')">
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold-ink);letter-spacing:0.5px"><span class="admin-expand-chevron">▸</span> ${o.order_id||'—'}${o.over_cap_at_submit ? `<span class="overcap-badge" title="Customer submitted ${o.over_cap_selected_count} ornaments when cap was ${o.over_cap_limit_at_submit}">⚠ Over-cap</span>` : ''}${o.submitted_after_window ? `<span class="late-submit-badge" title="${escapeHtml(t('late_submit_admin_tooltip'))}">${escapeHtml(t('late_submit_badge'))}</span>` : ''}${o.submitted_at_or_over_global_cap ? `<span class="global-cap-badge" title="${escapeHtml(t('overcap_admin_tooltip'))}">${escapeHtml(t('overcap_admin_badge'))}</span>` : ''}${(Array.isArray(o.over_limit_product_ids) && o.over_limit_product_ids.length) ? `<span class="global-cap-badge" title="${escapeHtml(t('overlimit_admin_tooltip') + ' ' + (o.over_limit_product_ids.map(pid => { const it = (o.order_items||[]).find(x => x.product_id === pid); return it ? (it.product_name||pid) : pid; }).join(', ')))}">${escapeHtml(t('overlimit_admin_badge'))}</span>` : ''}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);line-height:1.5">${placed}</td>
       <td><strong style="color:var(--cream)">${escapeHtml(name)}</strong><br><span style="font-size:11px;color:var(--cream-dim)">${escapeHtml(email)}</span></td>
@@ -12482,7 +12579,7 @@ Ivonne and Mr. D`;
         </select>
       </td>
     </tr>
-    <tr id="expand-${o.id}" class="admin-details-row" style="display:none">
+    <tr id="expand-${o.id}" class="admin-details-row" data-group="${escapeHtml(groupStatus)}" data-status="${escapeHtml(currentStatus)}" style="display:none">
       <td colspan="8" onclick="event.stopPropagation()">
         <div class="admin-details-inner">
           ${lineItemTableHtml}
@@ -12592,7 +12689,33 @@ Ivonne and Mr. D`;
         </div>
       </td>
     </tr>`;
-  }).join('');
+  };
+
+  // ─── Phase 7.8: bucket the sorted orders into status sections ───────────
+  // `orders` is already sorted by the admin's chosen column above, and both
+  // Array#sort and this partition are stable, so the column sort survives
+  // intact as the ordering *within* each section.
+  // A status not in ADMIN_ORDER_STATUS_ORDER (legacy or a value added to the
+  // DB later) gets its own section appended at the end rather than vanishing.
+  const orderBuckets = new Map(ADMIN_ORDER_STATUS_ORDER.map(s => [s, []]));
+  for (const o of orders) {
+    const s = o.status || 'pending';
+    if (!orderBuckets.has(s)) orderBuckets.set(s, []);
+    orderBuckets.get(s).push(o);
+  }
+  const rowsHtml = [...orderBuckets.entries()]
+    .filter(([, list]) => list.length)
+    .map(([status, list]) => {
+      const collapsed = !!adminOrderGroupCollapsed[status];
+      const label = t('status_' + status) || status;
+      // Header rows deliberately carry NEITHER admin-row-expandable NOR
+      // data-search / data-expand-target: that keeps them invisible to the
+      // search filter's row loop and out of the "N matches" count.
+      const hdr = `<tr class="admin-group-row${collapsed ? '' : ' open'}" data-group="${escapeHtml(status)}" onclick="toggleAdminOrderGroup('${escapeHtml(status)}')" title="${escapeHtml(t('admin_orders_group_toggle_hint'))}">
+        <td colspan="8"><span class="admin-expand-chevron">▸</span> ${escapeHtml(label)} <span class="admin-group-count">(${list.length})</span></td>
+      </tr>`;
+      return hdr + list.map((o, i) => renderOrderRow(o, status, collapsed, i % 2)).join('');
+    }).join('');
 
   // Phase 6.27: sortable column headers helper. Each header gets a visual
   // indicator (▲ ▼ ⇅) showing current sort state and clicks toggle direction.
@@ -12625,7 +12748,9 @@ Ivonne and Mr. D`;
     ${sortHdr(t('shipping_method'), 'shipping_method')}
     ${sortHdr(t('col_total'), 'total')}
     ${sortHdr(t('col_paypal'), 'paypal')}
-    ${sortHdr(t('col_status') || t('order_status_label'), 'status')}
+    <!-- Phase 7.8: no longer sortable. The table is always grouped by status,
+         so sorting rows by status would be a no-op. -->
+    <th>${escapeHtml(t('col_status') || t('order_status_label'))}</th>
   </tr></thead><tbody>
     ${rowsHtml}
   </tbody></table></div>`;
@@ -12674,6 +12799,35 @@ function toggleAdminOrderRow(orderDbId) {
   const isOpen = detailsRow.style.display !== 'none';
   detailsRow.style.display = isOpen ? 'none' : 'table-row';
   if (mainRow) mainRow.classList.toggle('expanded', !isOpen);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 7.8: collapse/expand one status section.
+// Works on the live DOM rather than re-rendering, so a collapse costs no
+// database round trip and does not disturb the search box or scroll position.
+// Two things it must get right:
+//   - reopening a section must respect the active search, so a row hidden by
+//     the search box does not reappear just because its section opened
+//   - collapsing must force any expanded detail row shut, otherwise the
+//     detail panel would be left visible under a hidden parent row
+// ═══════════════════════════════════════════════════════════════════════
+function toggleAdminOrderGroup(status) {
+  const collapsed = !adminOrderGroupCollapsed[status];
+  adminOrderGroupCollapsed[status] = collapsed;
+  const hdr = document.querySelector(`#adminOrders tr.admin-group-row[data-group="${status}"]`);
+  if (hdr) hdr.classList.toggle('open', !collapsed);
+  const norm = (adminOrderSearchQuery || '').trim().toLowerCase();
+  document.querySelectorAll(`#adminOrders tr.admin-row-expandable[data-group="${status}"]`).forEach(row => {
+    const det = document.getElementById(row.getAttribute('data-expand-target'));
+    if (collapsed) {
+      row.style.display = 'none';
+      row.classList.remove('expanded');
+      if (det) det.style.display = 'none';
+    } else {
+      const hay = row.getAttribute('data-search') || '';
+      row.style.display = (!norm || hay.indexOf(norm) !== -1) ? '' : 'none';
+    }
+  });
 }
 
 // Copy the payment request block to clipboard. Gives visual feedback on the button.
@@ -13607,8 +13761,11 @@ function reopenAdminOrderRow(orderDbId) {
   // re-open the one the admin was editing so it doesn't snap shut.
   const dr = document.getElementById('expand-' + orderDbId);
   if (!dr) return;
-  dr.style.display = 'table-row';
   const mr = document.querySelector(`[data-expand-target="expand-${orderDbId}"]`);
+  // Phase 7.8: if a status change moved this order into a collapsed section,
+  // leave it shut — otherwise the detail panel would show under a hidden row.
+  if (mr && adminOrderGroupCollapsed[mr.getAttribute('data-group')]) return;
+  dr.style.display = 'table-row';
   if (mr) mr.classList.add('expanded');
 }
 function filterAdminOrders(q) {
@@ -13616,13 +13773,31 @@ function filterAdminOrders(q) {
   const norm = adminOrderSearchQuery.trim().toLowerCase();
   const rows = document.querySelectorAll('#adminOrders tr.admin-row-expandable');
   let shown = 0;
+  // Phase 7.8: tally matches per status section so section headers can hide
+  // when a search empties them, and show a live count while one is running.
+  const hitsByGroup = {};
   rows.forEach(row => {
     const hay = row.getAttribute('data-search') || '';
     const match = !norm || hay.indexOf(norm) !== -1;
-    row.style.display = match ? '' : 'none';
+    const grp = row.getAttribute('data-group') || '';
+    if (match) { hitsByGroup[grp] = (hitsByGroup[grp] || 0) + 1; shown++; }
+    // A collapsed section stays collapsed even for matching rows — the header
+    // count tells the admin the matches are in there.
+    const collapsed = !!adminOrderGroupCollapsed[grp];
+    const hide = !match || collapsed;
+    row.style.display = hide ? 'none' : '';
     const det = document.getElementById(row.getAttribute('data-expand-target'));
-    if (det && !match) det.style.display = 'none';
-    if (match) shown++;
+    // Force-closing the panel must also clear .expanded, or the row comes back
+    // from a search with a rotated chevron over a closed panel.
+    if (hide) row.classList.remove('expanded');
+    if (det && hide) det.style.display = 'none';
+  });
+  document.querySelectorAll('#adminOrders tr.admin-group-row').forEach(h => {
+    const grp = h.getAttribute('data-group');
+    const n = hitsByGroup[grp] || 0;
+    h.style.display = n > 0 ? '' : 'none';
+    const c = h.querySelector('.admin-group-count');
+    if (c) c.textContent = '(' + n + ')';
   });
   const cnt = document.getElementById('adminOrderSearchCount');
   if (cnt) cnt.textContent = norm ? (shown + (shown === 1 ? ' match' : ' matches')) : '';
