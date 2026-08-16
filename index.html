@@ -16201,9 +16201,19 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   val(502, 429, kg(box.totalGrams), 9, 65, 1, 'Gewicht gesamt');
   val(354, 467, String(Math.round(Number(box.valueEuros || 0))), 10, 214, 1, 'Wert gesamt');
 
-  // ── Category. Always Handelsware: these are paid goods. A free extra
-  //    inside a paid order does not make the consignment a gift, and a
-  //    business sender cannot use the Geschenk box at all. ──────────────
+  // ── Art der Sendung. Exactly one box, always the same one.
+  //
+  //    Set to Sonstiges on the owner's instruction (Phase 7.13c), on Ivonne's
+  //    established practice. Note for whoever changes this next: Handelsware
+  //    is the technically accurate category for a paid order, and Sonstiges
+  //    normally invites an explanation, so if customs ever queries the
+  //    category, index 4 is the defensible answer.
+  //
+  //    Never data-driven off is_gift. A free extra inside a paid order does
+  //    not make the consignment a gift, and a business sender cannot use the
+  //    Geschenk box at all. ────────────────────────────────────────────────
+  const CN23_CATEGORY_INDEX = 5;   // 0 Dokumente 1 Warenmuster 2 Geschenk
+                                   // 3 Warenrücksendung 4 Handelsware 5 Sonstiges
   doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
   doc.text(L.kind[0], 40.2, 498);
   doc.setFont('helvetica', 'normal');
@@ -16211,7 +16221,7 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   catX.forEach((x, i) => {
     line(x, 507.6, 13.7, 13.7);
     lab(x + 17, 521.3, L.cat[i], 6);
-    if (i === 4) {                                  // Handelsware / Sale of goods
+    if (i === CN23_CATEGORY_INDEX) {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
       doc.text('X', x + 3.2, 518);
       doc.setFont('helvetica', 'normal');
