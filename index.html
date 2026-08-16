@@ -7597,6 +7597,8 @@ const T = {
     customs_contents_manual: "manual, calculated {n}g",
     customs_follow_items: "follow item weights",
     customs_packing_partial: "Save failed, the panel now shows what is actually stored:",
+    // Phase 7.12: a write the database accepted but silently discarded
+    customs_packing_not_written: "{n} value(s) were rejected by the database and NOT saved. This is a permissions problem, not a typing mistake. Do not print a customs document from this order until it is fixed.",
     customs_packing_save: "Save weights & boxes",
     customs_packing_saved: "Weights and boxes saved.",
     customs_add_box: "+ Add box",
@@ -7606,8 +7608,9 @@ const T = {
     customs_split_blocked: "Fix the highlighted box split first: the quantities do not add up.",
     customs_total_value: "Total declared value",
     customs_form_recommendation: "Recommended form",
-    customs_form_cn22: "CN22 (under €350)",
-    customs_form_cn23: "CN23 (€350 or over, or detailed)",
+    // Phase 7.11: CN23 on every parcel. The old customs_form_cn22 key and the
+    // value-threshold parenthetical are gone, because neither is true any more.
+    customs_form_cn23: "CN23",
     customs_notes_label: "Notes for customs (optional)",
     customs_notes_placeholder: "e.g., Fragile glass items. Handle with care.",
     customs_notes_save: "Save notes",
@@ -7615,7 +7618,7 @@ const T = {
     customs_copy_block: "Copy",
     customs_missing_settings: "Some customs settings are blank. Fill them in via the Customs Settings tab.",
     customs_doc_title: "Customs Declaration",
-    customs_doc_subtitle: "Commercial invoice, accompanying document for CN22 / CN23",
+    customs_doc_subtitle: "Commercial invoice, accompanying document for CN23",
     // ── Phase 6.30: Shipping tracking ──
     ship_modal_title: "Ship Order",
     ship_modal_sub: "Capture carrier and tracking number. Both are required when shipping. The customer will receive an email with a clickable tracking link.",
@@ -8881,6 +8884,8 @@ admin_lottery: "Lottery",
     customs_contents_manual: "manuell, berechnet {n}g",
     customs_follow_items: "Einzelgewichten folgen",
     customs_packing_partial: "Speichern fehlgeschlagen, die Anzeige zeigt jetzt den tatsächlich gespeicherten Stand:",
+    // Phase 7.12: Schreibvorgang von der Datenbank angenommen, aber verworfen
+    customs_packing_not_written: "{n} Wert(e) wurden von der Datenbank abgelehnt und NICHT gespeichert. Das ist ein Berechtigungsproblem, kein Tippfehler. Bitte kein Zolldokument aus dieser Bestellung drucken, bis das behoben ist.",
     customs_packing_save: "Gewichte & Kartons speichern",
     customs_packing_saved: "Gewichte und Kartons gespeichert.",
     customs_add_box: "+ Karton hinzufügen",
@@ -8890,8 +8895,8 @@ admin_lottery: "Lottery",
     customs_split_blocked: "Bitte zuerst die markierte Aufteilung korrigieren: die Mengen ergeben nicht die Zeilenmenge.",
     customs_total_value: "Gesamtwert (deklariert)",
     customs_form_recommendation: "Empfohlenes Formular",
-    customs_form_cn22: "CN22 (unter €350)",
-    customs_form_cn23: "CN23 (ab €350 oder ausführlich)",
+    // Phase 7.11: CN23 auf jedem Paket
+    customs_form_cn23: "CN23",
     customs_notes_label: "Hinweise für Zoll (optional)",
     customs_notes_placeholder: "z.B. Zerbrechliche Glasartikel. Vorsichtig behandeln.",
     customs_notes_save: "Hinweise speichern",
@@ -8899,7 +8904,7 @@ admin_lottery: "Lottery",
     customs_copy_block: "Kopieren",
     customs_missing_settings: "Einige Zolleinstellungen sind leer. Bitte über den Zolleinstellungen-Tab ausfüllen.",
     customs_doc_title: "Zollerklärung",
-    customs_doc_subtitle: "Handelsrechnung, Begleitdokument zu CN22 / CN23",
+    customs_doc_subtitle: "Handelsrechnung, Begleitdokument zu CN23",
     // ── Phase 6.30: Versandverfolgung ──
     ship_modal_title: "Bestellung versenden",
     ship_modal_sub: "Versanddienst und Sendungsnummer erfassen. Beide sind beim Versand erforderlich. Der Kunde erhält eine E-Mail mit einem anklickbaren Tracking-Link.",
@@ -14220,15 +14225,18 @@ function computeCustomsData(orderItems, packingRaw) {
       tareGrams,
       totalGrams: contentsGrams + tareGrams,
       valueEuros: acc.valueEuros,
-      // Each box crosses the €350 threshold on its own merits
-      recommendedForm: acc.valueEuros < 350 ? t('customs_form_cn22') : t('customs_form_cn23'),
+      // Phase 7.11: always CN23, whatever the box is worth. See the note on
+      // the order-level declaration below.
+      recommendedForm: t('customs_form_cn23'),
     };
   });
 
-  // CN22 if total value < €350 (per UPU/Deutsche Post threshold), else CN23
-  const recommendedForm = totalValue < 350
-    ? t('customs_form_cn22')
-    : t('customs_form_cn23');
+  // Phase 7.11: always CN23. This used to pick CN22 below the €350 UPU /
+  // Deutsche Post threshold and CN23 above it, so most parcels printed CN22.
+  // CN23 is the form this business declares on. It is also the safe direction:
+  // CN23 is accepted at any value, while CN22 is only permitted below the
+  // threshold, so a wrong guess here can only ever have been wrong downwards.
+  const recommendedForm = t('customs_form_cn23');
   return {
     lines, totalQty, totalWeightGrams: totalWeight, totalValueEuros: totalValue,
     recommendedForm,
@@ -14616,7 +14624,8 @@ function customsRecalc(orderDbId) {
     const formEl = panel.querySelector(`[data-cx="bf-${b.n}"]`);
     const boxValue = perBoxValue[b.n] || 0;
     if (valEl) valEl.textContent = boxValue.toFixed(2);
-    if (formEl) formEl.textContent = boxValue < 350 ? t('customs_form_cn22') : t('customs_form_cn23');
+    // Phase 7.11: always CN23, so this no longer moves with the box value.
+    if (formEl) formEl.textContent = t('customs_form_cn23');
   });
   const shippedEl = panel.querySelector('[data-cx="shipped"]');
   if (shippedEl) shippedEl.textContent = fmtGrams(shipped);
@@ -14639,16 +14648,32 @@ async function saveCustomsPacking(orderDbId, opts) {
     // Pin every weight, including ones left at the site default. Leaving them
     // NULL would let a later change to that default silently re-declare an
     // order that has already shipped.
+    // Phase 7.12: .select('id') is load-bearing, not decoration. Without it
+    // PostgREST answers an UPDATE with 204 No Content and error null. A row
+    // that a row-level-security policy filters out is not an error in
+    // Postgres - the statement simply matches zero rows and reports success.
+    // That is how an entire session of typed weights was lost with a green
+    // "saved" on screen: these writes go to order_items, the box write below
+    // goes to orders, and only orders had a working admin update policy. With
+    // .select() the response carries the rows actually written, so zero rows
+    // back is detectable.
     const writes = form.lines
-      .map(l => sb.from('order_items').update({ net_weight_grams: l.grams }).eq('id', l.id));
+      .map(l => sb.from('order_items').update({ net_weight_grams: l.grams }).eq('id', l.id).select('id'));
     const boxes = (opts && opts.boxes) || form.boxes;
     const alloc = (opts && opts.alloc) || form.alloc;
     const packing = { boxes, alloc };
     const results = await Promise.all(writes.concat([
-      sb.from('orders').update({ customs_packing: packing }).eq('id', orderDbId),
+      sb.from('orders').update({ customs_packing: packing }).eq('id', orderDbId).select('id'),
     ]));
     const failed = results.find(r => r && r.error);
     if (failed) throw failed.error;
+    // Every write above targets exactly one row by primary key, so anything
+    // that comes back empty was silently discarded and must be reported as a
+    // failure rather than celebrated as a save.
+    const wroteNothing = results.filter(r => !r || !Array.isArray(r.data) || r.data.length === 0);
+    if (wroteNothing.length) {
+      throw new Error(t('customs_packing_not_written').replace('{n}', wroteNothing.length));
+    }
   } catch (e) {
     console.error('[customs] packing save failed:', e);
     // Some of the parallel writes may have landed. Re-read so the panel shows
@@ -15601,7 +15626,7 @@ async function downloadOrderPdf(orderDbId, kind) {
 
 // ═══════════════════════════════════════════════════════════════════════
 // Phase 6.29: Customs document PDF
-// Companion document for CN22/CN23 — provides full sender/recipient
+// Companion document for the CN23 — provides full sender/recipient
 // info, line item breakdown with declared values and weights, totals,
 // admin notes, and a signature line. Not the official CN form (DHL's
 // online franking generates that), but a useful commercial-invoice-
