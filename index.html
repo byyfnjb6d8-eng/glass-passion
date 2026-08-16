@@ -6033,6 +6033,7 @@ let siteSettings = {
   // parcel is posted from, the other is where the goods were made. Identical
   // today, but the form asks for both.
   customsSenderPhone: null,
+  customsSenderEmail: 'glasbaetz@hotmail.com',
   customsSenderCountry: 'GERMANY',
   customsDefaultWeightGrams: 60,
   customsContentsDescription: 'Hand-blown glass Christmas ornaments',
@@ -7593,6 +7594,8 @@ const T = {
     cn23_warn_folded: "These fields contained letters the form's font cannot print, so accents were removed to keep them readable: {fields}. Check the printed sheet against the shipping label before sending.",
     cn23_setting_phone: "Sender phone",
     cn23_setting_phone_hint: "Printed on the CN23 so customs can reach you about a parcel instead of returning it. Include the country code.",
+    cn23_setting_email: "Sender email for customs",
+    cn23_setting_email_hint: "Printed on the CN23 next to your phone number. This is the address customs would write to, so it can differ from the general shop contact address.",
     cn23_setting_country: "Sender country",
     cn23_setting_country_hint: "The country line under your sender address on the CN23. Leave as GERMANY unless you post from elsewhere. Do not also type it into the address box.",
     customs_section_sender: "Sender",
@@ -8893,6 +8896,8 @@ admin_lottery: "Lottery",
     cn23_warn_folded: "Diese Felder enthielten Zeichen, die die Formularschrift nicht drucken kann. Akzente wurden entfernt, damit sie lesbar bleiben: {fields}. Bitte den Ausdruck mit dem Versandlabel abgleichen.",
     cn23_setting_phone: "Telefon Absender",
     cn23_setting_phone_hint: "Wird auf der CN23 gedruckt, damit der Zoll Sie bei Rückfragen erreichen kann, statt die Sendung zurückzuschicken. Mit Ländervorwahl.",
+    cn23_setting_email: "E-Mail des Absenders für den Zoll",
+    cn23_setting_email_hint: "Wird auf der CN23 neben Ihrer Telefonnummer gedruckt. An diese Adresse würde sich der Zoll wenden, sie kann daher von der allgemeinen Shop-Adresse abweichen.",
     cn23_setting_country: "Land des Absenders",
     cn23_setting_country_hint: "Die Länderzeile unter Ihrer Absenderanschrift auf der CN23. GERMANY belassen, sofern Sie nicht von anderswo versenden. Nicht zusätzlich in das Anschriftenfeld eintragen.",
     customs_section_sender: "Absender",
@@ -9951,6 +9956,7 @@ async function loadSiteSettings() {
       customsSenderAddress: data.customs_sender_address || null,
       customsSenderEori: data.customs_sender_eori || null,
       customsSenderPhone: data.customs_sender_phone || null,                    // Phase 7.13
+      customsSenderEmail: data.customs_sender_email || 'glasbaetz@hotmail.com',  // Phase 7.13b
       customsSenderCountry: data.customs_sender_country || 'GERMANY',           // Phase 7.13
       customsDefaultWeightGrams: data.customs_default_weight_grams != null ? Number(data.customs_default_weight_grams) : 60,
       customsContentsDescription: data.customs_contents_description || 'Hand-blown glass Christmas ornaments',
@@ -15974,6 +15980,34 @@ function cn23Safe(str) {
   return { text: out, folded: out !== s };
 }
 
+// Where the postcode goes depends on the destination, and getting it wrong is
+// the kind of thing that makes a sorting office hesitate. Germany and most of
+// Europe write "98724 Lauscha"; the US, Canada and Australia write
+// "Grand Rapids, MI 49503". Anything not listed falls back to the European
+// order, which is what this business posts from.
+const CN23_POSTCODE_LAST = new Set([
+  'US','USA','UNITED STATES','UNITED STATES OF AMERICA',
+  'CA','CAN','CANADA',
+  'AU','AUS','AUSTRALIA',
+  'NZ','NZL','NEW ZEALAND',
+  'GB','UK','UNITED KINGDOM','GREAT BRITAIN',
+  'IE','IRL','IRELAND',
+]);
+function cn23CityLine(order) {
+  const key = String(order.country_code || order.country || '').trim().toUpperCase();
+  const city = String(order.city || '').trim();
+  const region = String(order.state_region || '').trim();
+  const zip = String(order.postal_code || '').trim();
+  if (CN23_POSTCODE_LAST.has(key)) {
+    // "Grand Rapids, MI 49503" - region and postcode after the town.
+    const left = [city, region].filter(Boolean).join(', ');
+    return [left, zip].filter(Boolean).join(' ');
+  }
+  // "98724 Lauscha" with any region appended after a comma.
+  const left = [zip, city].filter(Boolean).join(' ');
+  return [left, region].filter(Boolean).join(', ');
+}
+
 // Trim to what the box can physically show at the given size, and report it.
 // Returns { text, clipped } so the caller can warn rather than silently cut a
 // customs declaration short.
@@ -16048,11 +16082,20 @@ async function generateCn23Pdf(orderDbId) {
 function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields, foldedFields) {
   const L = CN23_L;
   const line = (x, y, w, h) => doc.rect(x, y, w, h);          // ruled box
-  const lab = (x, y, pair, size) => {                          // DE over EN caption
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(size || 6.2);
+  // Caption above a box: German line, English line under it, both sitting
+  // clear of the rule. boxTop is the y of the box this labels, NOT a label
+  // position - deriving the baselines from the box is what stops the English
+  // line landing on the box's top edge, which is what hardcoded label
+  // positions did on 13 of the 22 captions.
+  const CAP_GAP = 3.5;            // clearance between English baseline and rule
+  const lab = (x, boxTop, pair, size) => {
+    const sz = size || 6.2;
+    const enY = boxTop - CAP_GAP;
+    const deY = enY - (sz + 1.2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(sz);
     doc.setTextColor(0, 0, 0);
-    if (pair[0]) doc.text(pair[0], x, y);
-    if (pair[1]) { doc.setTextColor(90, 90, 90); doc.text(pair[1], x, y + 7); doc.setTextColor(0, 0, 0); }
+    if (pair[0]) doc.text(pair[0], x, deY);
+    if (pair[1]) { doc.setTextColor(90, 90, 90); doc.text(pair[1], x, enY); doc.setTextColor(0, 0, 0); }
   };
   const val = (x, y, str, size, maxW, maxLines, fieldName) => {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(size || 10);
@@ -16082,7 +16125,7 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   }
 
   // ── Sender ──────────────────────────────────────────────────────────
-  lab(40.5, 96, L.sender);
+  lab(40.5, 112.5, L.sender);
   line(40.5, 112.5, 300.6, 82.4);
   const senderLines = [String(s.customsSenderName || '').trim()]
     .concat(String(s.customsSenderAddress || '').split('\n').map(x => x.trim()).filter(Boolean))
@@ -16090,21 +16133,21 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
     .filter(Boolean);
   senderLines.slice(0, 5).forEach((ln, i) => val(46, 126 + i * 12, ln, 9, 290, 1, 'Absender'));
 
-  lab(347.1, 96, L.senderTel);
+  lab(347.1, 112.5, L.senderTel);
   line(347.1, 112.5, 221.1, 23.7);
   // ASCII separator on purpose: anything non-Latin-1 here would trip the
   // character-fold warning on every single print and train the admin to
   // ignore it, which is how the silent-save bug did its damage.
-  const senderTel = [String(s.customsSenderPhone || '').trim(), String(CONTACT_EMAIL || '').trim()]
-    .filter(Boolean).join(' / ');
+  const senderTel = [String(s.customsSenderPhone || '').trim(),
+                     String(s.customsSenderEmail || '').trim()].filter(Boolean).join(' / ');
   val(352, 127, senderTel, 8, 212, 1, 'Telefon Absender');
 
-  lab(347.1, 154, L.senderRef);
+  lab(347.1, 171.0, L.senderRef);
   line(347.1, 171.0, 221.1, 23.7);
   val(352, 186, s.customsSenderEori || '', 9, 212, 1, 'Kennnummer Absender');
 
   // ── Parcel number ───────────────────────────────────────────────────
-  lab(41.4, 210, L.parcelNo);
+  lab(41.4, 223.2, L.parcelNo);
   line(41.4, 223.2, 528.0, 35.6);
   // Only when there is exactly one box. One tracking number stamped on N
   // sheets would be a false declaration on N-1 of them, so multi-box is left
@@ -16113,38 +16156,40 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   val(47, 245, parcelNo, 10, 518, 1, 'Sendungsnummer');
 
   // ── Addressee ───────────────────────────────────────────────────────
-  lab(41.6, 277, L.addressee);
+  lab(41.6, 293.1, L.addressee);
   line(41.6, 293.1, 300.3, 100.8);
-  const cityLine = [order.postal_code, order.city].filter(Boolean).join(' ');
   const addrLines = [
     `${order.first_name || ''} ${order.last_name || ''}`.trim(),
     order.address || '',
     order.address_line_2 || '',
-    [cityLine, order.state_region].filter(Boolean).join(', '),
+    cn23CityLine(order),
     String(order.country || order.country_code || '').toUpperCase(),
   ].filter(Boolean);
   addrLines.slice(0, 6).forEach((ln, i) => val(47, 307 + i * 12, ln, 9, 290, 1, 'Empfänger'));
 
-  lab(348.1, 277, L.addrTel, 5.6);
+  lab(348.1, 293.1, L.addrTel, 5.6);
   line(348.1, 293.1, 221.1, 23.7);
-  // Left blank on purpose: the form permits the addressee's contact details
-  // only with their consent, and the app records no such consent.
+  // Printed with the customer's consent, which the owner confirms is held for
+  // all customers. The form permits these only on that basis.
+  const addrTel = [String(order.phone || '').trim(), String(order.email || '').trim()]
+    .filter(Boolean).join(' / ');
+  val(353, 308, addrTel, 7.5, 212, 1, 'Telefon Empfänger');
 
-  lab(348.1, 336, L.addrRef, 5.6);
+  lab(348.1, 352.0, L.addrRef, 5.6);
   line(348.1, 352.0, 221.1, 23.7);
 
   // ── Contents row ────────────────────────────────────────────────────
-  lab(42.2, 408, L.contents);
-  lab(349.6, 408, L.qty);
-  lab(388.2, 408, L.netW);
-  lab(455.7, 408, L.value);
-  lab(498.3, 408, L.grossW, 5.6);
+  lab(42.2, 414.3, L.contents);
+  lab(349.6, 414.3, L.qty);
+  lab(388.2, 414.3, L.netW);
+  lab(455.7, 414.3, L.value);
+  lab(498.3, 414.3, L.grossW, 5.6);
   line(42.2, 414.3, 300.1, 55.5);
   line(349.6, 414.3, 32.5, 21);
   line(388.2, 414.3, 61.7, 21);
   line(455.7, 414.3, 37.7, 21);
   line(498.3, 414.3, 69.6, 21);
-  lab(349.6, 446, L.totalVal);
+  lab(349.6, 452.5, L.totalVal);
   line(349.6, 452.5, 218.3, 21);
 
   const desc = String(s.customsContentsDescription || '').trim() || 'Handblown glass Christmas ornaments';
@@ -16165,7 +16210,7 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   const catX = [40.2, 118.2, 207.7, 279.4, 397.7, 484.4];
   catX.forEach((x, i) => {
     line(x, 507.6, 13.7, 13.7);
-    lab(x + 17, 515, L.cat[i], 6);
+    lab(x + 17, 521.3, L.cat[i], 6);
     if (i === 4) {                                  // Handelsware / Sale of goods
       doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
       doc.text('X', x + 3.2, 518);
@@ -16175,10 +16220,10 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
 
   // ── Commercial-goods block ──────────────────────────────────────────
   doc.setFontSize(7); doc.text(L.commOnly[0], 42.2, 548);
-  lab(42.2, 570, L.hs);
-  lab(173.8, 570, L.origin);
-  lab(307.8, 570, L.charges);
-  lab(441.4, 570, L.office, 5.8);
+  lab(42.2, 577.0, L.hs);
+  lab(173.8, 577.0, L.origin);
+  lab(307.8, 577.0, L.charges);
+  lab(441.4, 577.0, L.office, 5.8);
   line(42.2, 577.0, 123.2, 32.6);
   line(173.8, 577.0, 123.6, 32.6);
   line(307.8, 577.0, 123.6, 32.6);
@@ -16191,23 +16236,23 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   // Einlieferungsstelle left blank: it is the postal operator's box.
 
   // ── Remarks / invoice ───────────────────────────────────────────────
-  lab(42.6, 640, L.remarks, 5.6);
+  lab(42.6, 655.5, L.remarks, 5.6);
   line(42.6, 655.5, 284.0, 39.0);
   const remarkParts = [];
   if (boxCount > 1) remarkParts.push(`Karton ${box.n} von ${boxCount} / Box ${box.n} of ${boxCount}`);
   if (order.customs_notes) remarkParts.push(String(order.customs_notes).trim());
   val(47, 668, remarkParts.join(' - '), 8, 274, 3, 'Bemerkungen');
 
-  lab(339.3, 640, L.invoice);
+  lab(339.3, 655.5, L.invoice);
   line(339.3, 655.5, 223.7, 39.0);
   // The Order ID is the invoice number: it is what the commercial invoice
   // this parcel carries is headed with.
   val(344, 672, order.order_id || '', 10, 214, 1, 'Rechnung');
 
   // ── Licence / certificate / certification / signature ───────────────
-  lab(41.4, 716, L.licence, 5.8);
+  lab(41.4, 722.5, L.licence, 5.8);
   line(41.4, 722.5, 217.0, 24.4);
-  lab(41.8, 770, L.certNo, 5.8);
+  lab(41.8, 775.7, L.certNo, 5.8);
   line(41.8, 775.7, 214.6, 24.4);
 
   doc.setFontSize(5.6); doc.setTextColor(40, 40, 40);
@@ -16216,7 +16261,7 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   doc.text(doc.splitTextToSize(L.certifyEn, 284), 276.8, 745);
   doc.setTextColor(0, 0, 0);
 
-  lab(276.8, 776, L.signature, 5.8);
+  lab(276.8, 782.6, L.signature, 5.8);
   line(276.8, 782.6, 284.6, 26.1);
 }
 
@@ -21256,6 +21301,11 @@ async function renderAdminCustoms() {
         <div class="field-hint" style="font-size:11px;color:var(--cream-dim);opacity:0.8;margin-top:4px" data-t="cn23_setting_phone_hint"></div>
       </div>
       <div class="field">
+        <label style="font-size:13px;color:var(--cream-dim);font-weight:300" data-t="cn23_setting_email"></label>
+        <input type="text" id="customsSenderEmail" value="${escAttr(s.customsSenderEmail)}" placeholder="glasbaetz@hotmail.com" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px">
+        <div class="field-hint" style="font-size:11px;color:var(--cream-dim);opacity:0.8;margin-top:4px" data-t="cn23_setting_email_hint"></div>
+      </div>
+      <div class="field">
         <label style="font-size:13px;color:var(--cream-dim);font-weight:300" data-t="cn23_setting_country"></label>
         <input type="text" id="customsSenderCountry" value="${escAttr(s.customsSenderCountry)}" placeholder="GERMANY" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px">
         <div class="field-hint" style="font-size:11px;color:var(--cream-dim);opacity:0.8;margin-top:4px" data-t="cn23_setting_country_hint"></div>
@@ -21325,6 +21375,7 @@ async function saveCustomsSettings() {
     customs_sender_eori: senderEori,
     // Phase 7.13: CN23 sender boxes
     customs_sender_phone: (document.getElementById('customsSenderPhone')?.value || '').trim() || null,
+    customs_sender_email: (document.getElementById('customsSenderEmail')?.value || '').trim() || null,
     customs_sender_country: (document.getElementById('customsSenderCountry')?.value || '').trim().toUpperCase() || 'GERMANY',
     customs_contents_description: contentsDesc,
     customs_hs_code: hsCode,
