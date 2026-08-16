@@ -15505,7 +15505,21 @@ async function generateInvoicePdf(orderDbId) {
     if (custLines[i]) doc.text(custLines[i], leftMargin, y + i * 5);
     if (shipLines[i]) doc.text(shipLines[i], leftMargin + 95, y + i * 5);
   }
-  y += maxRows * 5 + 8;
+  y += maxRows * 5 + 6;
+
+  // Phase 7.14: export markings, deliberately larger and bolder than the
+  // address block above so a customs officer reads them without hunting.
+  // Origin comes from the same setting the CN23 declares, so the invoice and
+  // the customs declaration can never disagree about where the goods are from.
+  doc.setFont('times', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...PDF_BRAND.ink);
+  doc.text('Export Delivery', leftMargin, y);
+  y += 7;
+  doc.text(`Country of Origin: ${String(siteSettings.customsOriginCountry || 'Germany').trim()}`, leftMargin, y);
+  y += 9;
+  doc.setFont('times', 'normal');
+  doc.setFontSize(11);
 
   // Items table — Phase 6.26: resolve via denormalized snapshot, add Qty column
   // Phase 6.29: gift rows display with the "Gift from..." prefix and FREE
