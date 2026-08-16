@@ -6024,6 +6024,10 @@ let siteSettings = {
   adminTimezone: 'America/New_York',
   // Phase 6.29: customs documentation settings
   customsHsCode: null,
+  // Phase 7.14b: the goods are always made in Lauscha, so origin is a business
+  // invariant, not a setting. COUNTRY_OF_ORIGIN below is what every document
+  // prints. This entry is kept only so the loader and save payload keep their
+  // shape; nothing reads it to decide what to declare.
   customsOriginCountry: 'Germany',
   customsSenderName: null,
   customsSenderAddress: null,
@@ -6400,6 +6404,14 @@ const BRAND_PAYPAL_EMAIL = 'glasbaetz@hotmail.com';
 // (e.g., if this changes to support@glass-passion.com or similar) is a
 // one-line change. Note: most translation strings still hardcode this email
 // because they're static text, but the footer and PDF footer read the constant.
+// Phase 7.14b: every ornament is hand-blown in Lauscha, Germany. Declaring
+// origin from an editable setting meant the invoice and the CN23 could be
+// edited into disagreeing with each other, and a mismatch between two
+// documents in the same envelope is what invites a question at the border.
+// One constant, used by the invoice, the customs companion document and the
+// CN23 alike.
+const COUNTRY_OF_ORIGIN = 'Germany';
+
 const CONTACT_EMAIL = 'info@glaserneleidenschaft.com';
 
 // ════════════════════════════════════════════════════════════════════════
@@ -7596,6 +7608,7 @@ const T = {
     cn23_warn_folded: "These fields contained letters the form's font cannot print, so accents were removed to keep them readable: {fields}. Check the printed sheet against the shipping label before sending.",
     cn23_setting_phone: "Sender phone",
     cn23_setting_phone_hint: "Printed on the CN23 so customs can reach you about a parcel instead of returning it. Include the country code.",
+    customs_origin_fixed_hint: "Fixed. Every ornament is hand-blown in Lauscha, so the invoice, the customs document and the CN23 all declare Germany. Making this editable would let two documents in the same envelope disagree.",
     cn23_setting_email: "Sender email for customs",
     cn23_setting_email_hint: "Printed on the CN23 next to your phone number. This is the address customs would write to, so it can differ from the general shop contact address.",
     cn23_setting_country: "Sender country",
@@ -8900,6 +8913,7 @@ admin_lottery: "Lottery",
     cn23_warn_folded: "Diese Felder enthielten Zeichen, die die Formularschrift nicht drucken kann. Akzente wurden entfernt, damit sie lesbar bleiben: {fields}. Bitte den Ausdruck mit dem Versandlabel abgleichen.",
     cn23_setting_phone: "Telefon Absender",
     cn23_setting_phone_hint: "Wird auf der CN23 gedruckt, damit der Zoll Sie bei Rückfragen erreichen kann, statt die Sendung zurückzuschicken. Mit Ländervorwahl.",
+    customs_origin_fixed_hint: "Fest eingestellt. Jedes Ornament wird in Lauscha geblasen, daher deklarieren Rechnung, Zolldokument und CN23 einheitlich Germany. Wäre dies änderbar, könnten zwei Dokumente in derselben Sendung voneinander abweichen.",
     cn23_setting_email: "E-Mail des Absenders für den Zoll",
     cn23_setting_email_hint: "Wird auf der CN23 neben Ihrer Telefonnummer gedruckt. An diese Adresse würde sich der Zoll wenden, sie kann daher von der allgemeinen Shop-Adresse abweichen.",
     cn23_setting_country: "Land des Absenders",
@@ -14323,7 +14337,7 @@ async function renderCustomsPanel(orderDbId) {
   const senderLines = [];
   if (s.customsSenderName) senderLines.push(s.customsSenderName);
   if (s.customsSenderAddress) senderLines.push(s.customsSenderAddress);
-  if (s.customsOriginCountry) senderLines.push(s.customsOriginCountry);
+  senderLines.push(COUNTRY_OF_ORIGIN);
   if (s.customsSenderEori) senderLines.push('EORI: ' + s.customsSenderEori);
   const senderText = senderLines.join('\n');
   const senderMissing = !s.customsSenderName || !s.customsSenderAddress;
@@ -14341,7 +14355,7 @@ async function renderCustomsPanel(orderDbId) {
   const contentsHeader = [
     s.customsContentsDescription || '(no description set)',
     s.customsHsCode ? `HS Code: ${s.customsHsCode}` : null,
-    s.customsOriginCountry ? `Country of Origin: ${s.customsOriginCountry}` : null,
+    `Country of Origin: ${COUNTRY_OF_ORIGIN}`,
   ].filter(Boolean).join('\n');
   // Phase 7.1: the copy block walks the boxes so a pasted declaration
   // matches the paperwork box for box.
@@ -14441,7 +14455,7 @@ async function renderCustomsPanel(orderDbId) {
       <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--cream);margin-bottom:8px">
         ${escapeHtml(s.customsContentsDescription || '')}<br>
         ${s.customsHsCode ? `<span style="color:var(--cream-dim)">${t('customs_field_hs')}:</span> ${escapeHtml(s.customsHsCode)}` : `<span class="customs-missing">${t('customs_field_hs')}: (not set)</span>`}<br>
-        ${s.customsOriginCountry ? `<span style="color:var(--cream-dim)">${t('customs_field_origin')}:</span> ${escapeHtml(s.customsOriginCountry)}` : ''}
+        <span style="color:var(--cream-dim)">${t('customs_field_origin')}:</span> ${escapeHtml(COUNTRY_OF_ORIGIN)}
       </div>
       <table class="customs-table">
         <thead><tr>
@@ -15516,7 +15530,7 @@ async function generateInvoicePdf(orderDbId) {
   doc.setTextColor(...PDF_BRAND.ink);
   doc.text('Export Delivery', leftMargin, y);
   y += 7;
-  doc.text(`Country of Origin: ${String(siteSettings.customsOriginCountry || 'Germany').trim()}`, leftMargin, y);
+  doc.text(`Country of Origin: ${COUNTRY_OF_ORIGIN}`, leftMargin, y);
   y += 9;
   doc.setFont('times', 'normal');
   doc.setFontSize(11);
@@ -15758,7 +15772,7 @@ async function generateCustomsPdf(orderDbId) {
   if (s.customsSenderAddress) {
     s.customsSenderAddress.split('\n').forEach(line => senderLines.push(line));
   }
-  if (s.customsOriginCountry) senderLines.push(s.customsOriginCountry);
+  senderLines.push(COUNTRY_OF_ORIGIN);
   if (s.customsSenderEori) senderLines.push('EORI: ' + s.customsSenderEori);
   if (senderLines.length === 0) senderLines.push('(no sender info — set via Customs admin tab)');
   let senderY = y;
@@ -15801,8 +15815,8 @@ async function generateCustomsPdf(orderDbId) {
   if (s.customsHsCode) {
     doc.text(`HS Code:  ${s.customsHsCode}`, leftMargin, y);
   }
-  if (s.customsOriginCountry) {
-    doc.text(`Origin:   ${s.customsOriginCountry}`, leftMargin + 70, y);
+  {
+    doc.text(`Origin:   ${COUNTRY_OF_ORIGIN}`, leftMargin + 70, y);
   }
   y += 8;
 
@@ -16286,7 +16300,7 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   line(307.8, 577.0, 123.6, 32.6);
   line(441.4, 577.0, 123.2, 32.6);
   val(47, 597, s.customsHsCode || '', 10, 115, 1, 'Zolltarif-Nr.');
-  val(178, 597, String(s.customsOriginCountry || '').toUpperCase(), 9, 116, 1, 'Ursprungsland');
+  val(178, 597, COUNTRY_OF_ORIGIN.toUpperCase(), 9, 116, 1, 'Ursprungsland');
   // Entgelte left blank: the app stores what the CUSTOMER was charged for
   // shipping, not the postage actually paid, and declaring the former would
   // overstate the dutiable value.
@@ -21389,7 +21403,8 @@ async function renderAdminCustoms() {
         </div>
         <div class="field" style="margin:0">
           <label style="font-size:13px;color:var(--cream-dim);font-weight:300" data-t="customs_origin_label"></label>
-          <input type="text" id="customsOriginCountry" value="${escAttr(s.customsOriginCountry)}" placeholder="Germany" style="width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px">
+          <input type="text" id="customsOriginCountry" value="${escAttr(COUNTRY_OF_ORIGIN)}" readonly title="${escapeHtml(t('customs_origin_fixed_hint'))}" style="width:100%;padding:9px;background:var(--surface);color:var(--cream-dim);border:1px solid var(--line2);border-radius:4px;font-size:14px;cursor:not-allowed">
+          <div class="field-hint" style="font-size:11px;color:var(--cream-dim);opacity:0.8;margin-top:4px" data-t="customs_origin_fixed_hint"></div>
         </div>
       </div>
       <div class="field" style="margin-top:12px">
