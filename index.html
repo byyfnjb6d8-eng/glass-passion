@@ -7588,6 +7588,8 @@ const T = {
     cn23_cannot_generate: "The CN23 cannot be printed yet. Fill these in under Customs Settings first:",
     cn23_missing_sender: "· Sender name and address",
     cn23_missing_hs: "· HS tariff number",
+    cn23_cannot_generate_weights: "The CN23 for box {boxes} cannot be printed: the ornament weights are all zero.",
+    cn23_missing_weights: "Open Customs Data on this order and enter a real weight for each ornament. A CN23 declaring zero weight for glass is a false declaration and will get the parcel opened.\n\nIf every weight looks like 0 when you open the panel, the default ornament weight in Customs Settings is 0 and is being saved onto every line.",
     cn23_warn_export_declaration: "BOX {boxes}: declared value is €{limit} or more.\n\nFor a postal shipment at or above €{limit}, Germany requires an electronic export declaration (ATLAS) cleared IN ADVANCE by customs. A CN23 on its own is not sufficient and the parcel is likely to be held.",
     cn23_warn_default_weights: "{n} item(s) on this order have no measured weight, so the site default was used. Enter the real weights in Customs Data and print again before shipping.",
     cn23_warn_clipped: "These values were too long for their box and have been cut short on the form: {fields}. Shorten them and print again.",
@@ -8890,6 +8892,8 @@ admin_lottery: "Lottery",
     cn23_cannot_generate: "Die CN23 kann noch nicht gedruckt werden. Bitte zuerst unter Zoll-Einstellungen ausfüllen:",
     cn23_missing_sender: "· Name und Anschrift des Absenders",
     cn23_missing_hs: "· Zolltarifnummer",
+    cn23_cannot_generate_weights: "Die CN23 für Karton {boxes} kann nicht gedruckt werden: die Ornamentgewichte sind alle null.",
+    cn23_missing_weights: "Bitte unter Zolldaten für jedes Ornament ein echtes Gewicht eintragen. Eine CN23 mit Gewicht null für Glas ist eine falsche Erklärung und führt zur Öffnung der Sendung.\n\nWenn beim Öffnen alle Gewichte 0 sind, steht das Standardgewicht in den Zoll-Einstellungen auf 0 und wird auf jede Zeile geschrieben.",
     cn23_warn_export_declaration: "KARTON {boxes}: Warenwert ab €{limit}.\n\nBei Postsendungen ab €{limit} verlangt Deutschland eine elektronische Ausfuhranmeldung (ATLAS), die VORAB vom Zoll abgefertigt sein muss. Eine CN23 allein genügt nicht und die Sendung wird wahrscheinlich zurückgehalten.",
     cn23_warn_default_weights: "{n} Position(en) dieser Bestellung haben kein gemessenes Gewicht, es wurde der Standardwert verwendet. Bitte die echten Gewichte unter Zolldaten eintragen und erneut drucken.",
     cn23_warn_clipped: "Diese Werte waren zu lang für ihr Feld und wurden auf dem Formular abgeschnitten: {fields}. Bitte kürzen und erneut drucken.",
@@ -16036,6 +16040,28 @@ async function generateCn23Pdf(orderDbId) {
   if (!String(s.customsSenderAddress || '').trim()) missing.push(t('cn23_missing_sender'));
   if (!String(s.customsHsCode || '').trim())        missing.push(t('cn23_missing_hs'));
   if (missing.length) { alert(t('cn23_cannot_generate') + '\n\n' + [...new Set(missing)].join('\n')); return; }
+
+  // Phase 7.13e: refuse to declare zero weight for physical goods.
+  //
+  // The site default ornament weight can legitimately be 0, and
+  // saveCustomsPacking pins EVERY line's displayed weight on save, including
+  // lines nobody touched. So one save writes 0 into every untouched line, and
+  // because 0 is a stored value the "weights are only defaults" warning below
+  // cannot see it - the app believes the weight is known.
+  //
+  // The result would be a CN23 declaring 0,00 kg of glass. That is a false
+  // declaration and exactly the thing that gets a parcel opened, so it is a
+  // hard block rather than a warning. There is no legitimate zero net weight
+  // for a box with ornaments in it.
+  const zeroBoxes = (customs.boxes || []).filter(b => (b.qty || 0) > 0 && !(Number(b.contentsGrams) > 0));
+  if (zeroBoxes.length) {
+    // Its own header: this is an order-level data problem, not a settings one,
+    // and pointing the admin at Customs Settings would send them to the wrong
+    // screen.
+    alert(t('cn23_cannot_generate_weights').replace('{boxes}', zeroBoxes.map(b => b.n).join(', ')) +
+      '\n\n' + t('cn23_missing_weights'));
+    return;
+  }
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
