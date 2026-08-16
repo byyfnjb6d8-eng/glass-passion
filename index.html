@@ -16045,11 +16045,18 @@ async function generateCn23Pdf(orderDbId) {
   }];
   const clippedFields = [];
   const foldedFields = [];
+  // Phase 7.13d: the CN23 is dated the day it is prepared and signed, so this
+  // is the print date, not the order date. Computed ONCE here rather than per
+  // page: a multi-box order printed across midnight must not carry two dates.
+  // European format, dd.mm.yyyy, which is what the German form expects.
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const printDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
   const kg = g => (Number(g || 0) / 1000).toFixed(2).replace('.', ',') + ' kg';
 
   boxes.forEach((box, idx) => {
     if (idx > 0) doc.addPage();
-    _cn23DrawPage(doc, order, customs, box, boxes.length, s, kg, clippedFields, foldedFields);
+    _cn23DrawPage(doc, order, customs, box, boxes.length, s, kg, clippedFields, foldedFields, printDate);
   });
 
   const base = `CN23-${order.order_id || orderDbId}`;
@@ -16079,7 +16086,7 @@ async function generateCn23Pdf(orderDbId) {
 
 // One CN23 page for one box. Every coordinate is measured off the real form,
 // y from the top of an A4 page.
-function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields, foldedFields) {
+function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields, foldedFields, printDate) {
   const L = CN23_L;
   const line = (x, y, w, h) => doc.rect(x, y, w, h);          // ruled box
   // Caption above a box: German line, English line under it, both sitting
@@ -16273,6 +16280,10 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
 
   lab(276.8, 782.6, L.signature, 5.8);
   line(276.8, 782.6, 284.6, 26.1);
+  // Date printed at the left of the box; the remaining ~200pt is deliberately
+  // left empty for Ivonne to sign by hand. The signature is never drawn.
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(0, 0, 0);
+  doc.text(printDate, 282, 799);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
