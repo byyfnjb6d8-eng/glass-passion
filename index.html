@@ -7606,6 +7606,10 @@ const T = {
     cn23_warn_default_weights: "{n} item(s) on this order have no measured weight, so the site default was used. Enter the real weights in Customs Data and print again before shipping.",
     cn23_warn_clipped: "These values were too long for their box and have been cut short on the form: {fields}. Shorten them and print again.",
     cn23_warn_folded: "These fields contained letters the form's font cannot print, so accents were removed to keep them readable: {fields}. Check the printed sheet against the shipping label before sending.",
+    // Phase 7.15: asked at print time, because the CN23 is prepared before the
+    // parcel is handed over and the order is not shipped yet.
+    cn23_tracking_prompt: "Sendungsnummer for this parcel.\n\nIt is printed in the Sendungsnummer box and saved on the order, so it is already filled in when you mark the order shipped.\n\nLeave blank to print an empty box and write the number on by hand.",
+    cn23_tracking_save_failed: "The tracking number could not be saved to the order: {msg}\n\nIt is still printed on this CN23, but you will have to type it again when you mark the order shipped.",
     cn23_setting_phone: "Sender phone",
     cn23_setting_phone_hint: "Printed on the CN23 so customs can reach you about a parcel instead of returning it. Include the country code.",
     customs_origin_fixed_hint: "Fixed. Every ornament is hand-blown in Lauscha, so the invoice, the customs document and the CN23 all declare Germany. Making this editable would let two documents in the same envelope disagree.",
@@ -8911,6 +8915,10 @@ admin_lottery: "Lottery",
     cn23_warn_default_weights: "{n} Position(en) dieser Bestellung haben kein gemessenes Gewicht, es wurde der Standardwert verwendet. Bitte die echten Gewichte unter Zolldaten eintragen und erneut drucken.",
     cn23_warn_clipped: "Diese Werte waren zu lang für ihr Feld und wurden auf dem Formular abgeschnitten: {fields}. Bitte kürzen und erneut drucken.",
     cn23_warn_folded: "Diese Felder enthielten Zeichen, die die Formularschrift nicht drucken kann. Akzente wurden entfernt, damit sie lesbar bleiben: {fields}. Bitte den Ausdruck mit dem Versandlabel abgleichen.",
+    // Phase 7.15: wird beim Drucken abgefragt, weil die CN23 vor der Übergabe
+    // der Sendung erstellt wird und die Bestellung noch nicht versandt ist.
+    cn23_tracking_prompt: "Sendungsnummer für diese Sendung.\n\nSie wird in das Feld Sendungsnummer gedruckt und bei der Bestellung gespeichert, sodass sie beim Setzen auf Versandt bereits eingetragen ist.\n\nLeer lassen, um das Feld frei zu drucken und die Nummer von Hand einzutragen.",
+    cn23_tracking_save_failed: "Die Sendungsnummer konnte nicht bei der Bestellung gespeichert werden: {msg}\n\nSie wird trotzdem auf diese CN23 gedruckt, muss aber beim Setzen auf Versandt erneut eingegeben werden.",
     cn23_setting_phone: "Telefon Absender",
     cn23_setting_phone_hint: "Wird auf der CN23 gedruckt, damit der Zoll Sie bei Rückfragen erreichen kann, statt die Sendung zurückzuschicken. Mit Ländervorwahl.",
     customs_origin_fixed_hint: "Fest eingestellt. Jedes Ornament wird in Lauscha geblasen, daher deklarieren Rechnung, Zolldokument und CN23 einheitlich Germany. Wäre dies änderbar, könnten zwei Dokumente in derselben Sendung voneinander abweichen.",
@@ -12745,7 +12753,7 @@ Ivonne and Mr. D`;
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
                 <div style="flex:1;min-width:200px">
                   <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-ink);font-weight:500;margin-bottom:8px">${t('ship_info_section')}</div>
-                  <div style="font-size:13px;color:var(--cream-dim);margin-bottom:2px">${t('shipped_via_label')}: <span style="color:var(--cream)">${escapeHtml(carrierName)}</span></div>
+                  ${carrierName ? `<div style="font-size:13px;color:var(--cream-dim);margin-bottom:2px">${t('shipped_via_label')}: <span style="color:var(--cream)">${escapeHtml(carrierName)}</span></div>` : ''}
                   <div style="font-size:13px;color:var(--cream-dim);margin-bottom:2px">${t('tracking_number_label')}: ${trackingDisplay}</div>
                   ${shippedAtStr ? `<div style="font-size:13px;color:var(--cream-dim);margin-bottom:2px">${t('ship_shipped_at_label')}: <span style="color:var(--cream)">${escapeHtml(shippedAtStr)}</span></div>` : ''}
                 </div>
@@ -13133,11 +13141,11 @@ async function adminSetOrderStatus(orderDbId, newStatus) {
 // re-edits update tracking fields but preserve the original timestamp.
 // ═══════════════════════════════════════════════════════════════════════
 
-let _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null };
+let _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null, hadShippedAt: false };
 
 async function openShipModal(orderDbId, opts = {}) {
   if (!requireCapability('can_edit_orders')) return;  // Phase 6.56a
-  _shipModalContext = { orderDbId, isEdit: !!opts.isEdit, originalStatus: opts.originalStatus || null };
+  _shipModalContext = { orderDbId, isEdit: !!opts.isEdit, originalStatus: opts.originalStatus || null, hadShippedAt: false };
   // Populate carrier dropdown from SHIPPING_CARRIERS list
   const sel = document.getElementById('shipCarrier');
   if (sel) {
@@ -13167,11 +13175,23 @@ async function openShipModal(orderDbId, opts = {}) {
   // pre-fill any existing tracking info (edit case)
   try {
     const { data: order } = await sb.from('orders')
-      .select('order_id, tracking_number, shipping_carrier, shipping_carrier_other')
+      .select('order_id, tracking_number, shipping_carrier, shipping_carrier_other, shipped_at')
       .eq('id', orderDbId).single();
     const banner = document.getElementById('shipOrderInfo');
     if (banner && order) banner.textContent = 'Order: ' + (order.order_id || orderDbId);
-    if (order && opts.isEdit) {
+    // Phase 7.15: whether this order has ever actually shipped, which is no
+    // longer the same question as "did we arrive here in edit mode". A CN23
+    // print can leave tracking on an unshipped order, so "Edit tracking" now
+    // reaches orders that never got a shipped_at.
+    // A failed read returns null rather than throwing, so fall back to isEdit
+    // there too: unknown must never mean "restamp the timestamp".
+    _shipModalContext.hadShippedAt = order ? !!order.shipped_at : !!opts.isEdit;
+    // Phase 7.15: prefill whenever the order already carries tracking data,
+    // not only in edit mode. Printing the CN23 can now save a tracking number
+    // before the order is shipped, so the first pass through this modal is
+    // often not the first time the number was entered - and a blank field here
+    // would invite retyping it, which is how the two records drift apart.
+    if (order && (opts.isEdit || order.tracking_number || order.shipping_carrier)) {
       // Pre-fill from existing tracking
       if (order.shipping_carrier) sel.value = order.shipping_carrier;
       if (order.tracking_number) document.getElementById('shipTrackingNumber').value = order.tracking_number;
@@ -13179,6 +13199,10 @@ async function openShipModal(orderDbId, opts = {}) {
       onShipCarrierChange();
     }
   } catch (e) {
+    // Could not read the order, so shipped_at is unknown. Assume an edit is
+    // touching an already-shipped order rather than risk stamping a new
+    // timestamp over a real one.
+    _shipModalContext.hadShippedAt = !!opts.isEdit;
     console.warn('Failed to load order for ship modal:', e);
   }
   document.getElementById('shipOrderModal').classList.add('show');
@@ -13194,7 +13218,7 @@ function closeShipModal() {
   // we need to re-render so the dropdown snaps back to the actual
   // stored status (not 'shipped' which the user selected pre-modal).
   const wasStatusChange = _shipModalContext.orderDbId && !_shipModalContext.isEdit;
-  _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null };
+  _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null, hadShippedAt: false };
   if (wasStatusChange) renderAdminOrders();
 }
 
@@ -13271,15 +13295,20 @@ async function doShipOrder(sendEmail) {
     return;
   }
   clearShipError();
-  // Build update payload. Only set shipped_at on FIRST transition to
-  // shipped (not on edits) so this stays a true audit field.
+  // Build update payload. Only set shipped_at on the FIRST ship, so this
+  // stays a true audit field; later corrections keep the original timestamp.
   const payload = {
     status: 'shipped',
     tracking_number: trackingNumber,
     shipping_carrier: carrier,
     shipping_carrier_other: carrier === 'other' ? carrierOther : null,
   };
-  if (!ctx.isEdit) {
+  // Phase 7.15: keyed on whether shipped_at actually exists, not on isEdit.
+  // "Edit tracking" can now be clicked on an order that was never shipped
+  // (the CN23 print stored a tracking number on it), and that save is a first
+  // ship, not a typo correction. Keying on isEdit alone left those orders
+  // shipped with no timestamp.
+  if (!ctx.hadShippedAt) {
     payload.shipped_at = new Date().toISOString();
   }
   // Disable buttons + show progress
@@ -13299,7 +13328,7 @@ async function doShipOrder(sendEmail) {
   // Close modal manually (not via closeShipModal because that re-renders
   // — and we want to control re-render timing relative to email send)
   document.getElementById('shipOrderModal').classList.remove('show');
-  _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null };
+  _shipModalContext = { orderDbId: null, isEdit: false, originalStatus: null, hadShippedAt: false };
   await renderAdminOrders();
   if (sendEmail) {
     sendEmailNotification('order_shipped', { orderId: ctx.orderDbId });
@@ -16097,6 +16126,36 @@ async function generateCn23Pdf(orderDbId) {
     n: 1, qty: customs.totalQty, contentsGrams: customs.totalWeightGrams,
     tareGrams: 0, totalGrams: customs.totalWeightGrams, valueEuros: customs.totalValueEuros,
   }];
+  // Phase 7.15: ask for the tracking number here, at print time.
+  //
+  // The CN23 is prepared BEFORE the parcel is handed over, and the only place
+  // that stored a tracking number was the "mark shipped" modal, which runs
+  // after. So orders.tracking_number was always empty at print time and the
+  // Sendungsnummer box always came out blank, which is the one moment the form
+  // actually needs it.
+  //
+  // The answer is written to the order as tracking_number ONLY - no status
+  // change, no shipped_at. Recording the number is not the same event as
+  // shipping, and shipped_at has to stay a true audit field.
+  //
+  // Single box only, for the same reason the field below is left blank on a
+  // multi-box set: one number stamped on N sheets is a false declaration on
+  // N-1 of them.
+  if (boxes.length === 1 && !String(order.tracking_number || '').trim()) {
+    const typed = prompt(t('cn23_tracking_prompt'), '');
+    const entered = String(typed == null ? '' : typed).trim();
+    if (entered) {
+      // Set locally first: a failed save must not cost the admin the print.
+      order.tracking_number = entered;
+      const { error: trackErr } = await sb.from('orders')
+        .update({ tracking_number: entered }).eq('id', orderDbId);
+      // No renderAdminOrders() here on purpose - it rebuilds the table with
+      // every detail row collapsed, and the admin is standing in the one they
+      // just printed from. The number shows up on the next render.
+      if (trackErr) alert(t('cn23_tracking_save_failed').replace('{msg}', trackErr.message));
+    }
+  }
+
   const clippedFields = [];
   const foldedFields = [];
   // Phase 7.13d: the CN23 is dated the day it is prepared and signed, so this
