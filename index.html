@@ -25205,10 +25205,17 @@ function customerRoleChips(email) {
   return out;
 }
 
+let _custDateFmt = null, _custDateFmtLang = null;
 function _custFmtDate(d) {
   if (!d) return '';
-  try { return new Date(d).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
-  catch (e) { return ''; }
+  try {
+    if (!_custDateFmt || _custDateFmtLang !== lang) {
+      _custDateFmt = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US',
+        { year: 'numeric', month: 'short', day: 'numeric' });
+      _custDateFmtLang = lang;
+    }
+    return _custDateFmt.format(new Date(d));
+  } catch (e) { return ''; }
 }
 
 // ── list view ─────────────────────────────────────────────────────────
@@ -25225,17 +25232,15 @@ async function renderCustomersList(el) {
 
   const st = _customersState;
   const term = (st.search || '').trim().toLowerCase();
+  // Dropdown filters only. The text search is applied to the rendered DOM by
+  // customersApplySearch(), so it must NOT also filter here: doing both meant
+  // the render emitted only the current matches, and clearing the box could
+  // then un-hide nothing but those.
   const rows = (all || []).filter(c => {
     if (st.filterKind && c.kind !== st.filterKind) return false;
     if (st.filterAccountStatus && c.account_status !== st.filterAccountStatus) return false;
     if (st.filterRosterStatus && c.membership_status !== st.filterRosterStatus) return false;
     if (st.filterFb && c.fb_group_member !== st.filterFb) return false;
-    if (term) {
-      const hay = [c.display_name, c.roster_name, c.primary_email, c.roster_email, c.facebook_name,
-                   c.city, c.country, c.comments, c.validation_reason,
-                   c.membership_label, c.last_order_label].filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(term)) return false;
-    }
     return true;
   });
 
@@ -25286,7 +25291,7 @@ async function renderCustomersList(el) {
         ${opt('', t('admin_customers_filter_fb_all'), st.filterFb)}
         ${CUSTOMER_FB_STATES.map(s => opt(s, t('admin_members_fb_' + s.toLowerCase()), st.filterFb)).join('')}
       </select>
-      <span style="font-size:11px;color:var(--cream-dim)">${rows.length}${(term || st.filterKind || st.filterAccountStatus || st.filterRosterStatus || st.filterFb) ? ' / ' + (all || []).length : ''}</span>
+      <span id="customersCount" style="font-size:11px;color:var(--cream-dim)">${rows.length}${(st.filterKind || st.filterAccountStatus || st.filterRosterStatus || st.filterFb) ? ' / ' + (all || []).length : ''}</span>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
       ${canManage ? `<button class="btn btn-gold btn-sm" onclick="customersStartAddRoster()" data-t="admin_customers_add_roster"></button>` : ''}
@@ -25315,11 +25320,13 @@ async function renderCustomersList(el) {
     </tr></thead><tbody>`;
 
   const body = rows.length === 0
-    ? `<tr><td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
+    ? `<tr id="customersNoMatch"><td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
     : rows.map(c => renderCustomerListRow(c)).join('');
 
   el.innerHTML = toolbar + head + body + '</tbody></table></div>';
   if (typeof applyT === 'function') applyT();
+  // The rows are new, so the active search has to be re-applied to them.
+  if ((_customersState.search || '').trim()) customersApplySearch();
   const bar = document.getElementById('customersBulkBar');
   if (bar) bar.style.display = 'none';
 }
@@ -25421,7 +25428,13 @@ function renderCustomerListRow(c) {
   // Every mutation lives in the profile view. One button, one width, always.
   const actions = `<button class="btn btn-outline btn-sm" onclick="customersOpen('${escapeHtml(c.row_key)}')" data-t="admin_customers_open"></button>`;
 
-  return `<tr class="${rowClass}" style="${rowStyle}">
+  // The same haystack the filter below uses, stamped on the row so typing in
+  // the search box can hide and show rows instead of rebuilding the table.
+  const hay = [c.display_name, c.roster_name, c.primary_email, c.roster_email, c.facebook_name,
+               c.city, c.country, c.comments, c.validation_reason,
+               c.membership_label, c.last_order_label].filter(Boolean).join(' ').toLowerCase();
+
+  return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" style="${rowStyle}">
     ${checkboxCell}
     <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong> ${customerKindChip(c.kind)}${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
     <td>${c.primary_email ? escapeHtml(c.primary_email) : `<span style="color:var(--cream-dim)">—</span>`}</td>
@@ -25440,13 +25453,42 @@ function renderCustomerListRow(c) {
 // keystroke. A real reload (tab open, showDeleted flip, any mutation)
 // leaves _useCache false and refetches.
 
+// Search hides and shows the rows already on screen. It used to re-render the
+// whole table on every keystroke, which meant rebuilding 300+ rows AND throwing
+// away the <input> the admin was typing into - so the character itself only
+// appeared once the rebuild finished. Same approach the Orders tab uses.
 function customersOnSearch(value) {
-  _customersState.search = value;
-  _customersState._useCache = true;
-  renderAdminCustomers().then(() => {
-    const inp = document.getElementById('customersSearch');
-    if (inp) { inp.focus(); const n = inp.value.length; try { inp.setSelectionRange(n, n); } catch (e) {} }
+  _customersState.search = value;      // remembered, so a real re-render keeps it
+  customersApplySearch();
+}
+
+function customersApplySearch() {
+  const term = (_customersState.search || '').trim().toLowerCase();
+  const rows = document.querySelectorAll('#adminCustomers .customers-table tbody tr[data-cust-search]');
+  let shown = 0;
+  rows.forEach(tr => {
+    const hit = !term || tr.getAttribute('data-cust-search').indexOf(term) !== -1;
+    tr.style.display = hit ? '' : 'none';
+    if (hit) shown++;
   });
+  const countEl = document.getElementById('customersCount');
+  if (countEl) countEl.textContent = term ? (shown + ' / ' + rows.length) : String(rows.length);
+  // The "no matches" row only exists when the render itself produced nothing,
+  // so searching to zero needs its own one.
+  let none = document.getElementById('customersSearchNoMatch');
+  const tbody = document.querySelector('#adminCustomers .customers-table tbody');
+  if (shown === 0 && rows.length > 0 && tbody) {
+    if (!none) {
+      none = document.createElement('tr');
+      none.id = 'customersSearchNoMatch';
+      none.innerHTML = '<td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">'
+        + escapeHtml(t('admin_customers_no_matches')) + '</td>';
+      tbody.appendChild(none);
+    }
+    none.style.display = '';
+  } else if (none) {
+    none.style.display = 'none';
+  }
 }
 
 function customersSetFilter(key, value) {
