@@ -2794,22 +2794,10 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 }
 #adminCustomers tr.member-status-inactive td { opacity: 0.55; }
 
-/* Which of the two lists a person came from. */
-.customer-kind-chip {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-.customer-kind-both    { background: rgba(201,168,76,0.18); color: var(--gold-ink); }
-/* Who can also get into the admin panel. Deliberately louder than the kind
-   chip: it is a permission, not a category. */
-.customer-admin-chip,
-.customer-owner-chip {
+/* Who can get into the admin panel. The only chip on a name now - whether
+   someone came from the roster or holds an account is already said in words
+   by the Standing column, so a chip for it was noise. */
+.customer-admin-chip {
   display: inline-block;
   padding: 1px 6px;
   margin-left: 4px;
@@ -2819,11 +2807,10 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   letter-spacing: 0.8px;
   text-transform: uppercase;
   vertical-align: middle;
+  background: rgba(139,42,42,0.14);
+  color: #8b2a2a;
+  border: 1px solid rgba(139,42,42,0.30);
 }
-.customer-admin-chip { background: rgba(139,42,42,0.14); color: #8b2a2a; border: 1px solid rgba(139,42,42,0.30); }
-.customer-owner-chip { background: rgba(176,141,64,0.20); color: var(--gold-ink); border: 1px solid rgba(176,141,64,0.45); }
-.customer-kind-account { background: rgba(60,130,70,0.14);  color: #3f7a4e; }
-.customer-kind-roster  { background: rgba(120,120,140,0.16); color: var(--cream-dim); }
 
 .customer-banned-chip,
 .customer-unlimited-chip,
@@ -8131,7 +8118,6 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_customers_col_notes: 'Notes',
   // what kind of record this person is
   admin_customers_role_admin: 'Admin',
-  admin_customers_role_owner: 'Owner',
   admin_customers_profile_load_failed: "Couldn't load {name}'s full record. Nothing has been changed. Their account, roster entry and orders are all safe in the database - this is a read error, not missing data.",
   admin_customers_retry: 'Try again',
   admin_customers_suggested: 'Likely the same person',
@@ -9511,7 +9497,6 @@ admin_members_advanced_show: 'Erweitert anzeigen (interne Sortier-Daten)',
   admin_customers_col_orders: 'Bestellungen',
   admin_customers_col_notes: 'Notizen',
   admin_customers_role_admin: 'Admin',
-  admin_customers_role_owner: 'Inhaber',
   admin_customers_profile_load_failed: 'Der vollständige Datensatz von {name} konnte nicht geladen werden. Es wurde nichts geändert. Konto, Listeneintrag und Bestellungen sind in der Datenbank sicher - dies ist ein Lesefehler, keine fehlenden Daten.',
   admin_customers_retry: 'Erneut versuchen',
   admin_customers_suggested: 'Wahrscheinlich dieselbe Person',
@@ -25126,11 +25111,6 @@ function customerStandingConflict(c) {
   return null;
 }
 
-function customerKindChip(kind) {
-  const map = { both: 'admin_customers_kind_both', account: 'admin_customers_kind_account', roster: 'admin_customers_kind_roster' };
-  const key = map[kind] || 'admin_customers_kind_account';
-  return '<span class="customer-kind-chip customer-kind-' + escapeHtml(kind || 'account') + '">' + escapeHtml(t(key)) + '</span>';
-}
 
 // "Member since" displays the owner's free-text label ("January 2019") in
 // preference to the internal date, but sorting on that text is alphabetical:
@@ -25195,14 +25175,12 @@ function _custProperName(s) {
 // identified by the same constant the capability loader falls back to.
 function customerRoleChips(email) {
   if (!email) return '';
-  var out = '';
-  if (String(email).toLowerCase() === OWNER_EMAIL_FALLBACK) {
-    out += '<span class="customer-owner-chip">' + escapeHtml(t('admin_customers_role_owner')) + '</span>';
-  }
-  if (typeof isAdminEmail === 'function' && isAdminEmail(email)) {
-    out += '<span class="customer-admin-chip">' + escapeHtml(t('admin_customers_role_admin')) + '</span>';
-  }
-  return out;
+  var lower = String(email).toLowerCase();
+  var isAdmin = (typeof isAdminEmail === 'function' && isAdminEmail(email))
+             || lower === OWNER_EMAIL_FALLBACK;   // owner counts, even if the list has not loaded
+  return isAdmin
+    ? '<span class="customer-admin-chip">' + escapeHtml(t('admin_customers_role_admin')) + '</span>'
+    : '';
 }
 
 let _custDateFmt = null, _custDateFmtLang = null;
@@ -25436,7 +25414,7 @@ function renderCustomerListRow(c) {
 
   return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" style="${rowStyle}">
     ${checkboxCell}
-    <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong> ${customerKindChip(c.kind)}${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
+    <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong>${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
     <td>${c.primary_email ? escapeHtml(c.primary_email) : `<span style="color:var(--cream-dim)">—</span>`}</td>
     <td>${standing}</td>
     <td class="cust-col-since">${memberSince}</td>
@@ -25594,7 +25572,6 @@ async function renderCustomerProfile(el) {
   const canManage = hasCapability('can_manage_members');
 
   const chips = [];
-  chips.push(customerKindChip(c.kind));
   const roleChips = customerRoleChips(c.primary_email);
   if (roleChips) chips.push(roleChips);
   if (c.account_status) chips.push(`<span class="status-badge status-${escapeHtml(c.account_status)}">${escapeHtml(t('status_' + c.account_status))}</span>`);
