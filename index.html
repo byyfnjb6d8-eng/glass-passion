@@ -2843,6 +2843,53 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 .customer-validated-note { font-size: 10px; color: #2a5535; font-family: 'DM Mono', monospace; margin-top: 4px; }
 .customer-note-marker    { font-size: 10px; color: var(--cream-dim); font-family: 'DM Mono', monospace; margin-top: 4px; cursor: help; }
 
+/* The profile, shown over the list. Wide and scrollable: it carries the
+   address form and the whole order history, which the 480px .modal default
+   cannot hold. text-align is reset because .modal centres its contents. */
+/* .modal.<name>, not .customer-profile-modal alone: the base .modal rule is
+   defined LATER in this stylesheet, so a single-class selector here loses to
+   its max-width:480px and the profile renders in a narrow column. */
+.modal.customer-profile-modal {
+  max-width: 1040px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 28px 32px 32px;
+  text-align: left;
+  position: relative;
+}
+/* Pinned to the viewport, not to the card: the card scrolls, and a close
+   button that scrolls out of reach on a long profile is no use. */
+.customer-profile-close {
+  position: fixed;
+  top: 16px; right: 22px;
+  z-index: 1;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  /* Light, because this sits on the dark backdrop rather than on the card.
+     --cream-dim is the right colour for ink on the light card and is all but
+     invisible here. */
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.85);
+  font-size: 24px; line-height: 1;
+  cursor: pointer; padding: 0;
+}
+.customer-profile-close:hover {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+}
+@media (max-width: 700px) {
+  .modal.customer-profile-modal { padding: 20px 16px 24px; max-height: 94vh; }
+}
+
+/* The whole row opens the customer, so it has to look like it does. */
+#adminCustomers .customers-table tbody tr[data-cust-search] { cursor: pointer; }
+#adminCustomers .customers-table tbody tr[data-cust-search]:hover td {
+  background: rgba(201,168,76,0.07);
+}
+
 /* Profile view sections */
 .customer-section {
   margin-bottom: 22px;
@@ -5375,6 +5422,15 @@ body.locked > *:not(#constructionGate) { display: none !important; }
           <button class="btn btn-ghost btn-sm" onclick="adminTab('admins')" id="adminTabAdmins" data-t="admin_tab_admins" style="display:none"></button>
         </div>
         <div id="adminCustomers" style="display:none"></div>
+        <!-- Phase 7.16: the customer profile opens over the list rather than
+             replacing it, so closing it puts you back exactly where you were
+             in a 318-row table instead of at the top. -->
+        <div id="customerProfileModal" class="modal-bg" onclick="customersProfileBackdrop(event)">
+          <button type="button" class="customer-profile-close" onclick="customersBack()" aria-label="Close">&times;</button>
+          <div class="modal customer-profile-modal">
+            <div id="customerProfileBody"></div>
+          </div>
+        </div>
         <div id="adminAccounts"></div>
         <div id="adminOrders" style="display:none"></div>
         <div id="adminHistory" style="display:none"></div>
@@ -8107,7 +8163,7 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_customers_search_ph: 'Search name, email, Facebook name, notes…',
   admin_customers_no_matches: 'No customers match your search.',
   admin_customers_open: 'Open',
-  admin_customers_back: '← Back to customers',
+  admin_customers_back: 'Close',
   admin_customers_save: 'Save',
   // list columns
   admin_customers_col_customer: 'Customer',
@@ -9488,7 +9544,7 @@ admin_members_advanced_show: 'Erweitert anzeigen (interne Sortier-Daten)',
   admin_customers_search_ph: 'Name, E-Mail, Facebook-Name, Notizen durchsuchen…',
   admin_customers_no_matches: 'Keine Kunden entsprechen Ihrer Suche.',
   admin_customers_open: 'Öffnen',
-  admin_customers_back: '← Zurück zur Kundenliste',
+  admin_customers_back: 'Schließen',
   admin_customers_save: 'Speichern',
   admin_customers_col_customer: 'Kunde',
   admin_customers_col_standing: 'Status',
@@ -25011,12 +25067,24 @@ async function renderAdminCustomers() {
       // from the current language; stamping afterwards would leave it stale
       // during the paint and queue an endless chain of repaints.
       _customersRenderedLang = lang;
+      // The list is ALWAYS drawn, so it reflects anything the profile changed.
+      // But drawing it replaces innerHTML, which drops the page scroll - and in
+      // a 318-row table that throws you back to the top every time a profile
+      // opens or closes. Hold the position across the repaint, same idea as
+      // _adminProductsRerenderKeepScroll on the Products tab.
+      const _scrollY = window.scrollY;
+      const _wrapLeft = (() => { const w = el.querySelector('.admin-table-wrap'); return w ? w.scrollLeft : 0; })();
+      await renderCustomersList(el);
+      if (window.scrollY !== _scrollY) window.scrollTo(0, _scrollY);
+      if (_wrapLeft) { const w = el.querySelector('.admin-table-wrap'); if (w) w.scrollLeft = _wrapLeft; }
       if (_customersState.openKey) {
+        _customersState._useCache = true;        // the list render just refreshed it
         const pending = _custCaptureForm();      // survive the rebuild
-        await renderCustomerProfile(el);
+        await renderCustomerProfile(document.getElementById('customerProfileBody'));
         _custRestoreForm(pending);
+        _custShowProfileModal();
       } else {
-        await renderCustomersList(el);
+        _custHideProfileModal();
       }
     } while (_customersRenderQueued);
   } finally {
@@ -25294,11 +25362,10 @@ async function renderCustomersList(el) {
       <th class="cust-col-since" style="cursor:pointer;user-select:none" onclick="customersSort('account_created_at')">${escapeHtml(t('admin_customers_col_joined_site'))}${arrow('account_created_at')}</th>
       <th style="cursor:pointer;user-select:none" onclick="customersSort('order_count')">${escapeHtml(t('admin_customers_col_orders'))}${arrow('order_count')}</th>
       <th class="cust-col-notes">${escapeHtml(t('admin_customers_col_notes'))}</th>
-      <th>${escapeHtml(t('col_actions'))}</th>
     </tr></thead><tbody>`;
 
   const body = rows.length === 0
-    ? `<tr id="customersNoMatch"><td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
+    ? `<tr id="customersNoMatch"><td colspan="8" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
     : rows.map(c => renderCustomerListRow(c)).join('');
 
   el.innerHTML = toolbar + head + body + '</tbody></table></div>';
@@ -25324,7 +25391,7 @@ function renderCustomerListRow(c) {
 
   // Only real accounts can be bulk-deleted, and never an admin's own.
   const checkboxCell = (c.profile_id && !isAdmin && !isDeleted && isOwner())
-    ? `<td><input type="checkbox" class="cust-row-check" data-user-id="${escapeHtml(c.profile_id)}" data-user-email="${escapeHtml(c.primary_email || '')}" data-user-name="${escapeHtml(c.display_name || '')}" onclick="customersUpdateBulkBar()" aria-label="Select row"></td>`
+    ? `<td><input type="checkbox" class="cust-row-check" data-user-id="${escapeHtml(c.profile_id)}" data-user-email="${escapeHtml(c.primary_email || '')}" data-user-name="${escapeHtml(c.display_name || '')}" onclick="event.stopPropagation(); customersUpdateBulkBar()" aria-label="Select row"></td>`
     : '<td></td>';
 
   const sub = [];
@@ -25403,8 +25470,8 @@ function renderCustomerListRow(c) {
   if (c.comments) notes.push(`<div class="customer-note-marker" title="${escapeHtml(c.comments)}">${escapeHtml(t('admin_customers_has_notes'))}</div>`);
   const notesCell = notes.length ? notes.join('') : '<span style="color:var(--cream-dim)">—</span>';
 
-  // Every mutation lives in the profile view. One button, one width, always.
-  const actions = `<button class="btn btn-outline btn-sm" onclick="customersOpen('${escapeHtml(c.row_key)}')" data-t="admin_customers_open"></button>`;
+  // No Actions column any more: the row itself opens the customer, so a button
+  // that did the same thing was a column of width for nothing.
 
   // The same haystack the filter below uses, stamped on the row so typing in
   // the search box can hide and show rows instead of rebuilding the table.
@@ -25412,7 +25479,7 @@ function renderCustomerListRow(c) {
                c.city, c.country, c.comments, c.validation_reason,
                c.membership_label, c.last_order_label].filter(Boolean).join(' ').toLowerCase();
 
-  return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" style="${rowStyle}">
+  return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" style="${rowStyle}" onclick="customersRowClick(event, '${escapeHtml(c.row_key)}')">
     ${checkboxCell}
     <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong>${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
     <td>${c.primary_email ? escapeHtml(c.primary_email) : `<span style="color:var(--cream-dim)">—</span>`}</td>
@@ -25421,7 +25488,6 @@ function renderCustomerListRow(c) {
     <td class="cust-col-since">${joinedSite}</td>
     <td>${ordersCell}</td>
     <td class="cust-col-notes">${notesCell}</td>
-    <td style="white-space:nowrap">${actions}</td>
   </tr>`;
 }
 
@@ -25459,7 +25525,7 @@ function customersApplySearch() {
     if (!none) {
       none = document.createElement('tr');
       none.id = 'customersSearchNoMatch';
-      none.innerHTML = '<td colspan="9" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">'
+      none.innerHTML = '<td colspan="8" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">'
         + escapeHtml(t('admin_customers_no_matches')) + '</td>';
       tbody.appendChild(none);
     }
@@ -25512,15 +25578,57 @@ function customersOpen(rowKey) {
   _customersState._orders = null;
   _customersState._ordersError = null;
   _customersState._linkResults = null;
+  _customersState._useCache = true;    // the list on screen is current; do not refetch to open a row
   renderAdminCustomers();
-  const panel = document.getElementById('adminCustomers');
-  if (panel && panel.scrollIntoView) panel.scrollIntoView({ block: 'start' });
 }
 
 function customersBack() {
   _customersState.openKey = null;
-  _customersState._useCache = false;   // come back to fresh data
+  _customersState._useCache = false;   // whatever was changed in there, re-read it
   renderAdminCustomers();
+}
+
+// Clicking the row opens the customer. Anything interactive inside a cell -
+// the select checkbox, a button, a link - has to keep doing its own job.
+function customersRowClick(ev, rowKey) {
+  if (ev && ev.target && ev.target.closest &&
+      ev.target.closest('input, button, select, textarea, a, label')) return;
+  customersOpen(rowKey);
+}
+
+// Escape closes the profile. Wired once, at first use, and it checks the modal
+// is actually open so it cannot steal Escape from anything else on the page.
+let _custEscWired = false;
+function _custWireEsc() {
+  if (_custEscWired) return;
+  _custEscWired = true;
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    const m = document.getElementById('customerProfileModal');
+    if (m && m.classList.contains('show')) customersBack();
+  });
+}
+
+function _custShowProfileModal() {
+  _custWireEsc();
+  const m = document.getElementById('customerProfileModal');
+  if (!m) return;
+  m.classList.add('show');
+  const body = document.getElementById('customerProfileBody');
+  if (body) body.scrollTop = 0;
+  const card = m.querySelector('.customer-profile-modal');
+  if (card) card.scrollTop = 0;
+}
+
+function _custHideProfileModal() {
+  const m = document.getElementById('customerProfileModal');
+  if (m) m.classList.remove('show');
+}
+
+// Only a click on the backdrop itself closes; a click that happens to bubble
+// up from inside the card must not.
+function customersProfileBackdrop(ev) {
+  if (ev && ev.target && ev.target.id === 'customerProfileModal') customersBack();
 }
 
 async function renderCustomerProfile(el) {
@@ -25587,9 +25695,6 @@ async function renderCustomerProfile(el) {
     </div>` : '';
 
   el.innerHTML = `
-    <div style="margin-bottom:14px">
-      <button class="btn btn-ghost btn-sm" onclick="customersBack()" data-t="admin_customers_back"></button>
-    </div>
     <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line2)">
       <h3 style="margin:0 0 6px;font-family:'Cinzel',serif;color:var(--cream);font-size:19px">${escapeHtml(_custProperName(c.display_name) || '')}</h3>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">${chips.join(' ')}</div>
@@ -25616,9 +25721,6 @@ async function renderCustomerProfile(el) {
 // showing an error.
 function _custRenderProfileLoadError(el, c, err) {
   el.innerHTML = `
-    <div style="margin-bottom:14px">
-      <button class="btn btn-ghost btn-sm" onclick="customersBack()" data-t="admin_customers_back"></button>
-    </div>
     <div style="padding:16px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14px;line-height:1.6">
       <strong>${escapeHtml(t('admin_customers_profile_load_failed').replace('{name}', _custProperName(c.display_name) || ''))}</strong><br>
       ${escapeHtml(err && (err.message || String(err)) || '')}
