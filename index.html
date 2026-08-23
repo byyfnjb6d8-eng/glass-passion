@@ -2898,10 +2898,10 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
 }
 .customer-section:last-child { border-bottom: none; }
 .customer-section-title {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-family: 'Cinzel', serif;
   color: var(--gold-ink);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -2922,25 +2922,25 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   margin-bottom: 6px;
 }
 .customer-candidate-conf {
-  font-size: 10px;
+  font-size: 12px;
   font-family: 'DM Mono', monospace;
   color: var(--gold-ink);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .customer-section-sub {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--cream-dim);
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 /* Reassurance sits next to the button, not in a manual nobody reads. */
 .customer-safe-note {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--cream-dim);
-  font-style: italic;
-  margin: 10px 0 0;
-  line-height: 1.5;
+  margin: 12px 0 0;
+  line-height: 1.6;
+  max-width: 68ch;
 }
 .customer-orders-table tbody tr.customer-order-cancelled td {
   opacity: 0.5;
@@ -25731,8 +25731,8 @@ function _custRenderProfileLoadError(el, c, err) {
   if (typeof applyT === 'function') applyT();
 }
 
-const _CUST_INPUT = 'width:100%;padding:9px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:14px;box-sizing:border-box';
-const _CUST_LABEL = 'display:block;font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px';
+const _CUST_INPUT = 'width:100%;padding:10px;background:var(--surface2);color:var(--cream);border:1px solid var(--line2);border-radius:4px;font-size:15px;box-sizing:border-box';
+const _CUST_LABEL = 'display:block;font-size:12.5px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px';
 
 function _custField(id, labelKey, value, extra) {
   return `<div>
@@ -25810,8 +25810,8 @@ function _custCandidateRow(c, cand, canManage) {
   if (o.membership_label) meta.push(escapeHtml(o.membership_label));
   return '<div class="customer-candidate">'
     + '<div style="min-width:0">'
-    +   '<div style="font-size:13px;color:var(--cream)">' + escapeHtml(_custProperName(o.display_name) || '') + '</div>'
-    +   (meta.length ? '<div style="font-size:11px;color:var(--cream-dim);word-break:break-word">' + meta.join(' &middot; ') + '</div>' : '')
+    +   '<div style="font-size:14.5px;color:var(--cream)">' + escapeHtml(_custProperName(o.display_name) || '') + '</div>'
+    +   (meta.length ? '<div style="font-size:12.5px;color:var(--cream-dim);word-break:break-word">' + meta.join(' &middot; ') + '</div>' : '')
     +   '<div class="customer-candidate-conf">' + escapeHtml(t(cand.key)) + '</div>'
     + '</div>'
     + (canManage
@@ -25823,7 +25823,7 @@ function _custCandidateRow(c, cand, canManage) {
 // The panel shown on a half-linked person, on whichever side is empty.
 function _custSuggestPanel(c, canManage) {
   if (c.roster_deleted_at) {
-    return '<p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_restore_before_link"></p>';
+    return '<p style="color:var(--cream-dim);font-size:14.5px;font-style:italic" data-t="admin_customers_restore_before_link"></p>';
   }
   var sugg = customerSuggestions(c, _customersState._cache || []);
   var searchFn = c.profile_id ? 'customersSearchRoster' : 'customersSearchAccounts';
@@ -25832,7 +25832,7 @@ function _custSuggestPanel(c, canManage) {
     + (sugg.length
         ? '<div class="customer-section-sub" data-t="admin_customers_suggested"></div>'
           + sugg.map(function (s) { return _custCandidateRow(c, s, canManage); }).join('')
-        : '<p style="color:var(--cream-dim);font-size:12px;font-style:italic;margin:0 0 10px" data-t="admin_customers_no_suggestions"></p>')
+        : '<p style="color:var(--cream-dim);font-size:14px;margin:0 0 12px" data-t="admin_customers_no_suggestions"></p>')
     + (canManage
         ? '<div style="margin-top:10px">'
           + '<input type="text" id="cuLinkSearch" oninput="' + searchFn + '(this.value)" placeholder="' + escapeHtml(t(ph)) + '" style="' + _CUST_INPUT + ';max-width:340px">'
@@ -25857,7 +25857,7 @@ function _custRenderSearch(c, wantKind, q) {
   var canManage = hasCapability('can_manage_members');
   el.innerHTML = rows.length
     ? rows.map(function (o) { return _custCandidateRow(c, { row: o, key: 'admin_customers_conf_manual' }, canManage); }).join('')
-    : '<div style="font-size:12px;color:var(--cream-dim);font-style:italic">' + escapeHtml(t('admin_customers_link_none')) + '</div>';
+    : '<div style="font-size:13.5px;color:var(--cream-dim);font-style:italic">' + escapeHtml(t('admin_customers_link_none')) + '</div>';
   if (typeof applyT === 'function') applyT();
 }
 
@@ -25870,7 +25870,7 @@ function _custSectionIdentity(c, p, canManage) {
   if (!p) {
     return `<div class="customer-section">
       <h4 class="customer-section-title" data-t="admin_customers_sec_identity"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_identity_roster_only"></p>
+      <p style="color:var(--cream-dim);font-size:14.5px;" data-t="admin_customers_identity_roster_only"></p>
     </div>`;
   }
   const ro = canManage ? '' : ' disabled';
@@ -25909,25 +25909,25 @@ function _custSectionAccount(c, p, canManage) {
     // than leaving the two lists to drift apart by email again.
     return `<div class="customer-section">
       <h4 class="customer-section-title" data-t="admin_customers_sec_account"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic;margin:0 0 12px" data-t="admin_customers_no_account_hint"></p>
+      <p style="color:var(--cream-dim);font-size:14.5px;margin:0 0 12px" data-t="admin_customers_no_account_hint"></p>
       ${_custSuggestPanel(c, canManage)}
     </div>`;
   }
   const flags = (c.flags ? String(c.flags).split(',') : []).filter(Boolean);
   const flagHtml = flags.length
     ? flags.map(f => `<div class="flag-note">${escapeHtml(t(f === 'similar_email' ? 'flag_email' : 'flag_address'))}</div>`).join('')
-    : `<span style="color:var(--cream-dim);font-size:13px">—</span>`;
+    : `<span style="color:var(--cream-dim);font-size:14.5px">—</span>`;
   const isAdmin = isAdminEmail(p.email);
   const safeId = escapeHtml(p.id);
 
   let banRow;
   if (c.is_banned) {
-    banRow = `<div style="font-size:13px;color:#c66;margin-bottom:6px">${escapeHtml(t('status_banned'))}${c.ban_reason ? ' - ' + escapeHtml(c.ban_reason) : ''}</div>`
+    banRow = `<div style="font-size:14.5px;color:#c66;margin-bottom:6px">${escapeHtml(t('status_banned'))}${c.ban_reason ? ' - ' + escapeHtml(c.ban_reason) : ''}</div>`
       + (canManage && !isAdmin ? `<button class="btn btn-ghost btn-sm" style="color:var(--gold-ink);border-color:var(--gold-ink)" onclick="customersUnban('${safeId}')" data-t="btn_unban"></button>` : '');
   } else {
     banRow = canManage && !isAdmin
       ? `<button class="btn btn-ghost btn-sm" style="color:#8b2a2a;border-color:rgba(139,42,42,0.5)" onclick="customersBan('${safeId}')" data-t="btn_ban"></button>`
-      : `<span style="color:var(--cream-dim);font-size:13px">—</span>`;
+      : `<span style="color:var(--cream-dim);font-size:14.5px">—</span>`;
   }
 
   return `<div class="customer-section">
@@ -25948,11 +25948,11 @@ function _custSectionAccount(c, p, canManage) {
               <option value="standard" ${p.unlimited_access ? '' : 'selected'}>${escapeHtml(t('access_standard'))}</option>
               <option value="unlimited" ${p.unlimited_access ? 'selected' : ''}>${escapeHtml(t('access_unlimited'))}</option>
             </select>`
-          : `<div style="font-size:13px;color:var(--cream)">${escapeHtml(t(p.unlimited_access ? 'access_unlimited' : 'access_standard'))}</div>`}
+          : `<div style="font-size:14.5px;color:var(--cream)">${escapeHtml(t(p.unlimited_access ? 'access_unlimited' : 'access_standard'))}</div>`}
       </div>
       <div>
         <label style="${_CUST_LABEL}" data-t="admin_customers_col_joined_site"></label>
-        <div style="font-size:13px;color:var(--cream)">${escapeHtml(_custFmtDate(p.created_at)) || '—'}</div>
+        <div style="font-size:14.5px;color:var(--cream)">${escapeHtml(_custFmtDate(p.created_at)) || '—'}</div>
       </div>
       <div>
         <label style="${_CUST_LABEL}" data-t="admin_customers_ban_label"></label>
@@ -25964,7 +25964,7 @@ function _custSectionAccount(c, p, canManage) {
       </div>
       <div>
         <label style="${_CUST_LABEL}" data-t="admin_customers_account_id"></label>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cream-dim);word-break:break-all">${escapeHtml(p.id)}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12.5px;color:var(--cream-dim);word-break:break-all">${escapeHtml(p.id)}</div>
       </div>
     </div>
     ${c.member_id && canManage ? `<div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="customersUnlink('${escapeHtml(c.member_id)}')" data-t="admin_customers_unlink"></button></div>` : ''}
@@ -25976,7 +25976,7 @@ function _custSectionRoster(c, m, canManage) {
   if (!m) {
     return `<div class="customer-section">
       <h4 class="customer-section-title" data-t="admin_customers_sec_roster"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic;margin:0 0 12px" data-t="admin_customers_not_on_roster_hint"></p>
+      <p style="color:var(--cream-dim);font-size:14.5px;margin:0 0 12px" data-t="admin_customers_not_on_roster_hint"></p>
       ${_custSuggestPanel(c, canManage)}
       ${canManage && c.profile_id ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">
         <button class="btn btn-ghost btn-sm" onclick="customersAddRosterForProfile('${escapeHtml(c.profile_id)}')" data-t="admin_customers_add_roster_for"></button>
@@ -26007,11 +26007,11 @@ function _custSectionRoster(c, m, canManage) {
       <div>
         <label style="${_CUST_LABEL}" data-t="admin_members_col_last_order"></label>
         <input type="text" id="cuRosterLastOrderLabel" value="${escapeHtml(m.last_order_label || '')}" style="${_CUST_INPUT}"${ro}>
-        ${isLinked ? `<div style="font-size:10px;color:var(--cream-dim);margin-top:4px;font-style:italic">${escapeHtml(t('admin_customers_last_order_from_orders'))}</div>` : ''}
+        ${isLinked ? `<div style="font-size:12px;color:var(--cream-dim);margin-top:4px;font-style:italic">${escapeHtml(t('admin_customers_last_order_from_orders'))}</div>` : ''}
       </div>
     </div>
     <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+      <label style="display:flex;align-items:center;gap:6px;font-size:14.5px;color:var(--cream);cursor:pointer">
         <input type="checkbox" id="cuRosterValidated" ${m.validated ? 'checked' : ''}${ro}>
         <span data-t="admin_members_col_validated"></span>
       </label>
@@ -26033,7 +26033,7 @@ function _custSectionRoster(c, m, canManage) {
         <input type="date" id="cuRosterLastOrderManual" value="${escapeHtml(isLinked ? '' : (m.last_order_date_manual || ''))}" style="${_CUST_INPUT}"${isLinked ? ' disabled title="' + escapeHtml(t('admin_customers_last_order_from_orders')) + '"' : ro}>
       </div>
     </div>
-    <p style="font-size:11px;color:var(--cream-dim);margin:6px 0 0" data-t="admin_members_advanced_help"></p>` : ''}
+    <p style="font-size:12.5px;color:var(--cream-dim);margin:6px 0 0" data-t="admin_members_advanced_help"></p>` : ''}
     <div id="cuRosterError" class="alert alert-error" style="margin-top:10px"></div>
     ${canManage ? `<div style="margin-top:12px"><button class="btn btn-gold btn-sm" onclick="customersSaveRoster('${escapeHtml(m.id)}')" data-t="admin_customers_save"></button></div>` : ''}
   </div>`;
@@ -26045,7 +26045,7 @@ function _custSectionNotes(c, m, canManage) {
   if (!m) {
     return `<div class="customer-section">
       <h4 class="customer-section-title" data-t="admin_customers_sec_notes"></h4>
-      <p style="color:var(--cream-dim);font-size:13px;font-style:italic" data-t="admin_customers_notes_need_roster"></p>
+      <p style="color:var(--cream-dim);font-size:14.5px;" data-t="admin_customers_notes_need_roster"></p>
     </div>`;
   }
   return `<div class="customer-section">
@@ -26059,7 +26059,7 @@ function _custSectionNotes(c, m, canManage) {
 // from everything else so neither is a stray click away from a save button.
 function _custSectionProvenance(c, canManage) {
   const line = (labelKey, value) => value
-    ? `<div style="font-size:12px;color:var(--cream-dim);margin-bottom:4px">${escapeHtml(t(labelKey))}: <span style="color:var(--cream)">${escapeHtml(value)}</span></div>`
+    ? `<div style="font-size:13.5px;color:var(--cream-dim);margin-bottom:4px">${escapeHtml(t(labelKey))}: <span style="color:var(--cream)">${escapeHtml(value)}</span></div>`
     : '';
   const audit = [
     line('admin_customers_created_by', c.created_by_email),
@@ -26079,11 +26079,11 @@ function _custSectionProvenance(c, canManage) {
 
   return `<div class="customer-section">
     <h4 class="customer-section-title" data-t="admin_customers_sec_provenance"></h4>
-    ${audit || `<div style="font-size:12px;color:var(--cream-dim)">—</div>`}
+    ${audit || `<div style="font-size:13.5px;color:var(--cream-dim)">—</div>`}
     ${danger.length ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">
-      <div style="font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px" data-t="admin_customers_danger"></div>
+      <div style="font-size:12.5px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px" data-t="admin_customers_danger"></div>
       <div class="action-group">${danger.join('')}</div>
-      <p style="font-size:11px;color:var(--cream-dim);margin:8px 0 0;font-style:italic" data-t="admin_customers_danger_hint"></p>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:8px 0 0;font-style:italic" data-t="admin_customers_danger_hint"></p>
     </div>` : ''}
   </div>`;
 }
@@ -26098,7 +26098,7 @@ async function renderCustomerOrders(profileId, renderKey) {
   const el = document.getElementById('customerOrders');
   if (!el) return;
   if (!profileId) {
-    el.innerHTML = `<p style="color:var(--cream-dim);font-size:13px;font-style:italic">${escapeHtml(t('admin_customers_orders_no_account'))}</p>`;
+    el.innerHTML = `<p style="color:var(--cream-dim);font-size:14.5px;font-style:italic">${escapeHtml(t('admin_customers_orders_no_account'))}</p>`;
     return;
   }
   const { data: orders, error } = await sb
@@ -26114,12 +26114,12 @@ async function renderCustomerOrders(profileId, renderKey) {
     // A query error is not an empty history. Say so, the same way the Orders
     // tab does, so a temporary failure can never read as "this customer has
     // never ordered".
-    el.innerHTML = `<div style="padding:12px 14px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:13px;line-height:1.5">
+    el.innerHTML = `<div style="padding:12px 14px;border:1px solid #b00;border-radius:6px;background:rgba(176,0,0,0.06);color:#b00;font-size:14.5px;line-height:1.5">
       <strong>${escapeHtml(t('admin_customers_orders_load_failed'))}</strong><br>${escapeHtml(error.message || String(error))}</div>`;
     return;
   }
   if (!orders || !orders.length) {
-    el.innerHTML = `<p style="color:var(--cream-dim);font-size:13px;font-style:italic">${escapeHtml(t('admin_customers_orders_none'))}</p>`;
+    el.innerHTML = `<p style="color:var(--cream-dim);font-size:14.5px;font-style:italic">${escapeHtml(t('admin_customers_orders_none'))}</p>`;
     return;
   }
 
@@ -26144,10 +26144,10 @@ async function renderCustomerOrders(profileId, renderKey) {
     }).join('<br>');
 
     return `<tr${isCancelled ? ' class="customer-order-cancelled"' : ''}>
-      <td style="white-space:nowrap"><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-ink)">${escapeHtml(o.order_id || '')}</span>${o.season ? `<br><span style="font-size:10px;color:var(--cream-dim)">${escapeHtml(String(o.season))}</span>` : ''}</td>
-      <td style="white-space:nowrap;font-size:12px;color:var(--cream-dim)">${escapeHtml(_custFmtDate(o.created_at))}</td>
+      <td style="white-space:nowrap"><span style="font-family:'DM Mono',monospace;font-size:13.5px;color:var(--gold-ink)">${escapeHtml(o.order_id || '')}</span>${o.season ? `<br><span style="font-size:12px;color:var(--cream-dim)">${escapeHtml(String(o.season))}</span>` : ''}</td>
+      <td style="white-space:nowrap;font-size:13.5px;color:var(--cream-dim)">${escapeHtml(_custFmtDate(o.created_at))}</td>
       <td><span class="status-badge status-${escapeHtml(isCancelled ? 'cancelled' : status)}">${escapeHtml(t('status_' + (isCancelled ? 'cancelled' : status)))}</span></td>
-      <td style="font-size:12px;line-height:1.5">${itemNames || '<span style="color:var(--cream-dim)">—</span>'}</td>
+      <td style="font-size:13.5px;line-height:1.5">${itemNames || '<span style="color:var(--cream-dim)">—</span>'}</td>
       <td style="text-align:right;white-space:nowrap">${units}</td>
       <td style="text-align:right;white-space:nowrap;font-family:'DM Mono',monospace;color:var(--gold-ink)">${(Number(total) || 0) > 0 ? '€' + (Number(total) || 0).toFixed(2) : '—'}</td>
       <td style="white-space:nowrap"><div class="action-group">
@@ -26158,7 +26158,7 @@ async function renderCustomerOrders(profileId, renderKey) {
   }).join('');
 
   el.innerHTML = `
-    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--cream-dim)">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;font-size:13.5px;color:var(--cream-dim)">
       <span>${escapeHtml(t('admin_customers_orders_live'))}: <strong style="color:var(--cream)">${liveCount}</strong></span>
       <span>${escapeHtml(t('admin_customers_orders_units'))}: <strong style="color:var(--cream)">${liveUnits}</strong></span>
       <span>${escapeHtml(t('admin_customers_orders_value'))}: <strong style="color:var(--gold-ink);font-family:'DM Mono',monospace">€${liveValue.toFixed(2)}</strong></span>
