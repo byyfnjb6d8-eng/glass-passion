@@ -2890,6 +2890,32 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
   background: rgba(201,168,76,0.07);
 }
 
+/* Section headings inside the customers table. Not a data row: no hover tint,
+   no pointer, and it must not look clickable because it is not. */
+#adminCustomers .customer-group-header td {
+  background: var(--surface2);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
+  padding: 10px 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+#adminCustomers .customers-table tbody tr.customer-group-header { cursor: default; }
+#adminCustomers .customers-table tbody tr.customer-group-header:hover td {
+  background: var(--surface2);
+}
+.customer-group-count {
+  margin-left: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--cream-dim);
+  text-transform: none;
+}
+
 /* Profile view sections */
 .customer-section {
   margin-bottom: 22px;
@@ -2954,7 +2980,6 @@ body.pre-launch-mode .product-table tbody tr:hover { background: inherit; }
    different questions. Narrower than that the table scrolls sideways inside
    .admin-table-wrap rather than clipping. */
 @media (max-width: 1100px) {
-  #adminCustomers .cust-col-notes { display: none; }
 }
 /* .cust-col-since carries no rule of its own. It marks the two date columns so
    a future responsive pass has a handle on them without re-deriving which
@@ -8172,6 +8197,8 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_customers_col_joined_site: 'Joined site',
   admin_customers_col_orders: 'Orders',
   admin_customers_col_notes: 'Notes',
+  admin_customers_group_with_account: 'Website account',
+  admin_customers_group_no_account: 'Roster only, no website account',
   // what kind of record this person is
   admin_customers_role_admin: 'Admin',
   admin_customers_profile_load_failed: "Couldn't load {name}'s full record. Nothing has been changed. Their account, roster entry and orders are all safe in the database - this is a read error, not missing data.",
@@ -9552,6 +9579,8 @@ admin_members_advanced_show: 'Erweitert anzeigen (interne Sortier-Daten)',
   admin_customers_col_joined_site: 'Website-Beitritt',
   admin_customers_col_orders: 'Bestellungen',
   admin_customers_col_notes: 'Notizen',
+  admin_customers_group_with_account: 'Website-Konto',
+  admin_customers_group_no_account: 'Nur Liste, kein Website-Konto',
   admin_customers_role_admin: 'Admin',
   admin_customers_profile_load_failed: 'Der vollständige Datensatz von {name} konnte nicht geladen werden. Es wurde nichts geändert. Konto, Listeneintrag und Bestellungen sind in der Datenbank sicher - dies ist ein Lesefehler, keine fehlenden Daten.',
   admin_customers_retry: 'Erneut versuchen',
@@ -25361,12 +25390,26 @@ async function renderCustomersList(el) {
       <th class="cust-col-since" style="cursor:pointer;user-select:none" onclick="customersSort('membership_date')">${escapeHtml(t('admin_customers_col_member_since'))}${arrow('membership_date')}</th>
       <th class="cust-col-since" style="cursor:pointer;user-select:none" onclick="customersSort('account_created_at')">${escapeHtml(t('admin_customers_col_joined_site'))}${arrow('account_created_at')}</th>
       <th style="cursor:pointer;user-select:none" onclick="customersSort('order_count')">${escapeHtml(t('admin_customers_col_orders'))}${arrow('order_count')}</th>
-      <th class="cust-col-notes">${escapeHtml(t('admin_customers_col_notes'))}</th>
     </tr></thead><tbody>`;
 
+  // Two sections: people who can order online, and people who only exist on the
+  // roster. `rows` is already sorted, and partitioning preserves that order, so
+  // clicking any header re-sorts BOTH sections by that column.
+  const withAccount = rows.filter(c => c.profile_id);
+  const noAccount   = rows.filter(c => !c.profile_id);
+  const groupHeader = (key, labelKey, n) =>
+    `<tr class="customer-group-header" data-cust-group-header="${key}">
+       <td colspan="7"><span>${escapeHtml(t(labelKey))}</span>
+       <span class="customer-group-count" data-cust-group-count="${key}">${n}</span></td>
+     </tr>`;
+  const section = (key, labelKey, list) => list.length
+    ? groupHeader(key, labelKey, list.length) + list.map(c => renderCustomerListRow(c, key)).join('')
+    : '';
+
   const body = rows.length === 0
-    ? `<tr id="customersNoMatch"><td colspan="8" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
-    : rows.map(c => renderCustomerListRow(c)).join('');
+    ? `<tr id="customersNoMatch"><td colspan="7" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">${escapeHtml(t('admin_customers_no_matches'))}</td></tr>`
+    : section('account', 'admin_customers_group_with_account', withAccount)
+      + section('roster', 'admin_customers_group_no_account', noAccount);
 
   el.innerHTML = toolbar + head + body + '</tbody></table></div>';
   if (typeof applyT === 'function') applyT();
@@ -25376,7 +25419,7 @@ async function renderCustomersList(el) {
   if (bar) bar.style.display = 'none';
 }
 
-function renderCustomerListRow(c) {
+function renderCustomerListRow(c, groupKey) {
   const isDeleted = !!c.roster_deleted_at;
   const isAdmin = c.primary_email ? isAdminEmail(c.primary_email) : false;
 
@@ -25456,20 +25499,6 @@ function renderCustomerListRow(c) {
           : `<span style="color:var(--cream-dim)">—</span>`);
   }
 
-  // ── notes and flags, condensed to markers; the full text is in the profile ──
-  const notes = [];
-  (c.flags ? String(c.flags).split(',') : []).filter(Boolean).forEach(f => {
-    const key = f === 'similar_email' ? 'flag_email' : 'flag_address';
-    notes.push(`<div class="flag-note">${escapeHtml(t(key))}</div>`);
-  });
-  if (c.email_mismatch) notes.push(`<div class="customer-warn-note" title="${escapeHtml(t('admin_customers_email_mismatch'))}">${escapeHtml(t('admin_customers_email_mismatch_short'))}</div>`);
-  if (c.validated) {
-    const who = c.validated_by_email ? t('admin_members_validated_by') + ' ' + c.validated_by_email + (c.validated_at ? ' ' + t('admin_members_on') + ' ' + _custFmtDate(c.validated_at) : '') : '';
-    notes.push(`<div class="customer-validated-note"${who ? ` title="${escapeHtml(who)}"` : ''}>${escapeHtml(t('admin_customers_validated_short'))}</div>`);
-  }
-  if (c.comments) notes.push(`<div class="customer-note-marker" title="${escapeHtml(c.comments)}">${escapeHtml(t('admin_customers_has_notes'))}</div>`);
-  const notesCell = notes.length ? notes.join('') : '<span style="color:var(--cream-dim)">—</span>';
-
   // No Actions column any more: the row itself opens the customer, so a button
   // that did the same thing was a column of width for nothing.
 
@@ -25479,7 +25508,7 @@ function renderCustomerListRow(c) {
                c.city, c.country, c.comments, c.validation_reason,
                c.membership_label, c.last_order_label].filter(Boolean).join(' ').toLowerCase();
 
-  return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" style="${rowStyle}" onclick="customersRowClick(event, '${escapeHtml(c.row_key)}')">
+  return `<tr class="${rowClass}" data-cust-search="${escapeHtml(hay)}" data-cust-group="${escapeHtml(groupKey || (c.profile_id ? 'account' : 'roster'))}" style="${rowStyle}" onclick="customersRowClick(event, '${escapeHtml(c.row_key)}')">
     ${checkboxCell}
     <td><strong style="color:var(--cream)">${deletedTag}${escapeHtml(_custProperName(c.display_name) || '')}</strong>${customerRoleChips(c.primary_email)}${sub.length ? '<br>' + sub.join('<br>') : ''}</td>
     <td>${c.primary_email ? escapeHtml(c.primary_email) : `<span style="color:var(--cream-dim)">—</span>`}</td>
@@ -25487,7 +25516,6 @@ function renderCustomerListRow(c) {
     <td class="cust-col-since">${memberSince}</td>
     <td class="cust-col-since">${joinedSite}</td>
     <td>${ordersCell}</td>
-    <td class="cust-col-notes">${notesCell}</td>
   </tr>`;
 }
 
@@ -25517,6 +25545,18 @@ function customersApplySearch() {
   });
   const countEl = document.getElementById('customersCount');
   if (countEl) countEl.textContent = term ? (shown + ' / ' + rows.length) : String(rows.length);
+  // A section heading with nothing left under it is noise, and its count has to
+  // follow the filter rather than keep advertising the unfiltered total.
+  document.querySelectorAll('#adminCustomers [data-cust-group-header]').forEach(h => {
+    const key = h.getAttribute('data-cust-group-header');
+    let n = 0;
+    document.querySelectorAll('#adminCustomers tr[data-cust-group="' + key + '"]').forEach(tr => {
+      if (tr.style.display !== 'none') n++;
+    });
+    h.style.display = n ? '' : 'none';
+    const c = h.querySelector('[data-cust-group-count]');
+    if (c) c.textContent = n;
+  });
   // The "no matches" row only exists when the render itself produced nothing,
   // so searching to zero needs its own one.
   let none = document.getElementById('customersSearchNoMatch');
@@ -25525,7 +25565,7 @@ function customersApplySearch() {
     if (!none) {
       none = document.createElement('tr');
       none.id = 'customersSearchNoMatch';
-      none.innerHTML = '<td colspan="8" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">'
+      none.innerHTML = '<td colspan="7" style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px">'
         + escapeHtml(t('admin_customers_no_matches')) + '</td>';
       tbody.appendChild(none);
     }
