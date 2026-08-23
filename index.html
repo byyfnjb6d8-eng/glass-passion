@@ -17299,7 +17299,11 @@ function openBulkDeleteModal(selector) {
   // Phase 7.16: the Customers table uses .cust-row-check so its checkboxes and
   // bulk bar cannot collide with the Accounts table's ids while both tabs are
   // rendered. Callers pass their own selector; Accounts keeps the default.
-  const checked = document.querySelectorAll((selector || '.admin-row-check') + ':checked');
+  // Hidden rows are excluded here too, not just at selection time: this is the
+  // last point before an irreversible bulk delete, and it must never act on a
+  // row the owner cannot see in the list behind the modal.
+  const checked = Array.from(document.querySelectorAll((selector || '.admin-row-check') + ':checked'))
+    .filter(cb => { const tr = cb.closest('tr'); return !tr || tr.style.display !== 'none'; });
   if (checked.length === 0) return;
   const modal = document.getElementById('bulkDeleteModal');
   if (!modal) return;
@@ -25540,11 +25544,18 @@ function customersApplySearch() {
     const hit = !term || tr.getAttribute('data-cust-search').indexOf(term) !== -1;
     tr.style.display = hit ? '' : 'none';
     if (hit) shown++;
+    else {
+      // Filtering someone out of view also takes them out of the selection, so
+      // a bulk action can never reach a row the owner cannot currently see.
+      const cb = tr.querySelector('.cust-row-check');
+      if (cb) cb.checked = false;
+    }
   });
   const countEl = document.getElementById('customersCount');
   if (countEl) countEl.textContent = term ? (shown + ' / ' + rows.length) : String(rows.length);
   // A section heading with nothing left under it is noise, and its count has to
   // follow the filter rather than keep advertising the unfiltered total.
+  if (typeof customersUpdateBulkBar === 'function') customersUpdateBulkBar();
   document.querySelectorAll('#adminCustomers [data-cust-group-header]').forEach(h => {
     const key = h.getAttribute('data-cust-group-header');
     let n = 0;
@@ -25594,7 +25605,14 @@ function customersToggleDeleted() {
 }
 
 function customersToggleSelectAll(headerCheckbox) {
-  document.querySelectorAll('.cust-row-check').forEach(cb => { cb.checked = headerCheckbox.checked; });
+  // Only what the search is actually showing. Rows hidden by the filter are
+  // force-unchecked rather than skipped: leaving one ticked out of sight would
+  // put a person into a bulk delete the owner cannot see on screen.
+  document.querySelectorAll('.cust-row-check').forEach(cb => {
+    const tr = cb.closest('tr');
+    if (tr && tr.style.display === 'none') { cb.checked = false; return; }
+    cb.checked = headerCheckbox.checked;
+  });
   customersUpdateBulkBar();
 }
 
