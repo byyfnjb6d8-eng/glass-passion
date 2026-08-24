@@ -8247,6 +8247,7 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_customers_add_roster_for: 'Add Facebook group details',
   admin_customers_notes_need_roster: 'Notes live on the Facebook group entry. Add one in the Facebook group section above to start keeping notes on this person.',
   admin_customers_roster_email: 'Facebook group email',
+  admin_customers_fedex_account: 'FedEx account',
   admin_customers_last_order_from_orders: 'Taken from their real orders. Not editable for someone with an account.',
   admin_customers_account_id: 'Account ID',
   admin_customers_ban_label: 'Site ban',
@@ -9625,6 +9626,7 @@ admin_members_advanced_show: 'Erweitert anzeigen (interne Sortier-Daten)',
   admin_customers_add_roster_for: 'Facebook-Gruppendaten hinzufügen',
   admin_customers_notes_need_roster: 'Notizen gehören zum Facebook-Gruppeneintrag. Legen Sie oben im Bereich Facebook-Gruppe einen an, um Notizen zu dieser Person zu führen.',
   admin_customers_roster_email: 'E-Mail in der Facebook-Gruppe',
+  admin_customers_fedex_account: 'FedEx-Kundennummer',
   admin_customers_last_order_from_orders: 'Wird aus den echten Bestellungen übernommen. Für Personen mit Konto nicht bearbeitbar.',
   admin_customers_account_id: 'Konto-ID',
   admin_customers_ban_label: 'Website-Sperre',
@@ -12265,6 +12267,9 @@ async function submitOrder() {
     phone:          p.phone          || null,
     facebook_name:  p.facebook_name  || null,
     paypal_email:   paypalVal,
+    // Phase 7.17: snapshotted like every other contact field, so a document
+    // raised today keeps this number even if the profile changes later.
+    fedex_account:  p.fedex_account  || null,
     // Address snapshot
     address:        p.address        || null,
     address_line_2: p.address_line_2 || null,
@@ -13059,6 +13064,14 @@ async function renderAdminOrders() {
     const cityLine = [o.city, o.state_region, o.postal_code].filter(Boolean).map(escapeHtml).join(' ');
     if (cityLine) addressLines.push(cityLine);
     if (o.country) addressLines.push(escapeHtml(o.country));
+    // Phase 7.17: the customer's own FedEx account belongs with the delivery
+    // details, not buried in the contact column - it is read at the moment the
+    // parcel is booked. Shown only when there is one.
+    if (o.fedex_account && String(o.fedex_account).trim()) {
+      addressLines.push(`<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold-ink)">`
+        + escapeHtml(t('admin_customers_fedex_account')) + ': '
+        + escapeHtml(String(o.fedex_account).trim()) + '</span>');
+    }
     const addressHtml = addressLines.length ? addressLines.join('<br>') : '—';
 
     const contactLines = [];
@@ -14156,6 +14169,7 @@ async function doSaveAddOrder() {
     phone: cust.phone || null,
     facebook_name: cust.facebook_name || null,
     paypal_email: cust.paypal_email || null,
+    fedex_account: cust.fedex_account || null,   // Phase 7.17
     address: cust.address || null,
     address_line_2: cust.address_line_2 || null,
     city: cust.city || null,
@@ -15827,6 +15841,21 @@ function drawPdfFooter(doc) {
 }
 
 // Fetch a single order with items joined — used by both PDF generators.
+// Phase 7.17: the customer's own FedEx account, drawn directly under the
+// address block on both PDFs so whoever books the parcel reads it with the
+// delivery details rather than hunting for it. Draws nothing at all when there
+// is no number, so an ordinary order does not carry an empty label. Returns
+// the new y so each caller keeps its own spacing below.
+function drawPdfFedexAccount(doc, o, leftMargin, y) {
+  const acct = o && o.fedex_account ? String(o.fedex_account).trim() : '';
+  if (!acct) return y;
+  doc.setFont('times', 'bold');
+  doc.text('FedEx Account:', leftMargin, y);
+  doc.setFont('times', 'normal');
+  doc.text(acct, leftMargin + 30, y);
+  return y + 6;
+}
+
 async function fetchOrderForPdf(orderDbId) {
   const { data, error } = await sb
     .from('orders')
@@ -15917,7 +15946,8 @@ async function generateOrderConfirmationPdf(orderDbId) {
     if (custLines[i]) doc.text(custLines[i], leftMargin, y + i * 5);
     if (shipLines[i]) doc.text(shipLines[i], leftMargin + 95, y + i * 5);
   }
-  y += maxRows * 5 + 8;
+  y += maxRows * 5 + 2;
+  y = drawPdfFedexAccount(doc, o, leftMargin, y + 3) + 3;
 
   // Phase 7.7: the shipping preference the customer actually chose, and the
   // PayPal type they picked. Same two-column layout as the block above.
@@ -16087,7 +16117,8 @@ async function generateInvoicePdf(orderDbId) {
     if (custLines[i]) doc.text(custLines[i], leftMargin, y + i * 5);
     if (shipLines[i]) doc.text(shipLines[i], leftMargin + 95, y + i * 5);
   }
-  y += maxRows * 5 + 6;
+  y += maxRows * 5 + 2;
+  y = drawPdfFedexAccount(doc, o, leftMargin, y + 2) + 2;
 
   // Phase 7.14: export markings, deliberately larger and bolder than the
   // address block above so a customs officer reads them without hunting.
@@ -25938,6 +25969,7 @@ function _custSectionIdentity(c, p, canManage) {
       ${_custField('cuFacebook', 'ea_facebook', p.facebook_name, ro)}
       ${_custField('cuPaypal', 'ea_paypal', p.paypal_email, ro)}
       ${_custField('cuPhone', 'ea_phone', p.phone, ro)}
+      ${_custField('cuFedex', 'admin_customers_fedex_account', p.fedex_account, ro)}
       <div>
         <label style="${_CUST_LABEL}" data-t="col_email"></label>
         <input type="text" value="${escapeHtml(p.email || '')}" style="${_CUST_INPUT};opacity:0.6" disabled title="${escapeHtml(t('ea_email_locked'))}">
@@ -26279,7 +26311,8 @@ async function customersSaveIdentity(profileId) {
   const updates = {
     first_name: nn(val('cuFirst')), last_name: nn(val('cuLast')),
     facebook_name: nn(val('cuFacebook')), paypal_email: nn(val('cuPaypal')),
-    phone: nn(val('cuPhone')), address: nn(val('cuAddress')),
+    phone: nn(val('cuPhone')), fedex_account: nn(val('cuFedex')),
+    address: nn(val('cuAddress')),
     address_line_2: nn(val('cuAddress2')), city: nn(val('cuCity')),
     state_region: nn(val('cuState')), postal_code: nn(val('cuPostal')),
     country: nn(val('cuCountry')), country_code: nn(val('cuCountryCode')),
@@ -26367,7 +26400,7 @@ function customersToggleAdvanced() {
 // keeps their edits, and the Save button still decides what reaches the
 // database.
 const _CUST_FORM_IDS = [
-  'cuFirst','cuLast','cuFacebook','cuPaypal','cuPhone','cuAddress','cuAddress2',
+  'cuFirst','cuLast','cuFacebook','cuPaypal','cuPhone','cuFedex','cuAddress','cuAddress2',
   'cuCity','cuState','cuPostal','cuCountry','cuCountryCode',
   'cuRosterName','cuRosterEmail','cuRosterStatus','cuRosterFb',
   'cuRosterMembershipLabel','cuRosterLastOrderLabel','cuRosterValidationReason',
