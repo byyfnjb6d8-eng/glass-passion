@@ -8247,7 +8247,7 @@ admin_members_advanced_show: 'Show advanced (internal sort dates)',
   admin_customers_add_roster_for: 'Add Facebook group details',
   admin_customers_notes_need_roster: 'Notes live on the Facebook group entry. Add one in the Facebook group section above to start keeping notes on this person.',
   admin_customers_roster_email: 'Facebook group email',
-  admin_customers_fedex_account: 'FedEx account',
+  admin_customers_fedex_account: 'FedEx customer number',
   admin_customers_last_order_from_orders: 'Taken from their real orders. Not editable for someone with an account.',
   admin_customers_account_id: 'Account ID',
   admin_customers_ban_label: 'Site ban',
@@ -12269,7 +12269,7 @@ async function submitOrder() {
     paypal_email:   paypalVal,
     // Phase 7.17: snapshotted like every other contact field, so a document
     // raised today keeps this number even if the profile changes later.
-    fedex_account:  p.fedex_account  || null,
+    fedex_account:  p.fedex_account  || null,   // FedEx customer number
     // Address snapshot
     address:        p.address        || null,
     address_line_2: p.address_line_2 || null,
@@ -13064,9 +13064,10 @@ async function renderAdminOrders() {
     const cityLine = [o.city, o.state_region, o.postal_code].filter(Boolean).map(escapeHtml).join(' ');
     if (cityLine) addressLines.push(cityLine);
     if (o.country) addressLines.push(escapeHtml(o.country));
-    // Phase 7.17: the customer's own FedEx account belongs with the delivery
-    // details, not buried in the contact column - it is read at the moment the
-    // parcel is booked. Shown only when there is one.
+    // Phase 7.17: appended BELOW the address lines, never replacing any of
+    // them - the address block above is untouched. It sits with the delivery
+    // details rather than in the contact column because it is read at the
+    // moment the parcel is booked. Shown only when there is one.
     if (o.fedex_account && String(o.fedex_account).trim()) {
       addressLines.push(`<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold-ink)">`
         + escapeHtml(t('admin_customers_fedex_account')) + ': '
@@ -15841,19 +15842,27 @@ function drawPdfFooter(doc) {
 }
 
 // Fetch a single order with items joined — used by both PDF generators.
-// Phase 7.17: the customer's own FedEx account, drawn directly under the
-// address block on both PDFs so whoever books the parcel reads it with the
-// delivery details rather than hunting for it. Draws nothing at all when there
-// is no number, so an ordinary order does not carry an empty label. Returns
-// the new y so each caller keeps its own spacing below.
+// Phase 7.17: the customer's FedEx customer number - FedEx assigns one to
+// anyone who has ever taken a delivery, so this is an identifier for the
+// recipient, not a billing account they opted into. Drawn directly BELOW the
+// address block, which is left exactly as it was: this is an extra line under
+// the address, never a replacement for any part of it. Draws nothing at all
+// when there is no number, so an ordinary order carries no empty label.
+// Returns the new y so each caller keeps its own spacing below.
+//
+// Drawn at the ADDRESS column, not the left margin. Both documents lay the
+// header out in two columns - contact on the left, delivery address at
+// leftMargin + 95 - so drawing at the left margin would put this under the
+// contact details instead of under the address it belongs to.
 function drawPdfFedexAccount(doc, o, leftMargin, y) {
   const acct = o && o.fedex_account ? String(o.fedex_account).trim() : '';
   if (!acct) return y;
+  const x = leftMargin + 95;
   doc.setFont('times', 'bold');
-  doc.text('FedEx Account:', leftMargin, y);
+  doc.text('FedEx Customer No.', x, y);
   doc.setFont('times', 'normal');
-  doc.text(acct, leftMargin + 30, y);
-  return y + 6;
+  doc.text(acct, x, y + 5);
+  return y + 11;
 }
 
 async function fetchOrderForPdf(orderDbId) {

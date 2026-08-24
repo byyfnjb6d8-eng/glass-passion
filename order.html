@@ -111,7 +111,7 @@
         // Phase 7.17: only shown when the order was booked against the
         // customer's own FedEx account. Reads the ORDER snapshot, so it is the
         // number this order actually used, not whatever the profile says now.
-        (o.fedex_account ? '<p class="meta"><strong>FedEx account:</strong> '+esc(o.fedex_account)+'</p>' : '') +
+        (o.fedex_account ? '<p class="meta"><strong>FedEx customer number:</strong> '+esc(o.fedex_account)+'</p>' : '') +
         '<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th></tr></thead>' +
         '<tbody>'+rows+'</tbody></table>' +
         '<div class="note">This is a read-only copy of your approved order. ' +
