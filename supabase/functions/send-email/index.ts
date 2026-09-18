@@ -980,11 +980,23 @@ async function handleDeleteUser(
     throw new Error(`Refusing to delete admin account: ${profile.email}`);
   }
 
-  // 3. Count what we're about to delete
-  const { count: preOrderItemCount } = await sb
-    .from("order_items").select("*", { count: "exact", head: true }).eq("user_id", userId);
-  const { count: preOrderCount } = await sb
-    .from("orders").select("*", { count: "exact", head: true }).eq("user_id", userId);
+  // 3. Count what we're about to delete.
+  // Phase 7.18: items are counted BY ORDER, not by their own user_id. An item's
+  // user_id is a denormalised copy that can disagree with the order it sits
+  // on - it did, on order GL-20260605-0074, where nine items still carried
+  // the id of the admin who placed the order after the order itself had been
+  // reassigned to the customer. Counting and deleting by item.user_id took
+  // those nine off a live order that was not being deleted at all.
+  const { data: ownOrders } = await sb
+    .from("orders").select("id").eq("user_id", userId);
+  const ownOrderIds: string[] = (ownOrders || []).map((o: any) => o.id);
+  const preOrderCount = ownOrderIds.length;
+  let preOrderItemCount = 0;
+  if (ownOrderIds.length) {
+    const { count } = await sb
+      .from("order_items").select("*", { count: "exact", head: true }).in("order_id", ownOrderIds);
+    preOrderItemCount = count || 0;
+  }
 
   // 4. Send notification email FIRST
   let emailSent = false;
@@ -1032,10 +1044,16 @@ async function handleDeleteUser(
   // 6. Cascade delete in FK-safe order
   const counts = { orderItems: 0, orders: 0, profile: 0, authUser: 0 };
 
-  const { count: oiCount, error: oiErr } = await sb
-    .from("order_items").delete({ count: "exact" }).eq("user_id", userId);
-  if (oiErr) throw new Error("Failed to delete order_items: " + oiErr.message);
-  counts.orderItems = oiCount || 0;
+  // Phase 7.18: delete items that belong to THIS USER'S ORDERS. Never by the
+  // item's own user_id - see the note at step 3. An item tagged with this
+  // user's id but sitting on someone else's order is that other person's
+  // property and is left alone.
+  if (ownOrderIds.length) {
+    const { count: oiCount, error: oiErr } = await sb
+      .from("order_items").delete({ count: "exact" }).in("order_id", ownOrderIds);
+    if (oiErr) throw new Error("Failed to delete order_items: " + oiErr.message);
+    counts.orderItems = oiCount || 0;
+  }
 
   const { count: ordCount, error: ordErr } = await sb
     .from("orders").delete({ count: "exact" }).eq("user_id", userId);
